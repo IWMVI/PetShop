@@ -1,10 +1,13 @@
 package br.iwmvi.petshop.tutor.model;
 
 import br.iwmvi.petshop.endereco.model.Endereco;
+import br.iwmvi.petshop.pet.model.Pet;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Getter
@@ -24,6 +27,9 @@ public class Tutor {
 
     @Column(nullable = false)
     private String telefone;
+
+    @OneToMany(mappedBy = "tutor")
+    private List<Pet> pets;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "endereco_id", unique = true)
