@@ -2,7 +2,7 @@ package br.iwmvi.petshop.tutor.service;
 
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
-import br.iwmvi.petshop.tutor.exception.EmailJaCadastradoException;
+import br.iwmvi.petshop.exception.EmailJaCadastradoException;
 import br.iwmvi.petshop.tutor.mapper.TutorMapper;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import br.iwmvi.petshop.tutor.repository.TutorRepository;
