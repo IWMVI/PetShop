@@ -1,4 +1,4 @@
-package br.iwmvi.petshop.tutor.dto.response;
+package br.iwmvi.petshop.endereco.dto.response;
 
 public record EnderecoResponse(
         String cep,

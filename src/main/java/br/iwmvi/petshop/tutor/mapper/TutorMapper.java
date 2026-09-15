@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.mapper;
 
+import br.iwmvi.petshop.endereco.mapper.EnderecoMapper;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
 import br.iwmvi.petshop.tutor.model.Tutor;

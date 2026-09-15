@@ -1,17 +1,19 @@
-package br.iwmvi.petshop.tutor.model;
+package br.iwmvi.petshop.endereco.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Entity
 @Getter
-@Embeddable
-@AllArgsConstructor
+@Table(name = "enderecos")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Endereco {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, length = 8)
     private String cep;
@@ -33,4 +35,15 @@ public class Endereco {
 
     @Column(nullable = false, length = 2)
     private String estado;
+
+    public Endereco(String cep, String logradouro, String numero, String complemento,
+                    String bairro, String cidade, String estado) {
+        this.cep = cep;
+        this.logradouro = logradouro;
+        this.numero = numero;
+        this.complemento = complemento;
+        this.bairro = bairro;
+        this.cidade = cidade;
+        this.estado = estado;
+    }
 }

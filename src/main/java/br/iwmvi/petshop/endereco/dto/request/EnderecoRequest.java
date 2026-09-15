@@ -1,4 +1,4 @@
-package br.iwmvi.petshop.tutor.dto.request;
+package br.iwmvi.petshop.endereco.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

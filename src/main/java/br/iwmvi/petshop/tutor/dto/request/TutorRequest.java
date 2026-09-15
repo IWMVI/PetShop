@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.dto.request;
 
+import br.iwmvi.petshop.endereco.dto.request.EnderecoRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

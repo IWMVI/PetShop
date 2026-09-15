@@ -1,8 +1,8 @@
-package br.iwmvi.petshop.tutor.mapper;
+package br.iwmvi.petshop.endereco.mapper;
 
-import br.iwmvi.petshop.tutor.dto.request.EnderecoRequest;
-import br.iwmvi.petshop.tutor.dto.response.EnderecoResponse;
-import br.iwmvi.petshop.tutor.model.Endereco;
+import br.iwmvi.petshop.endereco.dto.request.EnderecoRequest;
+import br.iwmvi.petshop.endereco.dto.response.EnderecoResponse;
+import br.iwmvi.petshop.endereco.model.Endereco;
 
 public final class EnderecoMapper {
 

@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.model;
 
+import br.iwmvi.petshop.endereco.model.Endereco;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -24,7 +25,8 @@ public class Tutor {
     @Column(nullable = false)
     private String telefone;
 
-    @Embedded
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "endereco_id", unique = true)
     private Endereco endereco;
 
     public Tutor(String nome, String email, String telefone, Endereco endereco) {
