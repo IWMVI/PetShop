@@ -125,14 +125,104 @@ class EnderecoRequestTest {
         }
     }
 
+    @Nested
+    @DisplayName("Logradouro")
+    class Logradouro {
+
+        @Test
+        @DisplayName("PCE - Deve aceitar logradouro quando preenchido.")
+        void deveAceitarLogradouro_quandoPreenchido() {
+            var request = criarEndereco("Praça da Sé", "Sé", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(violacoes).isEmpty();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar logradouro vazio.")
+        void naoDeveAceitarLogradouro_quandoVazio() {
+            var request = criarEndereco("", "Sé", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(possuiViolacao(violacoes, "logradouro")).isTrue();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar logradouro em branco.")
+        void naoDeveAceitarLogradouro_quandoEmBranco() {
+            var request = criarEndereco("   ", "Sé", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(possuiViolacao(violacoes, "logradouro")).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Bairro")
+    class Bairro {
+
+        @Test
+        @DisplayName("PCE - Deve aceitar bairro quando preenchido.")
+        void deveAceitarBairro_quandoPreenchido() {
+            var request = criarEndereco("Praça da Sé", "Sé", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(violacoes).isEmpty();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar bairro vazio.")
+        void naoDeveAceitarBairro_quandoVazio() {
+            var request = criarEndereco("Praça da Sé", "", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(possuiViolacao(violacoes, "bairro")).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("Cidade")
+    class Cidade {
+
+        @Test
+        @DisplayName("PCE - Deve aceitar cidade quando preenchida.")
+        void deveAceitarCidade_quandoPreenchida() {
+            var request = criarEndereco("Praça da Sé", "Sé", "São Paulo", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(violacoes).isEmpty();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar cidade vazia.")
+        void naoDeveAceitarCidade_quandoVazia() {
+            var request = criarEndereco("Praça da Sé", "Sé", "", "01001001", "SP");
+
+            var violacoes = validator.validate(request);
+
+            assertThat(possuiViolacao(violacoes, "cidade")).isTrue();
+        }
+    }
+
     private EnderecoRequest criarEndereco(String cep, String estado) {
+        return criarEndereco("Praça da Sé", "Sé", "São Paulo", cep, estado);
+    }
+
+    private EnderecoRequest criarEndereco(String logradouro, String bairro, String cidade,
+                                          String cep, String estado) {
         return new EnderecoRequest(
                 cep,
-                "Praça da Sé",
+                logradouro,
                 "100",
                 null,
-                "Sé",
-                "São Paulo",
+                bairro,
+                cidade,
                 estado
         );
     }
