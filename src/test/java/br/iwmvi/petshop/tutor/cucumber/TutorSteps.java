@@ -14,6 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -153,6 +154,16 @@ public class TutorSteps {
         resultado = excluirTutor(id);
     }
 
+    @Quando("tentar restaurar o tutor cadastrado")
+    public void tentarRestaurarTutorCadastrado() throws Exception {
+        resultado = restaurarTutor(tutorId);
+    }
+
+    @Quando("tentar restaurar o tutor de id {long}")
+    public void tentarRestaurarTutorDeId(long id) throws Exception {
+        resultado = restaurarTutor(id);
+    }
+
     @Entao("o cadastro do tutor deve retornar o status {int}")
     public void cadastroDoTutorDeveRetornarStatus(int statusEsperado) {
         assertThat(resultado)
@@ -254,6 +265,38 @@ public class TutorSteps {
                 .isEqualTo(404);
     }
 
+    @Entao("a lista não deve conter o tutor excluído")
+    public void listaNaoDeveConterTutorExcluido() throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.isArray())
+                .as("Resposta deve ser uma lista")
+                .isTrue();
+
+        boolean contem = StreamSupport.stream(response.spliterator(), false)
+                .anyMatch(tutor -> tutor.path("id").asLong() == tutorId);
+
+        assertThat(contem)
+                .as("Lista não deve conter o tutor excluído")
+                .isFalse();
+    }
+
+    @Entao("o tutor restaurado deve possuir o e-mail {string}")
+    public void tutorRestauradoDevePossuirEmail(String email) throws Exception {
+        tutorRetornadoDevePossuirEmail(email);
+    }
+
+    @Entao("o tutor cadastrado deve ser encontrado novamente")
+    public void tutorCadastradoDeveSerEncontradoNovamente() throws Exception {
+        resultado = buscarTutor(tutorId);
+
+        assertThat(resultado.getResponse().getStatus())
+                .as("Tutor restaurado deve retornar 200")
+                .isEqualTo(200);
+    }
+
     private MvcResult realizarCadastro(Map<String, Object> request) throws Exception {
         return mockMvc.perform(
                         post("/tutores")
@@ -278,6 +321,10 @@ public class TutorSteps {
 
     private MvcResult excluirTutor(long id) throws Exception {
         return mockMvc.perform(delete("/tutores/{id}", id)).andReturn();
+    }
+
+    private MvcResult restaurarTutor(long id) throws Exception {
+        return mockMvc.perform(post("/tutores/{id}/restaurar", id)).andReturn();
     }
 
     private long obterId(MvcResult resultadoCadastro) throws Exception {

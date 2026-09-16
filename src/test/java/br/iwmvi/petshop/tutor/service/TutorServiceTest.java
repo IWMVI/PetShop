@@ -17,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -124,7 +125,7 @@ public class TutorServiceTest {
         void deveListarTutores_quandoExistirem() {
             var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
 
-            when(tutorRepository.findAll()).thenReturn(List.of(tutor));
+            when(tutorRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(tutor));
 
             var response = tutorService.listar();
 
@@ -137,7 +138,17 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve retornar lista vazia quando não houver tutores cadastrados.")
         void deveRetornarListaVazia_quandoNaoExistiremTutores() {
-            when(tutorRepository.findAll()).thenReturn(List.of());
+            when(tutorRepository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+
+            var response = tutorService.listar();
+
+            assertThat(response).isEmpty();
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve listar tutores excluídos logicamente.")
+        void naoDeveListarTutores_quandoExcluidosLogicamente() {
+            when(tutorRepository.findAllByDeletedAtIsNull()).thenReturn(List.of());
 
             var response = tutorService.listar();
 
@@ -154,7 +165,7 @@ public class TutorServiceTest {
         void deveBuscarTutor_quandoIdExistir() {
             var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
 
             var response = tutorService.buscarPorId(1L);
 
@@ -166,10 +177,20 @@ public class TutorServiceTest {
         @Test
         @DisplayName("ESE - Não deve buscar tutor quando o id não existir.")
         void naoDeveBuscarTutor_quandoIdNaoExistir() {
-            when(tutorRepository.findById(1L)).thenReturn(Optional.empty());
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> tutorService.buscarPorId(1L))
                     .isInstanceOf(TutorNotFoundException.class);
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve buscar tutor excluído logicamente.")
+        void naoDeveBuscarTutor_quandoExcluidoLogicamente() {
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tutorService.buscarPorId(1L))
+                    .isInstanceOf(TutorNotFoundException.class)
+                    .hasMessageContaining("1");
         }
     }
 
@@ -188,7 +209,7 @@ public class TutorServiceTest {
                     EnderecoTestData.criarEnderecoRequest()
             );
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
             when(tutorRepository.existsByEmail("novo@test.com")).thenReturn(false);
 
             var response = tutorService.atualizar(1L, request);
@@ -213,7 +234,7 @@ public class TutorServiceTest {
                     EnderecoTestData.criarEnderecoRequest()
             );
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.empty());
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> tutorService.atualizar(1L, request))
                     .isInstanceOf(TutorNotFoundException.class);
@@ -232,7 +253,7 @@ public class TutorServiceTest {
                     EnderecoTestData.criarEnderecoRequest()
             );
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
             when(tutorRepository.existsByEmail("outro@test.com")).thenReturn(true);
 
             assertThatThrownBy(() -> tutorService.atualizar(1L, request))
@@ -253,7 +274,7 @@ public class TutorServiceTest {
                     EnderecoTestData.criarEnderecoRequest()
             );
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
 
             var response = tutorService.atualizar(1L, request);
 
@@ -269,26 +290,69 @@ public class TutorServiceTest {
     class ExclusaoTutor {
 
         @Test
-        @DisplayName("PCE - Deve excluir tutor quando o id existir.")
+        @DisplayName("PCE - Deve marcar o tutor como excluído quando o id existir.")
         void deveExcluirTutor_quandoIdExistir() {
             var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
 
-            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
 
             tutorService.excluir(1L);
 
-            verify(tutorRepository).delete(tutor);
+            assertThat(tutor.getDeletedAt()).isNotNull();
+            verify(tutorRepository).save(tutor);
         }
 
         @Test
         @DisplayName("ESE - Não deve excluir tutor quando o id não existir.")
         void naoDeveExcluirTutor_quandoIdNaoExistir() {
-            when(tutorRepository.findById(1L)).thenReturn(Optional.empty());
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> tutorService.excluir(1L))
                     .isInstanceOf(TutorNotFoundException.class);
 
-            verify(tutorRepository, never()).delete(any());
+            verify(tutorRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve excluir novamente um tutor já excluído logicamente.")
+        void naoDeveExcluirTutor_quandoJaExcluidoLogicamente() {
+            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tutorService.excluir(1L))
+                    .isInstanceOf(TutorNotFoundException.class);
+
+            verify(tutorRepository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Restauração de tutores.")
+    class RestauracaoTutor {
+
+        @Test
+        @DisplayName("PCE - Deve restaurar tutor excluído quando o id existir.")
+        void deveRestaurarTutor_quandoIdExistir() {
+            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            tutor.setDeletedAt(LocalDateTime.now());
+
+            when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
+
+            var response = tutorService.restaurar(1L);
+
+            assertThat(response.id()).isEqualTo(1L);
+            assertThat(tutor.getDeletedAt()).isNull();
+            verify(tutorRepository).save(tutor);
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve restaurar tutor quando o id não existir.")
+        void naoDeveRestaurarTutor_quandoIdNaoExistir() {
+            when(tutorRepository.findById(1L)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tutorService.restaurar(1L))
+                    .isInstanceOf(TutorNotFoundException.class);
+
+            verify(tutorRepository, never()).save(any());
         }
     }
 

@@ -70,3 +70,22 @@ Funcionalidade: Gerenciamento de tutores
   Cenário: Excluir tutor por identificador inexistente
     Quando tentar excluir o tutor de id 9999
     Então a resposta deve retornar o status 404
+
+  Cenário: Listar tutores não deve incluir excluídos
+    Dado que existe um tutor cadastrado com o e-mail "oculto@test.com"
+    Quando tentar excluir o tutor cadastrado
+    E listar os tutores
+    Então a resposta deve retornar o status 200
+    E a lista não deve conter o tutor excluído
+
+  Cenário: Restaurar tutor excluído
+    Dado que existe um tutor cadastrado com o e-mail "restaurar@test.com"
+    Quando tentar excluir o tutor cadastrado
+    E tentar restaurar o tutor cadastrado
+    Então a resposta deve retornar o status 200
+    E o tutor restaurado deve possuir o e-mail "restaurar@test.com"
+    E o tutor cadastrado deve ser encontrado novamente
+
+  Cenário: Restaurar tutor por identificador inexistente
+    Quando tentar restaurar o tutor de id 9999
+    Então a resposta deve retornar o status 404
