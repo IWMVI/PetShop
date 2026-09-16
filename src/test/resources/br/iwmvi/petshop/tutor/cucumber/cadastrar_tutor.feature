@@ -21,6 +21,11 @@ Funcionalidade: Cadastro de tutor
     Quando tentar cadastrar um tutor com o e-mail "invalido"
     Então o cadastro do tutor deve retornar o status 400
 
+  Cenário: Não cadastrar tutor com e-mail já cadastrado
+    Dado que existe um tutor cadastrado com o e-mail "duplicado@test.com"
+    Quando tentar cadastrar um tutor com o e-mail "duplicado@test.com"
+    Então o cadastro do tutor deve retornar o status 409
+
   Cenário: Não cadastrar tutor com CEP inválido
     Quando tentar cadastrar um tutor com o CEP "123"
     Então o cadastro do tutor deve retornar o status 400
