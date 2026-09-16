@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.cucumber;
 
+import br.iwmvi.petshop.endereco.EnderecoTestData;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import io.cucumber.datatable.DataTable;
@@ -127,22 +128,14 @@ public class TutorSteps {
             String cidade,
             String estado
     ) {
-        Map<String, Object> endereco = new LinkedHashMap<>();
-
-        endereco.put("cep", cep);
-        endereco.put("logradouro", logradouro);
-        endereco.put("numero", numero);
-        endereco.put("complemento", null);
-        endereco.put("bairro", bairro);
-        endereco.put("cidade", cidade);
-        endereco.put("estado", estado);
-
         Map<String, Object> tutor = new LinkedHashMap<>();
 
         tutor.put("nome", nome);
         tutor.put("email", email);
         tutor.put("telefone", telefone);
-        tutor.put("endereco", endereco);
+        tutor.put("endereco", EnderecoTestData.criarEnderecoJson(
+                cep, logradouro, numero, null, bairro, cidade, estado
+        ));
 
         return tutor;
     }
