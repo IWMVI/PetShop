@@ -1,20 +1,23 @@
 package br.iwmvi.petshop.tutor.cucumber;
 
-import tools.jackson.databind.JsonNode;
-import tools.jackson.databind.ObjectMapper;
+import br.iwmvi.petshop.endereco.EnderecoTestData;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Entao;
 import io.cucumber.java.pt.Quando;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 public class TutorSteps {
 
@@ -25,6 +28,18 @@ public class TutorSteps {
     private ObjectMapper objectMapper;
 
     private MvcResult resultado;
+
+    private Long tutorId;
+
+    @Dado("que existe um tutor cadastrado com o e-mail {string}")
+    public void queExisteUmTutorCadastradoComEmail(String email) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("email", email);
+
+        resultado = realizarCadastro(request);
+        tutorId = obterId(resultado);
+    }
 
     @Quando("cadastrar um tutor com os seguintes dados:")
     public void cadastrarTutorComOsSeguintesDados(DataTable dataTable) throws Exception {
@@ -67,6 +82,88 @@ public class TutorSteps {
         resultado = realizarCadastro(request);
     }
 
+    @Quando("listar os tutores")
+    public void listarTutores() throws Exception {
+        resultado = mockMvc.perform(get("/tutores")).andReturn();
+    }
+
+    @Quando("buscar o tutor cadastrado")
+    public void buscarTutorCadastrado() throws Exception {
+        resultado = buscarTutor(tutorId);
+    }
+
+    @Quando("tentar buscar o tutor de id {long}")
+    public void tentarBuscarTutorDeId(long id) throws Exception {
+        resultado = buscarTutor(id);
+    }
+
+    @Quando("tentar atualizar o tutor cadastrado com os seguintes dados:")
+    public void tentarAtualizarTutorCadastradoComOsSeguintesDados(DataTable dataTable) throws Exception {
+        Map<String, String> dados = dataTable.asMap(String.class, String.class);
+
+        Map<String, Object> request = criarTutorRequest(
+                dados.get("nome"),
+                dados.get("email"),
+                dados.get("telefone"),
+                dados.get("cep"),
+                dados.get("logradouro"),
+                dados.get("numero"),
+                dados.get("bairro"),
+                dados.get("cidade"),
+                dados.get("estado")
+        );
+
+        resultado = realizarAtualizacao(tutorId, request);
+    }
+
+    @Quando("tentar atualizar o tutor cadastrado com o e-mail {string}")
+    public void tentarAtualizarTutorCadastradoComEmail(String email) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("email", email);
+
+        resultado = realizarAtualizacao(tutorId, request);
+    }
+
+    @Quando("tentar atualizar o tutor de id {long} com os seguintes dados:")
+    public void tentarAtualizarTutorDeIdComOsSeguintesDados(long id, DataTable dataTable) throws Exception {
+        Map<String, String> dados = dataTable.asMap(String.class, String.class);
+
+        Map<String, Object> request = criarTutorRequest(
+                dados.get("nome"),
+                dados.get("email"),
+                dados.get("telefone"),
+                dados.get("cep"),
+                dados.get("logradouro"),
+                dados.get("numero"),
+                dados.get("bairro"),
+                dados.get("cidade"),
+                dados.get("estado")
+        );
+
+        resultado = realizarAtualizacao(id, request);
+    }
+
+    @Quando("tentar excluir o tutor cadastrado")
+    public void tentarExcluirTutorCadastrado() throws Exception {
+        resultado = excluirTutor(tutorId);
+    }
+
+    @Quando("tentar excluir o tutor de id {long}")
+    public void tentarExcluirTutorDeId(long id) throws Exception {
+        resultado = excluirTutor(id);
+    }
+
+    @Quando("tentar restaurar o tutor cadastrado")
+    public void tentarRestaurarTutorCadastrado() throws Exception {
+        resultado = restaurarTutor(tutorId);
+    }
+
+    @Quando("tentar restaurar o tutor de id {long}")
+    public void tentarRestaurarTutorDeId(long id) throws Exception {
+        resultado = restaurarTutor(id);
+    }
+
     @Entao("o cadastro do tutor deve retornar o status {int}")
     public void cadastroDoTutorDeveRetornarStatus(int statusEsperado) {
         assertThat(resultado)
@@ -75,6 +172,17 @@ public class TutorSteps {
 
         assertThat(resultado.getResponse().getStatus())
                 .as("Status HTTP retornado pelo cadastro")
+                .isEqualTo(statusEsperado);
+    }
+
+    @Entao("a resposta deve retornar o status {int}")
+    public void respostaDeveRetornarStatus(int statusEsperado) {
+        assertThat(resultado)
+                .as("Resultado da requisição deve existir")
+                .isNotNull();
+
+        assertThat(resultado.getResponse().getStatus())
+                .as("Status HTTP retornado")
                 .isEqualTo(statusEsperado);
     }
 
@@ -93,6 +201,102 @@ public class TutorSteps {
                 .isPositive();
     }
 
+    @Entao("a resposta deve conter uma lista de tutores")
+    public void respostaDeveConterListaDeTutores() throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.isArray())
+                .as("Resposta deve ser uma lista")
+                .isTrue();
+
+        assertThat(response.size())
+                .as("Lista deve conter ao menos um tutor")
+                .isPositive();
+    }
+
+    @Entao("o tutor retornado deve possuir um identificador")
+    public void tutorRetornadoDevePossuirIdentificador() throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.hasNonNull("id"))
+                .as("Resposta deve possuir o campo id")
+                .isTrue();
+    }
+
+    @Entao("o tutor retornado deve possuir o e-mail {string}")
+    public void tutorRetornadoDevePossuirEmail(String email) throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.hasNonNull("email"))
+                .as("Resposta deve possuir o campo email")
+                .isTrue();
+
+        assertThat(response.get("email").asString())
+                .as("E-mail do tutor retornado")
+                .isEqualTo(email);
+    }
+
+    @Entao("o tutor retornado deve possuir os dados atualizados")
+    public void tutorRetornadoDevePossuirDadosAtualizados() throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.get("nome").asString()).isEqualTo("Wallace Atualizado");
+        assertThat(response.get("email").asString()).isEqualTo("atualizado@test.com");
+        assertThat(response.get("telefone").asString()).isEqualTo("11911112222");
+        assertThat(response.get("endereco").get("cep").asString()).isEqualTo("01001010");
+        assertThat(response.get("endereco").get("logradouro").asString()).isEqualTo("Avenida Paulista");
+        assertThat(response.get("endereco").get("estado").asString()).isEqualTo("SP");
+    }
+
+    @Entao("o tutor excluído não deve mais ser encontrado")
+    public void tutorExcluidoNaoDeveMaisSerEncontrado() throws Exception {
+        resultado = buscarTutor(tutorId);
+
+        assertThat(resultado.getResponse().getStatus())
+                .as("Tutor excluído deve retornar 404")
+                .isEqualTo(404);
+    }
+
+    @Entao("a lista não deve conter o tutor excluído")
+    public void listaNaoDeveConterTutorExcluido() throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultado.getResponse().getContentAsString()
+        );
+
+        assertThat(response.isArray())
+                .as("Resposta deve ser uma lista")
+                .isTrue();
+
+        boolean contem = StreamSupport.stream(response.spliterator(), false)
+                .anyMatch(tutor -> tutor.path("id").asLong() == tutorId);
+
+        assertThat(contem)
+                .as("Lista não deve conter o tutor excluído")
+                .isFalse();
+    }
+
+    @Entao("o tutor restaurado deve possuir o e-mail {string}")
+    public void tutorRestauradoDevePossuirEmail(String email) throws Exception {
+        tutorRetornadoDevePossuirEmail(email);
+    }
+
+    @Entao("o tutor cadastrado deve ser encontrado novamente")
+    public void tutorCadastradoDeveSerEncontradoNovamente() throws Exception {
+        resultado = buscarTutor(tutorId);
+
+        assertThat(resultado.getResponse().getStatus())
+                .as("Tutor restaurado deve retornar 200")
+                .isEqualTo(200);
+    }
+
     private MvcResult realizarCadastro(Map<String, Object> request) throws Exception {
         return mockMvc.perform(
                         post("/tutores")
@@ -100,6 +304,35 @@ public class TutorSteps {
                                 .content(objectMapper.writeValueAsString(request))
                 )
                 .andReturn();
+    }
+
+    private MvcResult realizarAtualizacao(Long id, Map<String, Object> request) throws Exception {
+        return mockMvc.perform(
+                        put("/tutores/{id}", id)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andReturn();
+    }
+
+    private MvcResult buscarTutor(long id) throws Exception {
+        return mockMvc.perform(get("/tutores/{id}", id)).andReturn();
+    }
+
+    private MvcResult excluirTutor(long id) throws Exception {
+        return mockMvc.perform(delete("/tutores/{id}", id)).andReturn();
+    }
+
+    private MvcResult restaurarTutor(long id) throws Exception {
+        return mockMvc.perform(post("/tutores/{id}/restaurar", id)).andReturn();
+    }
+
+    private long obterId(MvcResult resultadoCadastro) throws Exception {
+        JsonNode response = objectMapper.readTree(
+                resultadoCadastro.getResponse().getContentAsString()
+        );
+
+        return response.get("id").asLong();
     }
 
     private Map<String, Object> criarTutorRequestValido() {
@@ -127,22 +360,14 @@ public class TutorSteps {
             String cidade,
             String estado
     ) {
-        Map<String, Object> endereco = new LinkedHashMap<>();
-
-        endereco.put("cep", cep);
-        endereco.put("logradouro", logradouro);
-        endereco.put("numero", numero);
-        endereco.put("complemento", null);
-        endereco.put("bairro", bairro);
-        endereco.put("cidade", cidade);
-        endereco.put("estado", estado);
-
         Map<String, Object> tutor = new LinkedHashMap<>();
 
         tutor.put("nome", nome);
         tutor.put("email", email);
         tutor.put("telefone", telefone);
-        tutor.put("endereco", endereco);
+        tutor.put("endereco", EnderecoTestData.criarEnderecoJson(
+                cep, logradouro, numero, null, bairro, cidade, estado
+        ));
 
         return tutor;
     }

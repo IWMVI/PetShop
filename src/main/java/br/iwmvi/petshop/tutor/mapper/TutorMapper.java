@@ -19,6 +19,13 @@ public final class TutorMapper {
         );
     }
 
+    public static void atualizarEntidade(Tutor tutor, TutorRequest request) {
+        tutor.setNome(request.nome());
+        tutor.setEmail(request.email().toLowerCase());
+        tutor.setTelefone(request.telefone().replaceAll("\\D", ""));
+        EnderecoMapper.atualizarEntidade(tutor.getEndereco(), request.endereco());
+    }
+
     public static TutorResponse toResponse(Tutor tutor) {
         return new TutorResponse(
                 tutor.getId(),

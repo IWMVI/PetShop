@@ -21,6 +21,16 @@ public final class EnderecoMapper {
         );
     }
 
+    public static void atualizarEntidade(Endereco endereco, EnderecoRequest request) {
+        endereco.setCep(request.cep().replaceAll("\\D", ""));
+        endereco.setLogradouro(request.logradouro());
+        endereco.setNumero(request.numero());
+        endereco.setComplemento(request.complemento());
+        endereco.setBairro(request.bairro());
+        endereco.setCidade(request.cidade());
+        endereco.setEstado(request.estado().toUpperCase());
+    }
+
     public static EnderecoResponse toResponse(Endereco endereco) {
         return new EnderecoResponse(
                 endereco.getCep(),
