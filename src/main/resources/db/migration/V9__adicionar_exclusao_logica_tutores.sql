@@ -1,0 +1,1 @@
+ALTER TABLE tutores ADD COLUMN deleted_at TIMESTAMP;

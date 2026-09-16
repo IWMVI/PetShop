@@ -44,4 +44,9 @@ public class TutorController {
     public void excluir(@PathVariable Long id) {
         tutorService.excluir(id);
     }
+
+    @PostMapping("/{id}/restaurar")
+    public TutorResponse restaurar(@PathVariable Long id) {
+        return tutorService.restaurar(id);
+    }
 }

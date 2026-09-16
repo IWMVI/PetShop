@@ -10,6 +10,7 @@ import br.iwmvi.petshop.tutor.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -32,20 +33,20 @@ public class TutorService {
     }
 
     public List<TutorResponse> listar() {
-        return tutorRepository.findAll().stream()
+        return tutorRepository.findAllByDeletedAtIsNull().stream()
                 .map(TutorMapper::toResponse)
                 .toList();
     }
 
     public TutorResponse buscarPorId(Long id) {
-        Tutor tutor = tutorRepository.findById(id)
+        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new TutorNotFoundException(id));
 
         return TutorMapper.toResponse(tutor);
     }
 
     public TutorResponse atualizar(Long id, TutorRequest request) {
-        Tutor tutor = tutorRepository.findById(id)
+        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
                 .orElseThrow(() -> new TutorNotFoundException(id));
 
         String email = request.email().toLowerCase();
@@ -61,9 +62,20 @@ public class TutorService {
     }
 
     public void excluir(Long id) {
+        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
+                .orElseThrow(() -> new TutorNotFoundException(id));
+
+        tutor.setDeletedAt(LocalDateTime.now());
+        tutorRepository.save(tutor);
+    }
+
+    public TutorResponse restaurar(Long id) {
         Tutor tutor = tutorRepository.findById(id)
                 .orElseThrow(() -> new TutorNotFoundException(id));
 
-        tutorRepository.delete(tutor);
+        tutor.setDeletedAt(null);
+        tutorRepository.save(tutor);
+
+        return TutorMapper.toResponse(tutor);
     }
 }
