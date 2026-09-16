@@ -19,7 +19,7 @@ public class PetService {
     private final TutorRepository tutorRepository;
 
     public PetResponse cadastrar(PetRequest request, Long tutorId) {
-        Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new TutorNotFoundException(tutorId));
+        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(tutorId).orElseThrow(() -> new TutorNotFoundException(tutorId));
         Pet pet = PetMapper.toEntity(request, tutor);
 
         Pet petSalvo = repository.save(pet);
