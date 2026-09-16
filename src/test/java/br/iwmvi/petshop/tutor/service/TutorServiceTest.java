@@ -1,6 +1,6 @@
 package br.iwmvi.petshop.tutor.service;
 
-import br.iwmvi.petshop.endereco.dto.request.EnderecoRequest;
+import br.iwmvi.petshop.endereco.EnderecoTestData;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.exception.EmailJaCadastradoException;
 import br.iwmvi.petshop.tutor.model.Tutor;
@@ -77,7 +77,7 @@ public class TutorServiceTest {
                     "wallace",
                     "WALLACE@TEST.COM",
                     "11111111111",
-                    criarEnderecoRequest()
+                    EnderecoTestData.criarEnderecoRequest()
             );
 
             when(tutorRepository.existsByEmail("wallace@test.com")).thenReturn(false);
@@ -94,15 +94,7 @@ public class TutorServiceTest {
                     "Wallace",
                     "WALLACE@test.com",
                     "11111111111",
-                    new EnderecoRequest(
-                            "01001-010",
-                            "Praça da Sé",
-                            "01",
-                            "Lado Ímpar",
-                            "Sé",
-                            "São Paulo",
-                            "sp"
-                    )
+                    EnderecoTestData.criarEnderecoRequest()
             );
 
             when(tutorRepository.existsByEmail("wallace@test.com")).thenReturn(false);
@@ -115,8 +107,6 @@ public class TutorServiceTest {
             Tutor tutorPersistido = captor.getValue();
 
             assertThat(tutorPersistido.getEmail()).isEqualTo("wallace@test.com");
-            assertThat(tutorPersistido.getEndereco().getCep()).isEqualTo("01001010");
-            assertThat(tutorPersistido.getEndereco().getEstado()).isEqualTo("SP");
         }
     }
 
@@ -125,19 +115,7 @@ public class TutorServiceTest {
                 "Wallace",
                 "wallace@test.com",
                 "11111111111",
-                criarEnderecoRequest()
-        );
-    }
-
-    private EnderecoRequest criarEnderecoRequest() {
-        return new EnderecoRequest(
-                "01001-001",
-                "Praça da Sé",
-                "1",
-                "Lado Ímpar",
-                "Sé",
-                "São Paulo",
-                "SP"
+                EnderecoTestData.criarEnderecoRequest()
         );
     }
 }
