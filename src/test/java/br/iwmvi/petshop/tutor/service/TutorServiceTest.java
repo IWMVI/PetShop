@@ -123,7 +123,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve listar os tutores cadastrados.")
         void deveListarTutores_quandoExistirem() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
 
             when(tutorRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(tutor));
 
@@ -165,7 +165,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve buscar tutor quando o id existir.")
         void deveBuscarTutor_quandoIdExistir() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
 
             when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
 
@@ -203,7 +203,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve atualizar tutor quando o id existir e o e-mail não estiver em uso.")
         void deveAtualizarTutor_quandoDadosForemValidos() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace Atualizado",
                     "NOVO@test.com",
@@ -247,7 +247,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("ESE - Não deve atualizar tutor quando o e-mail já estiver em uso por outro tutor.")
         void naoDeveAtualizarTutor_quandoEmailJaEstiverEmUso() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace",
                     "outro@test.com",
@@ -268,7 +268,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("AVL - Deve permitir atualizar quando o e-mail se mantém o mesmo do tutor.")
         void devePermitirAtualizar_quandoEmailSeManterDoMesmoTutor() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace Atualizado",
                     "wallace@test.com",
@@ -294,7 +294,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve marcar o tutor como excluído quando o id existir.")
         void deveExcluirTutor_quandoIdExistir() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
 
             when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
 
@@ -336,7 +336,7 @@ public class TutorServiceTest {
         @Test
         @DisplayName("PCE - Deve restaurar tutor excluído quando o id existir.")
         void deveRestaurarTutor_quandoIdExistir() {
-            var tutor = criarTutor(1L, "Wallace", "wallace@test.com");
+            var tutor = criarTutor();
             tutor.setDeletedAt(LocalDateTime.now());
 
             when(tutorRepository.findById(1L)).thenReturn(Optional.of(tutor));
@@ -369,10 +369,10 @@ public class TutorServiceTest {
         );
     }
 
-    private Tutor criarTutor(Long id, String nome, String email) {
+    private Tutor criarTutor() {
         var tutor = new Tutor(
-                nome,
-                email,
+                "Wallace",
+                "wallace@test.com",
                 "11999999999",
                 new Endereco(
                         "01001010",
@@ -385,7 +385,7 @@ public class TutorServiceTest {
                 )
         );
 
-        ReflectionTestUtils.setField(tutor, "id", id);
+        ReflectionTestUtils.setField(tutor, "id", 1L);
 
         return tutor;
     }
