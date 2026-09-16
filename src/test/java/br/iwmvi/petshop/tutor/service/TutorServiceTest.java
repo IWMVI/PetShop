@@ -153,6 +153,8 @@ public class TutorServiceTest {
             var response = tutorService.listar();
 
             assertThat(response).isEmpty();
+            verify(tutorRepository).findAllByDeletedAtIsNull();
+            verify(tutorRepository, never()).findAll();
         }
     }
 
@@ -321,6 +323,8 @@ public class TutorServiceTest {
             assertThatThrownBy(() -> tutorService.excluir(1L))
                     .isInstanceOf(TutorNotFoundException.class);
 
+            verify(tutorRepository).findByIdAndDeletedAtIsNull(1L);
+            verify(tutorRepository, never()).findById(1L);
             verify(tutorRepository, never()).save(any());
         }
     }
