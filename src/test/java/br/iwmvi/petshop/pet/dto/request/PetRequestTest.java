@@ -129,6 +129,17 @@ class PetRequestTest {
         }
 
         @Test
+        @DisplayName("PCE - Deve aceitar raça com exatamente 100 caracteres.")
+        void deveAceitarRaca_quandoExatamente100Caracteres() {
+            var racaComLimite = "a".repeat(100);
+            var request = criarPet("Fluffy", "Gato", racaComLimite, 2, new BigDecimal("5.50"));
+
+            var violacoes = validator.validate(request);
+
+            assertThat(violacoes).isEmpty();
+        }
+
+        @Test
         @DisplayName("PCE - Não deve aceitar raça com mais de 100 caracteres.")
         void naoDeveAceitarRaca_quandoMaiorQue100Caracteres() {
             var racaLonga = "a".repeat(101);
