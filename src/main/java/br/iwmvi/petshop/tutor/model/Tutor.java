@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.model;
 
+import br.iwmvi.petshop.common.entity.SoftDeleteEntity;
 import br.iwmvi.petshop.endereco.model.Endereco;
 import br.iwmvi.petshop.pet.model.Pet;
 import jakarta.persistence.*;
@@ -8,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -16,7 +16,7 @@ import java.util.List;
 @Setter
 @Table(name = "tutores")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Tutor {
+public class Tutor extends SoftDeleteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,6 @@ public class Tutor {
 
     @Column(nullable = false)
     private String telefone;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @OneToMany(mappedBy = "tutor")
     private List<Pet> pets;
