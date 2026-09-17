@@ -22,4 +22,29 @@ public class PetController {
         return petService.cadastrar(request, tutorId);
     }
 
+    @GetMapping
+    public java.util.List<PetResponse> listar(@PathVariable Long tutorId) {
+        return petService.listarPorTutor(tutorId);
+    }
+
+    @GetMapping("/{petId}")
+    public PetResponse buscarPorId(@PathVariable Long tutorId,
+                                   @PathVariable Long petId) {
+        return petService.buscarPorId(petId, tutorId);
+    }
+
+    @PutMapping("/{petId}")
+    public PetResponse atualizar(@PathVariable Long tutorId,
+                                 @PathVariable Long petId,
+                                 @Valid @RequestBody PetRequest request) {
+        return petService.atualizar(tutorId, petId, request);
+    }
+
+    @DeleteMapping("/{petId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletar(@PathVariable Long tutorId,
+                        @PathVariable Long petId) {
+        petService.deletar(tutorId, petId);
+    }
+
 }
