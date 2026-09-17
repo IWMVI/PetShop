@@ -1,18 +1,18 @@
 package br.iwmvi.petshop.servico.model;
 
+import br.iwmvi.petshop.common.entity.SoftDeleteEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "servicos")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Servico {
+public class Servico extends SoftDeleteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,6 @@ public class Servico {
     @Column(name = "duracao_minutos")
     private Integer tempoEstimadoMinutos;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     public Servico(String nome, String descricao, BigDecimal preco, Integer tempoEstimadoMinutos) {
         this.nome = nome;
         this.descricao = descricao;
@@ -45,13 +42,5 @@ public class Servico {
         this.descricao = descricao;
         this.preco = preco;
         this.tempoEstimadoMinutos = tempoEstimadoMinutos;
-    }
-
-    public void deletar() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public void restaurar() {
-        this.deletedAt = null;
     }
 }

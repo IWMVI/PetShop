@@ -1,81 +1,82 @@
 package br.iwmvi.petshop.tutor.service;
 
+import br.iwmvi.petshop.common.mapper.ResponseMapper;
+import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
+import br.iwmvi.petshop.common.service.CrudService;
+import br.iwmvi.petshop.exception.EmailJaCadastradoException;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
-import br.iwmvi.petshop.exception.EmailJaCadastradoException;
-import br.iwmvi.petshop.exception.TutorNotFoundException;
 import br.iwmvi.petshop.tutor.mapper.TutorMapper;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import br.iwmvi.petshop.tutor.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
-public class TutorService {
+public class TutorService extends CrudService<Tutor, Long, TutorRequest, TutorResponse> {
 
-    private final TutorRepository tutorRepository;
+    private final TutorRepository repository;
+    private final TutorMapper mapper;
 
-    public TutorResponse cadastrar(TutorRequest request) {
-        String email = request.email().toLowerCase();
-
-        if (tutorRepository.existsByEmail(email)) {
-            throw new EmailJaCadastradoException("Email ja cadastrado: " + email);
-        }
-
-        Tutor tutor = TutorMapper.toEntity(request);
-        tutorRepository.save(tutor);
-
-        return TutorMapper.toResponse(tutor);
+    @Override
+    protected SoftDeleteRepository<Tutor, Long> getRepository() {
+        return repository;
     }
 
-    public List<TutorResponse> listar() {
-        return tutorRepository.findAllByDeletedAtIsNull().stream()
-                .map(TutorMapper::toResponse)
-                .toList();
+    @Override
+    protected ResponseMapper<Tutor, TutorResponse> getMapper() {
+        return mapper;
+    }
+
+    @Override
+    protected Tutor mapToEntity(TutorRequest request) {
+        return mapper.toEntity(request);
+    }
+
+    @Override
+    protected void updateEntity(Tutor entity, TutorRequest request) {
+        mapper.atualizarEntidade(entity, request);
+    }
+
+    @Override
+    protected void validateBeforeSave(Tutor entity) {
+        String email = entity.getEmail().toLowerCase();
+        entity.setEmail(email);
+
+        boolean emailExists = repository.existsByEmail(email);
+        if (emailExists) {
+            throw new EmailJaCadastradoException("Email ja cadastrado: " + email);
+        }
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Tutor";
+    }
+
+    // Métodos legados para compatibilidade
+    public TutorResponse cadastrar(TutorRequest request) {
+        return create(request);
     }
 
     public TutorResponse buscarPorId(Long id) {
-        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new TutorNotFoundException(id));
-
-        return TutorMapper.toResponse(tutor);
+        return findById(id);
     }
 
     public TutorResponse atualizar(Long id, TutorRequest request) {
-        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new TutorNotFoundException(id));
-
-        String email = request.email().toLowerCase();
-
-        if (!email.equals(tutor.getEmail()) && tutorRepository.existsByEmail(email)) {
-            throw new EmailJaCadastradoException("Email ja cadastrado: " + email);
-        }
-
-        TutorMapper.atualizarEntidade(tutor, request);
-        tutorRepository.save(tutor);
-
-        return TutorMapper.toResponse(tutor);
+        return update(id, request);
     }
 
     public void excluir(Long id) {
-        Tutor tutor = tutorRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new TutorNotFoundException(id));
-
-        tutor.setDeletedAt(LocalDateTime.now());
-        tutorRepository.save(tutor);
+        delete(id);
     }
 
     public TutorResponse restaurar(Long id) {
-        Tutor tutor = tutorRepository.findById(id)
-                .orElseThrow(() -> new TutorNotFoundException(id));
-
+        Tutor tutor = repository.findById(id)
+                .orElseThrow(() -> new EmailJaCadastradoException("Tutor não encontrado"));
         tutor.setDeletedAt(null);
-        tutorRepository.save(tutor);
-
-        return TutorMapper.toResponse(tutor);
+        repository.save(tutor);
+        return mapper.toResponse(tutor);
     }
 }

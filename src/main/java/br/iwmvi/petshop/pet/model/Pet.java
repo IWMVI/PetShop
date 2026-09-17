@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.pet.model;
 
+import br.iwmvi.petshop.common.entity.SoftDeleteEntity;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,13 +8,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
 @Table(name = "pets")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Pet {
+public class Pet extends SoftDeleteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,9 +32,6 @@ public class Pet {
     private String raca;
 
     private Integer idade;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "tutor_id", nullable = false)
@@ -55,14 +52,6 @@ public class Pet {
         this.peso = peso;
         this.raca = raca;
         this.idade = idade;
-    }
-
-    public void deletar() {
-        this.deletedAt = LocalDateTime.now();
-    }
-
-    public void restaurar() {
-        this.deletedAt = null;
     }
 
 }

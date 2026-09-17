@@ -1,6 +1,8 @@
 package br.iwmvi.petshop.servico.service;
 
-import br.iwmvi.petshop.exception.ServicoNotFoundException;
+import br.iwmvi.petshop.common.mapper.ResponseMapper;
+import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
+import br.iwmvi.petshop.common.service.CrudService;
 import br.iwmvi.petshop.servico.dto.request.ServicoRequest;
 import br.iwmvi.petshop.servico.dto.response.ServicoResponse;
 import br.iwmvi.petshop.servico.mapper.ServicoMapper;
@@ -9,51 +11,57 @@ import br.iwmvi.petshop.servico.repository.ServicoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
-public class ServicoService {
+public class ServicoService extends CrudService<Servico, Long, ServicoRequest, ServicoResponse> {
 
     private final ServicoRepository repository;
+    private final ServicoMapper mapper;
 
-    public ServicoResponse cadastrar(ServicoRequest request) {
-        Servico servico = ServicoMapper.toEntity(request);
-        Servico servicoSalvo = repository.save(servico);
-        return ServicoMapper.toResponse(servicoSalvo);
+    @Override
+    protected SoftDeleteRepository<Servico, Long> getRepository() {
+        return repository;
     }
 
-    public List<ServicoResponse> listar() {
-        List<ServicoResponse> responses = new ArrayList<>();
-        for (Servico servico : repository.findAllByDeletedAtIsNull()) {
-            responses.add(ServicoMapper.toResponse(servico));
-        }
-        return responses;
+    @Override
+    protected ResponseMapper<Servico, ServicoResponse> getMapper() {
+        return mapper;
+    }
+
+    @Override
+    protected Servico mapToEntity(ServicoRequest request) {
+        return mapper.toEntity(request);
+    }
+
+    @Override
+    protected void updateEntity(Servico entity, ServicoRequest request) {
+        entity.atualizar(
+                request.nome(),
+                request.descricao(),
+                request.preco(),
+                request.tempoEstimadoMinutos()
+        );
+    }
+
+    @Override
+    protected String getEntityName() {
+        return "Serviço";
+    }
+
+    // Métodos legados para compatibilidade com controllers existentes
+    public ServicoResponse cadastrar(ServicoRequest request) {
+        return create(request);
     }
 
     public ServicoResponse buscarPorId(Long id) {
-        Servico servico = repository.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
-                new ServicoNotFoundException(id));
-        return ServicoMapper.toResponse(servico);
+        return findById(id);
     }
 
     public ServicoResponse atualizar(Long id, ServicoRequest request) {
-        Servico servico = repository.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
-                new ServicoNotFoundException(id));
-
-        servico.atualizar(request.nome(), request.descricao(), request.preco(), request.tempoEstimadoMinutos());
-
-        Servico servicoAtualizado = repository.save(servico);
-
-        return ServicoMapper.toResponse(servicoAtualizado);
+        return update(id, request);
     }
 
     public void deletar(Long id) {
-        Servico servico = repository.findByIdAndDeletedAtIsNull(id).orElseThrow(() ->
-                new ServicoNotFoundException(id));
-
-        servico.deletar();
-        repository.save(servico);
+        delete(id);
     }
 }
