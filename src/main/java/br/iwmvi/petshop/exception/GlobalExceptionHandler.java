@@ -33,4 +33,16 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleServicoNotFound(ServicoNotFoundException ex) {
         return Map.of("mensagem", ex.getMessage());
     }
+
+    @ExceptionHandler(AgendamentoNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleAgendamentoNotFound(AgendamentoNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
+    @ExceptionHandler(AgendamentoValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleAgendamentoValidation(AgendamentoValidationException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
 }
