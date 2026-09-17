@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
 @Getter
@@ -66,10 +67,21 @@ public class Agendamento {
     }
 
     public void definirServicos(List<Servico> servicos) {
-        this.agendamentoServicos.clear();
+        var precosExistentes = agendamentoServicos.stream()
+                .collect(Collectors.toMap(
+                        as -> as.getServico().getId(),
+                        AgendamentoServico::getPrecoCobrado
+                ));
+
+        agendamentoServicos.clear();
         for (Servico servico : servicos) {
-            this.agendamentoServicos.add(new AgendamentoServico(this, servico, servico.getPreco()));
+            var precoCobrado = precosExistentes.getOrDefault(servico.getId(), servico.getPreco());
+            agendamentoServicos.add(new AgendamentoServico(this, servico, precoCobrado));
         }
+    }
+
+    public void setValorTotal(BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
     }
 
     public void cancelar() {
