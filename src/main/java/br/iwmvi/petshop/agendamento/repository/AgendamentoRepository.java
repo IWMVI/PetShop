@@ -1,7 +1,7 @@
 package br.iwmvi.petshop.agendamento.repository;
 
 import br.iwmvi.petshop.agendamento.model.Agendamento;
-import org.springframework.data.jpa.repository.JpaRepository;
+import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface AgendamentoRepository extends JpaRepository<Agendamento, Long> {
+public interface AgendamentoRepository extends SoftDeleteRepository<Agendamento, Long> {
 
     @Query("""
             SELECT DISTINCT a

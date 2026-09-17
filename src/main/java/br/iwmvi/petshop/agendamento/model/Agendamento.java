@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.agendamento.model;
 
+import br.iwmvi.petshop.common.entity.SoftDeleteEntity;
 import br.iwmvi.petshop.pet.model.Pet;
 import br.iwmvi.petshop.servico.model.Servico;
 import jakarta.persistence.*;
@@ -17,7 +18,7 @@ import java.util.stream.Collectors;
 @Getter
 @Table(name = "agendamentos")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Agendamento {
+public class Agendamento extends SoftDeleteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,9 +44,6 @@ public class Agendamento {
     @Column(name = "created_at", insertable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
-
     @OneToMany(mappedBy = "agendamento", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<AgendamentoServico> agendamentoServicos = new ArrayList<>();
 
@@ -63,7 +61,7 @@ public class Agendamento {
         this.observacoes = observacoes;
         this.valorTotal = valorTotal;
         this.status = AgendamentoStatus.AGENDADO;
-        this.deletedAt = null;
+        setDeletedAt(null);
     }
 
     public void definirServicos(List<Servico> servicos) {
