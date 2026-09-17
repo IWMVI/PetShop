@@ -26,6 +26,13 @@ Obs: Será atualizado conforme o projeto evoluir.
 src/main/java/br/iwmvi/petshop
 ├── config/          # DatabaseInitializer (cria o banco automaticamente)
 ├── exception/       # Exceções de domínio (EmailJaCadastradoException, TutorNotFoundException)
+├── agendamento/     # Entidade de agendamento e endpoints
+│   ├── controller/  # AgendamentoController
+│   ├── dto/         # AgendamentoRequest / AgendamentoResponse
+│   ├── mapper/      # AgendamentoMapper
+│   ├── model/       # Agendamento e AgendamentoServico
+│   ├── repository/  # AgendamentoRepository
+│   └── service/     # AgendamentoService
 ├── tutor/           # Entidade de tutor e endpoints
 │   ├── controller/  # TutorController
 │   ├── dto/         # TutorRequest / TutorResponse
@@ -125,6 +132,18 @@ curl -X POST http://localhost:8080/tutores/1/pets \
     "raca": "Labrador",
     "idade": 3,
     "peso": 25.5
+  }'
+```
+
+### Exemplo — agendar serviços para um pet
+
+```bash
+curl -X POST http://localhost:8080/pets/1/agendamentos \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dataHora": "2099-12-31T10:00:00",
+    "observacoes": "Levar com coleira",
+    "servicoIds": [1, 2]
   }'
 ```
 
