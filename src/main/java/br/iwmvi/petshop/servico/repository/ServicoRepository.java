@@ -12,4 +12,6 @@ public interface ServicoRepository extends JpaRepository<Servico, Long> {
     List<Servico> findAllByDeletedAtIsNull();
 
     Optional<Servico> findByIdAndDeletedAtIsNull(Long id);
+
+    List<Servico> findByIdInAndDeletedAtIsNull(List<Long> ids);
 }
