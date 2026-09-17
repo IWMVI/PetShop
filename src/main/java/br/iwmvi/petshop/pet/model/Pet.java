@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -32,6 +33,9 @@ public class Pet {
 
     private Integer idade;
 
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "tutor_id", nullable = false)
     private Tutor tutor;
@@ -43,6 +47,22 @@ public class Pet {
         this.raca = raca;
         this.idade = idade;
         this.tutor = tutor;
+    }
+
+    public void atualizar(String nome, String especie, BigDecimal peso, String raca, Integer idade) {
+        this.nome = nome;
+        this.especie = especie;
+        this.peso = peso;
+        this.raca = raca;
+        this.idade = idade;
+    }
+
+    public void deletar() {
+        this.deletedAt = LocalDateTime.now();
+    }
+
+    public void restaurar() {
+        this.deletedAt = null;
     }
 
 }
