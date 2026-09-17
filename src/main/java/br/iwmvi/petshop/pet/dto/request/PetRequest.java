@@ -14,7 +14,7 @@ public record PetRequest(
         @Size(max = 50)
         String especie,
 
-        @Size(max = 50)
+        @Size(max = 100)
         String raca,
 
         @PositiveOrZero
