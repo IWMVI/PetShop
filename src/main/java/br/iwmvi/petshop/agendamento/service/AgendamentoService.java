@@ -39,7 +39,11 @@ public class AgendamentoService {
         Pet pet = buscarPetAtivo(petId);
         List<Servico> servicos = buscarServicosAtivos(request.servicoIds());
 
-        Agendamento agendamentoSalvo = agendamentoRepository.save(AgendamentoMapper.toEntity(request, pet, servicos));
+        Agendamento agendamento = AgendamentoMapper.toEntity(request, pet, servicos);
+        BigDecimal valorTotal = calcularValorTotal(agendamento);
+        agendamento.setValorTotal(valorTotal);
+
+        Agendamento agendamentoSalvo = agendamentoRepository.save(agendamento);
 
         return AgendamentoMapper.toResponse(agendamentoSalvo);
     }
@@ -70,12 +74,10 @@ public class AgendamentoService {
         Agendamento agendamento = buscarAgendamentoAtivo(petId, agendamentoId);
         List<Servico> servicos = buscarServicosAtivos(request.servicoIds());
 
-        BigDecimal valorTotal = servicos.stream()
-                .map(Servico::getPreco)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        agendamento.atualizar(request.dataHora(), request.observacoes(), valorTotal);
+        agendamento.atualizar(request.dataHora(), request.observacoes(), BigDecimal.ZERO);
         agendamento.definirServicos(servicos);
+        BigDecimal valorTotal = calcularValorTotal(agendamento);
+        agendamento.setValorTotal(valorTotal);
 
         return AgendamentoMapper.toResponse(agendamentoRepository.save(agendamento));
     }
@@ -86,6 +88,12 @@ public class AgendamentoService {
         Agendamento agendamento = buscarAgendamentoAtivo(petId, agendamentoId);
         agendamento.cancelar();
         agendamentoRepository.save(agendamento);
+    }
+
+    private BigDecimal calcularValorTotal(Agendamento agendamento) {
+        return agendamento.getAgendamentoServicos().stream()
+                .map(as -> as.getPrecoCobrado())
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private Pet buscarPetAtivo(Long petId) {
