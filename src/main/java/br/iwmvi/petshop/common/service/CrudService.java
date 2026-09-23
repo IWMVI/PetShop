@@ -104,7 +104,7 @@ public abstract class CrudService<T extends SoftDeleteEntity, ID, REQ, RES> {
      */
     public RES update(ID id, REQ request) {
         T entity = findByIdOrThrow(id);
-        validateBeforeSave(entity);
+        validateUpdate(entity, request);
         updateEntity(entity, request);
         T updated = getRepository().save(entity);
         return getMapper().toResponse(updated);
@@ -130,7 +130,23 @@ public abstract class CrudService<T extends SoftDeleteEntity, ID, REQ, RES> {
      */
     protected T findByIdOrThrow(ID id) {
         return getRepository().findActiveById(id)
-                .orElseThrow(() -> new EntityNotFoundException(getEntityName() + " não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException(getEntityName() + " com ID " + id + " não encontrado"));
+    }
+
+    /**
+     * Valida a atualização de uma entidade antes de aplicar os novos valores.
+     *
+     * É invocada com a entidade persistida (estado anterior) e o DTO request, antes de
+     * {@link #updateEntity} mutar a entidade. Por padrão delega a
+     * {@link #validateBeforeSave}, mas pode ser sobrescrita para validar somente
+     * o delta entre o estado persistido e a requisição (ex.: não relançar regra de
+     * unicidade quando o valor não mudou).
+     *
+     * @param entity a entidade persistida (estado anterior)
+     * @param request o DTO request com os novos valores
+     */
+    protected void validateUpdate(T entity, REQ request) {
+        validateBeforeSave(entity);
     }
 
     /**
