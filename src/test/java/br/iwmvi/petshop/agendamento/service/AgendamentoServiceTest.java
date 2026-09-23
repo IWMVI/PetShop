@@ -5,6 +5,9 @@ import br.iwmvi.petshop.agendamento.dto.request.AgendamentoRequest;
 import br.iwmvi.petshop.agendamento.model.Agendamento;
 import br.iwmvi.petshop.agendamento.model.AgendamentoStatus;
 import br.iwmvi.petshop.agendamento.repository.AgendamentoRepository;
+import br.iwmvi.petshop.agendamento.validator.DataHoraValidador;
+import br.iwmvi.petshop.agendamento.validator.ServicosObrigatoriosValidador;
+import br.iwmvi.petshop.common.validator.CompositeValidator;
 import br.iwmvi.petshop.exception.AgendamentoNotFoundException;
 import br.iwmvi.petshop.exception.AgendamentoValidationException;
 import br.iwmvi.petshop.exception.PetNotFoundException;
@@ -12,11 +15,11 @@ import br.iwmvi.petshop.pet.model.Pet;
 import br.iwmvi.petshop.pet.repository.PetRepository;
 import br.iwmvi.petshop.servico.model.Servico;
 import br.iwmvi.petshop.servico.repository.ServicoRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -41,8 +44,20 @@ class AgendamentoServiceTest {
     @Mock
     private ServicoRepository servicoRepository;
 
-    @InjectMocks
     private AgendamentoService agendamentoService;
+
+    @BeforeEach
+    void setUp() {
+        agendamentoService = new AgendamentoService(
+                agendamentoRepository,
+                petRepository,
+                servicoRepository,
+                new CompositeValidator<>(List.of(
+                        new DataHoraValidador(),
+                        new ServicosObrigatoriosValidador()
+                ))
+        );
+    }
 
     @Nested
     @DisplayName("Cadastro de agendamentos")
@@ -55,7 +70,7 @@ class AgendamentoServiceTest {
             AgendamentoRequest request = AgendamentoTestData.criarAgendamentoRequest(LocalDateTime.now().plusDays(1));
             List<Servico> servicos = servicosPadrao();
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(servicoRepository.findByIdInAndDeletedAtIsNull(List.of(10L, 11L))).thenReturn(servicos);
             when(agendamentoRepository.save(any(Agendamento.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -72,7 +87,7 @@ class AgendamentoServiceTest {
         void naoDeveCadastrarComPetInexistente() {
             AgendamentoRequest request = AgendamentoTestData.criarAgendamentoRequest(LocalDateTime.now().plusDays(1));
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.empty());
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> agendamentoService.cadastrar(2L, request))
                     .isInstanceOf(PetNotFoundException.class);
@@ -99,7 +114,7 @@ class AgendamentoServiceTest {
             Pet pet = AgendamentoTestData.criarPet();
             AgendamentoRequest request = AgendamentoTestData.criarAgendamentoRequest(LocalDateTime.now().plusDays(1));
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(servicoRepository.findByIdInAndDeletedAtIsNull(List.of(10L, 11L)))
                     .thenReturn(List.of(AgendamentoTestData.criarServico(10L, "Banho", "50.00")));
 
@@ -121,7 +136,7 @@ class AgendamentoServiceTest {
             Pet pet = AgendamentoTestData.criarPet();
             Agendamento agendamento = AgendamentoTestData.criarAgendamento(pet, LocalDateTime.now().plusDays(1), servicosPadrao());
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(agendamentoRepository.findByPetIdAndDeletedAtIsNull(2L)).thenReturn(List.of(agendamento));
 
             var response = agendamentoService.listarPorPet(2L);
@@ -133,7 +148,7 @@ class AgendamentoServiceTest {
         @Test
         @DisplayName("ESE - Não deve listar quando pet não existir")
         void naoDeveListarQuandoPetNaoExistir() {
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.empty());
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> agendamentoService.listarPorPet(2L))
                     .isInstanceOf(PetNotFoundException.class);
@@ -147,7 +162,7 @@ class AgendamentoServiceTest {
             Pet pet = AgendamentoTestData.criarPet();
             Agendamento agendamento = AgendamentoTestData.criarAgendamento(pet, LocalDateTime.now().plusDays(1), servicosPadrao());
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(agendamentoRepository.findByIdAndPetIdAndDeletedAtIsNull(50L, 2L)).thenReturn(Optional.of(agendamento));
 
             var response = agendamentoService.buscarPorId(2L, 50L);
@@ -160,7 +175,7 @@ class AgendamentoServiceTest {
         void naoDeveBuscarAgendamentoInexistente() {
             Pet pet = AgendamentoTestData.criarPet();
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(agendamentoRepository.findByIdAndPetIdAndDeletedAtIsNull(50L, 2L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> agendamentoService.buscarPorId(2L, 50L))
@@ -183,7 +198,7 @@ class AgendamentoServiceTest {
                     List.of(10L)
             );
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(agendamentoRepository.findByIdAndPetIdAndDeletedAtIsNull(50L, 2L)).thenReturn(Optional.of(agendamento));
             when(servicoRepository.findByIdInAndDeletedAtIsNull(List.of(10L)))
                     .thenReturn(List.of(AgendamentoTestData.criarServico(10L, "Banho", "50.00")));
@@ -201,7 +216,7 @@ class AgendamentoServiceTest {
             Pet pet = AgendamentoTestData.criarPet();
             Agendamento agendamento = AgendamentoTestData.criarAgendamento(pet, LocalDateTime.now().plusDays(1), servicosPadrao());
 
-            when(petRepository.findByIdAndDeletedAtIsNull(2L)).thenReturn(Optional.of(pet));
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
             when(agendamentoRepository.findByIdAndPetIdAndDeletedAtIsNull(50L, 2L)).thenReturn(Optional.of(agendamento));
 
             agendamentoService.cancelar(2L, 50L);

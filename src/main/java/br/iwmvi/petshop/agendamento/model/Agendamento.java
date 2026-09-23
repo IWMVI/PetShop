@@ -84,6 +84,6 @@ public class Agendamento extends SoftDeleteEntity {
 
     public void cancelar() {
         this.status = AgendamentoStatus.CANCELADO;
-        this.deletedAt = LocalDateTime.now();
+        setDeletedAt(LocalDateTime.now());
     }
 }

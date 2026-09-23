@@ -5,6 +5,7 @@ import br.iwmvi.petshop.agendamento.dto.response.AgendamentoResponse;
 import br.iwmvi.petshop.agendamento.mapper.AgendamentoMapper;
 import br.iwmvi.petshop.agendamento.model.Agendamento;
 import br.iwmvi.petshop.agendamento.repository.AgendamentoRepository;
+import br.iwmvi.petshop.common.validator.EntityValidator;
 import br.iwmvi.petshop.exception.AgendamentoNotFoundException;
 import br.iwmvi.petshop.exception.AgendamentoValidationException;
 import br.iwmvi.petshop.exception.PetNotFoundException;
@@ -24,6 +25,16 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+/**
+ * Serviço de agendamentos.
+ *
+ * <p>Diferente de {@link br.iwmvi.petshop.common.service.CrudService}, a operação
+ * principal é agregada por pet (rota aninhada {@code /pets/{petId}/agendamentos}) e o
+ * "delete" tem semântica própria de cancelamento (status {@code CANCELADO} + soft delete).
+ * Adaptá-lo à base genérica exigiria carregar o {@code petId} por contexto
+ * (ex.: {@code ThreadLocal}, um smell já criticado no PetService), por isso mantém
+ * seu próprio fluxo CRUD deixando claro o vínculo com o pet.
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -32,6 +43,7 @@ public class AgendamentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final PetRepository petRepository;
     private final ServicoRepository servicoRepository;
+    private final EntityValidator<Agendamento> agendamentoValidator;
 
     public AgendamentoResponse cadastrar(Long petId, AgendamentoRequest request) {
         validarDataHora(request.dataHora());
@@ -40,6 +52,7 @@ public class AgendamentoService {
         List<Servico> servicos = buscarServicosAtivos(request.servicoIds());
 
         Agendamento agendamento = AgendamentoMapper.toEntity(request, pet, servicos);
+        agendamentoValidator.validate(agendamento);
         BigDecimal valorTotal = calcularValorTotal(agendamento);
         agendamento.setValorTotal(valorTotal);
 
@@ -76,6 +89,7 @@ public class AgendamentoService {
 
         agendamento.atualizar(request.dataHora(), request.observacoes(), BigDecimal.ZERO);
         agendamento.definirServicos(servicos);
+        agendamentoValidator.validate(agendamento);
         BigDecimal valorTotal = calcularValorTotal(agendamento);
         agendamento.setValorTotal(valorTotal);
 
@@ -97,7 +111,7 @@ public class AgendamentoService {
     }
 
     private Pet buscarPetAtivo(Long petId) {
-        return petRepository.findByIdAndDeletedAtIsNull(petId)
+        return petRepository.findActiveById(petId)
                 .orElseThrow(() -> new PetNotFoundException(petId));
     }
 
@@ -106,6 +120,8 @@ public class AgendamentoService {
                 .orElseThrow(() -> new AgendamentoNotFoundException(agendamentoId));
     }
 
+    // Guarda de fronteira: rejeita data inválida antes de consultar repositórios.
+    // A regra canônica é aplicada também pelo agendamentoValidator sobre a entidade.
     private void validarDataHora(LocalDateTime dataHora) {
         if (dataHora != null && dataHora.isBefore(LocalDateTime.now())) {
             throw new AgendamentoValidationException("Data/hora do agendamento não pode ser no passado.");
