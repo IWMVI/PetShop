@@ -1,15 +1,16 @@
 package br.iwmvi.petshop.servico.service;
 
-import br.iwmvi.petshop.exception.ServicoNotFoundException;
+import br.iwmvi.petshop.exception.EntityNotFoundException;
 import br.iwmvi.petshop.servico.ServicoTestData;
 import br.iwmvi.petshop.servico.dto.request.ServicoRequest;
+import br.iwmvi.petshop.servico.mapper.ServicoMapper;
 import br.iwmvi.petshop.servico.model.Servico;
 import br.iwmvi.petshop.servico.repository.ServicoRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -29,8 +30,12 @@ public class ServicoServiceTest {
     @Mock
     private ServicoRepository repository;
 
-    @InjectMocks
     private ServicoService servicoService;
+
+    @BeforeEach
+    void setUp() {
+        servicoService = new ServicoService(repository, new ServicoMapper());
+    }
 
     @Nested
     @DisplayName("Cadastro de serviços.")
@@ -67,9 +72,9 @@ public class ServicoServiceTest {
         void deveListarServicos_quandoExistirem() {
             var servico = ServicoTestData.criarServico();
 
-            when(repository.findAllByDeletedAtIsNull()).thenReturn(List.of(servico));
+            when(repository.findAllActive()).thenReturn(List.of(servico));
 
-            var response = servicoService.listar();
+            var response = servicoService.findAll();
 
             assertThat(response).hasSize(1);
             assertThat(response.getFirst().id()).isEqualTo(1L);
@@ -79,9 +84,9 @@ public class ServicoServiceTest {
         @Test
         @DisplayName("PCE - Deve retornar lista vazia quando não há serviços.")
         void deveRetornarListaVazia_quandoNaoExistiremServicos() {
-            when(repository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+            when(repository.findAllActive()).thenReturn(List.of());
 
-            var response = servicoService.listar();
+            var response = servicoService.findAll();
 
             assertThat(response).isEmpty();
         }
@@ -89,12 +94,12 @@ public class ServicoServiceTest {
         @Test
         @DisplayName("ESE - Não deve listar serviços excluídos logicamente.")
         void naoDeveListarServicos_quandoExcluidosLogicamente() {
-            when(repository.findAllByDeletedAtIsNull()).thenReturn(List.of());
+            when(repository.findAllActive()).thenReturn(List.of());
 
-            var response = servicoService.listar();
+            var response = servicoService.findAll();
 
             assertThat(response).isEmpty();
-            verify(repository).findAllByDeletedAtIsNull();
+            verify(repository).findAllActive();
         }
     }
 
@@ -107,7 +112,7 @@ public class ServicoServiceTest {
         void deveBuscarServico_quandoIdExistir() {
             var servico = ServicoTestData.criarServico();
 
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(servico));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(servico));
 
             var response = servicoService.buscarPorId(1L);
 
@@ -118,19 +123,19 @@ public class ServicoServiceTest {
         @Test
         @DisplayName("ESE - Não deve buscar serviço quando o id não existir.")
         void naoDeveBuscarServico_quandoIdNaoExistir() {
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(repository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> servicoService.buscarPorId(1L))
-                    .isInstanceOf(ServicoNotFoundException.class);
+                    .isInstanceOf(EntityNotFoundException.class);
         }
 
         @Test
         @DisplayName("ESE - Não deve buscar serviço excluído logicamente.")
         void naoDeveBuscarServico_quandoExcluidoLogicamente() {
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(repository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> servicoService.buscarPorId(1L))
-                    .isInstanceOf(ServicoNotFoundException.class)
+                    .isInstanceOf(EntityNotFoundException.class)
                     .hasMessageContaining("1");
         }
     }
@@ -150,7 +155,7 @@ public class ServicoServiceTest {
                     90
             );
 
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(servico));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(servico));
             when(repository.save(any(Servico.class))).thenAnswer(i -> i.getArgument(0));
 
             var response = servicoService.atualizar(1L, request);
@@ -167,10 +172,10 @@ public class ServicoServiceTest {
         void naoDeveAtualizarServico_quandoIdNaoExistir() {
             var request = ServicoTestData.criarServicoRequest();
 
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(repository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> servicoService.atualizar(1L, request))
-                    .isInstanceOf(ServicoNotFoundException.class);
+                    .isInstanceOf(EntityNotFoundException.class);
 
             verify(repository, never()).save(any());
         }
@@ -185,22 +190,21 @@ public class ServicoServiceTest {
         void deveExcluirServico_quandoIdExistir() {
             var servico = ServicoTestData.criarServico();
 
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(servico));
-            when(repository.save(any(Servico.class))).thenAnswer(i -> i.getArgument(0));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(servico));
 
             servicoService.deletar(1L);
 
-            assertThat(servico.getDeletedAt()).isNotNull();
-            verify(repository).save(servico);
+            verify(repository).softDelete(1L);
+            verify(repository, never()).save(any());
         }
 
         @Test
         @DisplayName("ESE - Não deve excluir serviço quando o id não existir.")
         void naoDeveExcluirServico_quandoIdNaoExistir() {
-            when(repository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(repository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> servicoService.deletar(1L))
-                    .isInstanceOf(ServicoNotFoundException.class);
+                    .isInstanceOf(EntityNotFoundException.class);
 
             verify(repository, never()).save(any());
         }

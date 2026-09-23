@@ -5,15 +5,16 @@ import br.iwmvi.petshop.exception.PetNotFoundException;
 import br.iwmvi.petshop.exception.TutorNotFoundException;
 import br.iwmvi.petshop.pet.PetTestData;
 import br.iwmvi.petshop.pet.dto.request.PetRequest;
+import br.iwmvi.petshop.pet.mapper.PetMapper;
 import br.iwmvi.petshop.pet.model.Pet;
 import br.iwmvi.petshop.pet.repository.PetRepository;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import br.iwmvi.petshop.tutor.repository.TutorRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -36,8 +37,12 @@ public class PetServiceTest {
     @Mock
     private TutorRepository tutorRepository;
 
-    @InjectMocks
     private PetService petService;
+
+    @BeforeEach
+    void setUp() {
+        petService = new PetService(petRepository, tutorRepository, new PetMapper());
+    }
 
     @Nested
     @DisplayName("Cadastro de pets.")
@@ -49,7 +54,7 @@ public class PetServiceTest {
             var tutor = criarTutor();
             var request = PetTestData.criarPetRequest();
 
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.of(tutor));
             when(petRepository.save(any(Pet.class))).thenAnswer(i -> {
                 Pet pet = i.getArgument(0);
                 ReflectionTestUtils.setField(pet, "id", 1L);
@@ -64,7 +69,7 @@ public class PetServiceTest {
             assertThat(response.raca()).isEqualTo("Persa");
             assertThat(response.idade()).isEqualTo(2);
 
-            verify(tutorRepository).findByIdAndDeletedAtIsNull(1L);
+            verify(tutorRepository).findActiveById(1L);
             verify(petRepository).save(any(Pet.class));
         }
 
@@ -73,12 +78,12 @@ public class PetServiceTest {
         void naoDeveCadastrarPet_quandoTutorNaoExistir() {
             var request = PetTestData.criarPetRequest();
 
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> petService.cadastrar(request, 1L))
                     .isInstanceOf(TutorNotFoundException.class);
 
-            verify(tutorRepository).findByIdAndDeletedAtIsNull(1L);
+            verify(tutorRepository).findActiveById(1L);
             verify(petRepository, never()).save(any());
         }
     }
@@ -93,7 +98,7 @@ public class PetServiceTest {
             var tutor = criarTutor();
             var pet = PetTestData.criarPet(tutor);
 
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.of(tutor));
             when(petRepository.findByTutorIdAndDeletedAtIsNull(1L)).thenReturn(List.of(pet));
 
             var response = petService.listarPorTutor(1L);
@@ -106,7 +111,7 @@ public class PetServiceTest {
         @Test
         @DisplayName("PCE - Deve retornar lista vazia quando não houver pets cadastrados.")
         void deveRetornarListaVazia_quandoNaoExistiremPets() {
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(criarTutor()));
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.of(criarTutor()));
             when(petRepository.findByTutorIdAndDeletedAtIsNull(1L)).thenReturn(List.of());
 
             var response = petService.listarPorTutor(1L);
@@ -117,12 +122,12 @@ public class PetServiceTest {
         @Test
         @DisplayName("ESE - Não deve listar pets quando o tutor não existir.")
         void naoDeveListarPets_quandoTutorNaoExistir() {
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.empty());
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> petService.listarPorTutor(1L))
                     .isInstanceOf(TutorNotFoundException.class);
 
-            verify(tutorRepository).findByIdAndDeletedAtIsNull(1L);
+            verify(tutorRepository).findActiveById(1L);
             verify(petRepository, never()).findByTutorIdAndDeletedAtIsNull(any());
         }
 
@@ -131,7 +136,7 @@ public class PetServiceTest {
         void naoDeveListarPets_quandoExcluidosLogicamente() {
             var tutor = criarTutor();
 
-            when(tutorRepository.findByIdAndDeletedAtIsNull(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.of(tutor));
             when(petRepository.findByTutorIdAndDeletedAtIsNull(1L)).thenReturn(List.of());
 
             var response = petService.listarPorTutor(1L);
@@ -235,12 +240,11 @@ public class PetServiceTest {
             var pet = PetTestData.criarPet(tutor);
 
             when(petRepository.findByIdAndTutorIdAndDeletedAtIsNull(1L, 1L)).thenReturn(Optional.of(pet));
-            when(petRepository.save(any(Pet.class))).thenAnswer(i -> i.getArgument(0));
 
             petService.deletar(1L, 1L);
 
-            assertThat(pet.getDeletedAt()).isNotNull();
-            verify(petRepository).save(pet);
+            verify(petRepository).softDelete(1L);
+            verify(petRepository, never()).save(any());
         }
 
         @Test
