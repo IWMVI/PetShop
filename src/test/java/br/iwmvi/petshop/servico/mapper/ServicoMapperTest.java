@@ -27,7 +27,7 @@ class ServicoMapperTest {
                     60
             );
 
-            var servico = ServicoMapper.toEntity(request);
+            var servico = new ServicoMapper().toEntity(request);
 
             assertThat(servico.getNome()).isEqualTo("Banho e Tosa");
             assertThat(servico.getDescricao()).isEqualTo("Banho completo com tosa");
@@ -45,7 +45,7 @@ class ServicoMapperTest {
         void deveMapearTodosOsCamposParaResposta() {
             var servico = ServicoTestData.criarServico();
 
-            var response = ServicoMapper.toResponse(servico);
+            var response = new ServicoMapper().toResponse(servico);
 
             assertThat(response.id()).isEqualTo(1L);
             assertThat(response.nome()).isEqualTo("Banho e Tosa");

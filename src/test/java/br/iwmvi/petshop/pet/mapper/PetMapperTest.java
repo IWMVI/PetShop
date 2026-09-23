@@ -31,7 +31,7 @@ class PetMapperTest {
             );
 
             var tutor = criarTutor();
-            var pet = PetMapper.toEntity(request, tutor);
+            var pet = new PetMapper().toEntity(request, tutor);
 
             assertThat(pet.getNome()).isEqualTo("Fluffy");
             assertThat(pet.getEspecie()).isEqualTo("Gato");
@@ -52,7 +52,7 @@ class PetMapperTest {
             var tutor = criarTutor();
             var pet = PetTestData.criarPet(tutor);
 
-            var response = PetMapper.toResponse(pet);
+            var response = new PetMapper().toResponse(pet);
 
             assertThat(response.id()).isEqualTo(1L);
             assertThat(response.nome()).isEqualTo("Fluffy");

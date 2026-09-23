@@ -34,7 +34,7 @@ class TutorMapperTest {
                     )
             );
 
-            var tutor = TutorMapper.toEntity(request);
+            var tutor = new TutorMapper().toEntity(request);
 
             assertThat(tutor.getNome()).isEqualTo("Wallace");
             assertThat(tutor.getEmail()).isEqualTo("wallace@test.com");
@@ -51,7 +51,7 @@ class TutorMapperTest {
         @Test
         @DisplayName("PCE - Deve mapear todos os campos do tutor.")
         void deveMapearTodosOsCampos() {
-            var tutor = TutorMapper.toEntity(new TutorRequest(
+            var tutor = new TutorMapper().toEntity(new TutorRequest(
                     "Wallace",
                     "wallace@test.com",
                     "11911112222",
@@ -68,7 +68,7 @@ class TutorMapperTest {
 
             ReflectionTestUtils.setField(tutor, "id", 1L);
 
-            var response = TutorMapper.toResponse(tutor);
+            var response = new TutorMapper().toResponse(tutor);
 
             assertThat(response.id()).isEqualTo(1L);
             assertThat(response.nome()).isEqualTo("Wallace");

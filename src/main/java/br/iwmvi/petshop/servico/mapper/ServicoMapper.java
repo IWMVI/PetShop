@@ -1,15 +1,16 @@
 package br.iwmvi.petshop.servico.mapper;
 
+import br.iwmvi.petshop.common.mapper.RequestMapper;
+import br.iwmvi.petshop.common.mapper.ResponseMapper;
 import br.iwmvi.petshop.servico.dto.request.ServicoRequest;
 import br.iwmvi.petshop.servico.dto.response.ServicoResponse;
 import br.iwmvi.petshop.servico.model.Servico;
+import org.springframework.stereotype.Component;
 
-public final class ServicoMapper {
+@Component
+public class ServicoMapper implements RequestMapper<ServicoRequest, Servico>, ResponseMapper<Servico, ServicoResponse> {
 
-    private ServicoMapper() {
-    }
-
-    public static Servico toEntity(ServicoRequest request) {
+    public Servico toEntity(ServicoRequest request) {
         return new Servico(
                 request.nome(),
                 request.descricao(),
@@ -18,7 +19,8 @@ public final class ServicoMapper {
         );
     }
 
-    public static ServicoResponse toResponse(Servico servico) {
+    @Override
+    public ServicoResponse toResponse(Servico servico) {
         return new ServicoResponse(
                 servico.getId(),
                 servico.getNome(),
