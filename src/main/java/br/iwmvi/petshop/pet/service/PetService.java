@@ -74,8 +74,6 @@ public class PetService extends CrudService<Pet, Long, PetRequest, PetResponse> 
 
     // Métodos legados para compatibilidade
     public PetResponse cadastrar(PetRequest request, Long tutorId) {
-        tutorRepository.findActiveById(tutorId)
-                .orElseThrow(() -> new TutorNotFoundException(tutorId));
         setTutorContext(tutorId);
         return create(request);
     }

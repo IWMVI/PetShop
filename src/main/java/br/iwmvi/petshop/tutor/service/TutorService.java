@@ -4,6 +4,7 @@ import br.iwmvi.petshop.common.mapper.ResponseMapper;
 import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
 import br.iwmvi.petshop.common.service.CrudService;
 import br.iwmvi.petshop.exception.EmailJaCadastradoException;
+import br.iwmvi.petshop.exception.TutorNotFoundException;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
 import br.iwmvi.petshop.tutor.mapper.TutorMapper;
@@ -51,6 +52,19 @@ public class TutorService extends CrudService<Tutor, Long, TutorRequest, TutorRe
     }
 
     @Override
+    protected void validateUpdate(Tutor entity, TutorRequest request) {
+        String novoEmail = request.email().toLowerCase();
+        if (entity.getEmail().equalsIgnoreCase(novoEmail)) {
+            return;
+        }
+
+        boolean emailExists = repository.existsByEmail(novoEmail);
+        if (emailExists) {
+            throw new EmailJaCadastradoException("Email ja cadastrado: " + novoEmail);
+        }
+    }
+
+    @Override
     protected String getEntityName() {
         return "Tutor";
     }
@@ -74,7 +88,7 @@ public class TutorService extends CrudService<Tutor, Long, TutorRequest, TutorRe
 
     public TutorResponse restaurar(Long id) {
         Tutor tutor = repository.findById(id)
-                .orElseThrow(() -> new EmailJaCadastradoException("Tutor não encontrado"));
+                .orElseThrow(() -> new TutorNotFoundException(id));
         tutor.setDeletedAt(null);
         repository.save(tutor);
         return mapper.toResponse(tutor);
