@@ -1,0 +1,139 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+    direction LR
+
+    class SoftDeleteEntity {
+        <<abstract>>
+        -LocalDateTime deletedAt
+        +delete() void
+        +isActive() boolean
+    }
+
+    class Tutor {
+        -Long id
+        -String nome
+        -String email
+        -String telefone
+        -Endereco endereco
+        -List~Pet~ pets
+        +Tutor(nome, email, telefone, endereco)
+    }
+
+    class Endereco {
+        -Long id
+        -String cep
+        -String logradouro
+        -String numero
+        -String complemento
+        -String bairro
+        -String cidade
+        -String estado
+        +Endereco(cep, logradouro, numero, complemento, bairro, cidade, estado)
+    }
+
+    class Pet {
+        -Long id
+        -String nome
+        -String especie
+        -BigDecimal peso
+        -String raca
+        -Integer idade
+        -Tutor tutor
+        +Pet(nome, especie, peso, raca, idade, tutor)
+        +atualizar(nome, especie, peso, raca, idade) void
+    }
+
+    class Agendamento {
+        -Long id
+        -LocalDateTime dataHora
+        -String observacoes
+        -AgendamentoStatus status
+        -BigDecimal valorTotal
+        -LocalDateTime createdAt
+        -Pet pet
+        -List~AgendamentoServico~ agendamentoServicos
+        +Agendamento(pet, dataHora, observacoes, status, valorTotal)
+        +atualizar(dataHora, observacoes, valorTotal) void
+        +definirServicos(servicos) void
+        +cancelar() void
+    }
+
+    class AgendamentoServico {
+        -AgendamentoServicoId id
+        -BigDecimal precoCobrado
+        -Agendamento agendamento
+        -Servico servico
+        +AgendamentoServico(agendamento, servico, precoCobrado)
+    }
+
+    class AgendamentoServicoId {
+        -Long agendamentoId
+        -Long servicoId
+        +AgendamentoServicoId(agendamentoId, servicoId)
+    }
+
+    class Servico {
+        -Long id
+        -String nome
+        -String descricao
+        -BigDecimal preco
+        -Integer tempoEstimadoMinutos
+        +Servico(nome, descricao, preco, tempoEstimadoMinutos)
+        +atualizar(nome, descricao, preco, tempoEstimadoMinutos) void
+    }
+
+    class AgendamentoStatus {
+        <<enumeration>>
+        AGENDADO
+        CANCELADO
+        CONCLUIDO
+    }
+
+    class HistoricoPet {
+        <<planned>>
+        -Long id
+        -Pet pet
+        -String tipoEvento
+        -String descricao
+        -LocalDateTime dataEvento
+        -String profissional
+        -LocalDateTime createdAt
+    }
+
+    class Pagamento {
+        <<planned>>
+        -Long id
+        -Agendamento agendamento
+        -BigDecimal valor
+        -String metodoPagamento
+        -String status
+        -LocalDateTime dataPagamento
+        -LocalDateTime deletedAt
+    }
+
+    %% Herança
+    SoftDeleteEntity <|-- Tutor
+    SoftDeleteEntity <|-- Pet
+    SoftDeleteEntity <|-- Agendamento
+    SoftDeleteEntity <|-- Servico
+    SoftDeleteEntity <|.. Pagamento : planejado
+
+    %% Relacionamentos do domínio
+    Tutor "1" *-- "1" Endereco : possui
+    Tutor "1" --> "*" Pet : possui
+    Pet "1" --> "*" Agendamento : possui
+
+    %% Agendamento e serviços
+    Agendamento "1" *-- "*" AgendamentoServico : contém
+    Servico "1" --> "*" AgendamentoServico : utilizado em
+    AgendamentoServico "1" *-- "1" AgendamentoServicoId : possui
+
+    %% Enum
+    Agendamento --> AgendamentoStatus : possui
+
+    %% Funcionalidades planejadas
+    Pet "1" --> "*" HistoricoPet : possui
+    Agendamento "1" --> "*" Pagamento : possui

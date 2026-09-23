@@ -1,0 +1,91 @@
+%% Diagrama de Entidades do Projeto PetShop
+%% Entidades implementadas: Tutor, Endereco, Pet, Agendamento, AgendamentoServico, Servico
+%% Entidades planejadas (issues abertas): HistoricoPet (#7), Pagamento (#8)
+
+erDiagram
+    tutores {
+        BIGINT id PK
+        VARCHAR nome
+        VARCHAR email UK
+        VARCHAR telefone
+        BIGINT endereco_id FK
+        TIMESTAMP deleted_at
+    }
+
+    enderecos {
+        BIGINT id PK
+        VARCHAR cep
+        VARCHAR logradouro
+        VARCHAR numero
+        VARCHAR complemento
+        VARCHAR bairro
+        VARCHAR cidade
+        VARCHAR estado
+    }
+
+    pets {
+        BIGINT id PK
+        BIGINT tutor_id FK
+        VARCHAR nome
+        VARCHAR especie
+        VARCHAR raca
+        INT idade
+        DECIMAL peso
+        TEXT observacoes
+        TIMESTAMP created_at
+        TIMESTAMP deleted_at
+    }
+
+    agendamentos {
+        BIGINT id PK
+        BIGINT pet_id FK
+        TIMESTAMP data_hora
+        TEXT observacoes
+        VARCHAR status
+        DECIMAL valor_total
+        TIMESTAMP created_at
+        TIMESTAMP deleted_at
+    }
+
+    servicos {
+        BIGINT id PK
+        VARCHAR nome
+        TEXT descricao
+        DECIMAL preco
+        INT duracao_minutos
+        TIMESTAMP deleted_at
+    }
+
+    agendamento_servicos {
+        BIGINT agendamento_id PK_FK
+        BIGINT servico_id PK_FK
+        DECIMAL preco_cobrado
+    }
+
+    historico_pets {
+        BIGINT id PK
+        BIGINT pet_id FK
+        VARCHAR tipo_evento
+        TEXT descricao
+        TIMESTAMP data_evento
+        VARCHAR profissional
+        TIMESTAMP created_at
+    }
+
+    pagamentos {
+        BIGINT id PK
+        BIGINT agendamento_id FK
+        DECIMAL valor
+        VARCHAR metodo_pagamento
+        VARCHAR status
+        TIMESTAMP data_pagamento
+        TIMESTAMP deleted_at
+    }
+
+    enderecos ||--o| tutores : "endereco_id (1:1)"
+    tutores ||--o{ pets : "tutor_id (1:N)"
+    pets ||--o{ agendamentos : "pet_id (1:N)"
+    agendamentos ||--o{ agendamento_servicos : "agendamento_id (1:N)"
+    servicos ||--o{ agendamento_servicos : "servico_id (1:N)"
+    pets ||--o{ historico_pets : "pet_id (1:N)"
+    agendamentos ||--o{ pagamentos : "agendamento_id (1:N)"
