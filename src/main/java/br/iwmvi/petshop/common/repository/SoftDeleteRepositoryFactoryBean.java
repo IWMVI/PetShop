@@ -7,9 +7,11 @@ import org.springframework.data.repository.core.RepositoryMetadata;
 import org.springframework.data.repository.core.support.RepositoryFactorySupport;
 
 import jakarta.persistence.EntityManager;
+import org.springframework.data.repository.Repository;
+
 import java.io.Serializable;
 
-public class SoftDeleteRepositoryFactoryBean<R, T, ID extends Serializable>
+public class SoftDeleteRepositoryFactoryBean<R extends Repository<T, ID>, T, ID extends Serializable>
         extends JpaRepositoryFactoryBean<R, T, ID> {
 
     public SoftDeleteRepositoryFactoryBean(Class<? extends R> repositoryInterface) {
