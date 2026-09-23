@@ -1,5 +1,7 @@
 package br.iwmvi.petshop.common.validator;
 
+import br.iwmvi.petshop.exception.ValidationException;
+
 /**
  * Interface para validação de entidades usando o padrão Strategy.
  *

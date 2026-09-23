@@ -45,4 +45,10 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleAgendamentoValidation(AgendamentoValidationException ex) {
         return Map.of("mensagem", ex.getMessage());
     }
+
+    @ExceptionHandler(EntityNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleEntityNotFound(EntityNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
 }

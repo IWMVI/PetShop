@@ -1,4 +1,4 @@
-package br.iwmvi.petshop.common.validator;
+package br.iwmvi.petshop.exception;
 
 public class ValidationException extends RuntimeException {
 
