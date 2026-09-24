@@ -7,6 +7,7 @@ import br.iwmvi.petshop.agendamento.model.AgendamentoStatus;
 import br.iwmvi.petshop.agendamento.repository.AgendamentoRepository;
 import br.iwmvi.petshop.agendamento.validator.DataHoraValidador;
 import br.iwmvi.petshop.agendamento.validator.ServicosObrigatoriosValidador;
+import br.iwmvi.petshop.common.dto.PaginaResponse;
 import br.iwmvi.petshop.common.validator.CompositeValidator;
 import br.iwmvi.petshop.exception.AgendamentoNotFoundException;
 import br.iwmvi.petshop.exception.AgendamentoValidationException;
@@ -20,8 +21,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,6 +35,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -136,13 +142,36 @@ class AgendamentoServiceTest {
             Pet pet = AgendamentoTestData.criarPet();
             Agendamento agendamento = AgendamentoTestData.criarAgendamento(pet, LocalDateTime.now().plusDays(1), servicosPadrao());
 
+            ReflectionTestUtils.setField(agendamento, "id", 30L);
+
             when(petRepository.findActiveById(2L)).thenReturn(Optional.of(pet));
-            when(agendamentoRepository.findByPetIdAndDeletedAtIsNull(2L)).thenReturn(List.of(agendamento));
+            when(agendamentoRepository.findIdsByPetId(eq(2L), any(Pageable.class)))
+                    .thenAnswer(i -> new PageImpl<>(List.of(30L), i.getArgument(1), 11));
+            when(agendamentoRepository.findAllComServicosByIdIn(List.of(30L))).thenReturn(List.of(agendamento));
 
-            var response = agendamentoService.listarPorPet(2L);
+            var response = agendamentoService.listarPorPet(2L, 1, 10);
 
-            assertThat(response).hasSize(1);
-            assertThat(response.getFirst().petId()).isEqualTo(2L);
+            assertThat(response.itens()).hasSize(1);
+            assertThat(response.itens().getFirst().petId()).isEqualTo(2L);
+            assertThat(response.itens().getFirst().servicos().getFirst().nome()).isNotBlank();
+            assertThat(response.pagina()).isEqualTo(1);
+            assertThat(response.total()).isEqualTo(11);
+            assertThat(response.totalPaginas()).isEqualTo(2);
+        }
+
+        @Test
+        @DisplayName("AVL - Deve limitar o tamanho da página ao máximo permitido")
+        void deveLimitarTamanhoDaPagina() {
+            when(petRepository.findActiveById(2L)).thenReturn(Optional.of(AgendamentoTestData.criarPet()));
+            when(agendamentoRepository.findIdsByPetId(eq(2L), any(Pageable.class)))
+                    .thenAnswer(i -> new PageImpl<>(List.<Long>of(), i.getArgument(1), 0));
+
+            agendamentoService.listarPorPet(2L, -3, 1000);
+
+            var captor = ArgumentCaptor.forClass(Pageable.class);
+            verify(agendamentoRepository).findIdsByPetId(eq(2L), captor.capture());
+            assertThat(captor.getValue().getPageNumber()).isZero();
+            assertThat(captor.getValue().getPageSize()).isEqualTo(PaginaResponse.TAMANHO_MAXIMO);
         }
 
         @Test
@@ -150,7 +179,7 @@ class AgendamentoServiceTest {
         void naoDeveListarQuandoPetNaoExistir() {
             when(petRepository.findActiveById(2L)).thenReturn(Optional.empty());
 
-            assertThatThrownBy(() -> agendamentoService.listarPorPet(2L))
+            assertThatThrownBy(() -> agendamentoService.listarPorPet(2L, 0, 10))
                     .isInstanceOf(PetNotFoundException.class);
 
             verifyNoInteractions(agendamentoRepository);

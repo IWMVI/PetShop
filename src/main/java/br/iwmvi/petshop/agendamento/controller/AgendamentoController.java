@@ -3,12 +3,12 @@ package br.iwmvi.petshop.agendamento.controller;
 import br.iwmvi.petshop.agendamento.dto.request.AgendamentoRequest;
 import br.iwmvi.petshop.agendamento.dto.response.AgendamentoResponse;
 import br.iwmvi.petshop.agendamento.service.AgendamentoService;
+import br.iwmvi.petshop.common.dto.PaginaResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,8 +25,10 @@ public class AgendamentoController {
     }
 
     @GetMapping
-    public List<AgendamentoResponse> listar(@PathVariable Long petId) {
-        return agendamentoService.listarPorPet(petId);
+    public PaginaResponse<AgendamentoResponse> listar(@PathVariable Long petId,
+                                                      @RequestParam(defaultValue = "0") int pagina,
+                                                      @RequestParam(defaultValue = "" + PaginaResponse.TAMANHO_PADRAO) int tamanho) {
+        return agendamentoService.listarPorPet(petId, pagina, tamanho);
     }
 
     @GetMapping("/{id}")

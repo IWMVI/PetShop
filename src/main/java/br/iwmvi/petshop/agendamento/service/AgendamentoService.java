@@ -1,5 +1,8 @@
 package br.iwmvi.petshop.agendamento.service;
 
+import br.iwmvi.petshop.common.dto.PaginaResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import br.iwmvi.petshop.agendamento.dto.request.AgendamentoRequest;
 import br.iwmvi.petshop.agendamento.dto.response.AgendamentoResponse;
 import br.iwmvi.petshop.agendamento.mapper.AgendamentoMapper;
@@ -61,14 +64,19 @@ public class AgendamentoService {
         return AgendamentoMapper.toResponse(agendamentoSalvo);
     }
 
+    /** Lista uma página dos agendamentos do pet, ordenados por data e hora. */
     @Transactional(readOnly = true)
-    public List<AgendamentoResponse> listarPorPet(Long petId) {
+    public PaginaResponse<AgendamentoResponse> listarPorPet(Long petId, int pagina, int tamanho) {
         buscarPetAtivo(petId);
 
-        return agendamentoRepository.findByPetIdAndDeletedAtIsNull(petId)
+        var pageable = PaginaResponse.pageable(pagina, tamanho, Sort.by("dataHora").and(Sort.by("id")));
+        Page<Long> ids = agendamentoRepository.findIdsByPetId(petId, pageable);
+
+        Map<Long, Agendamento> porId = agendamentoRepository.findAllComServicosByIdIn(ids.getContent())
                 .stream()
-                .map(AgendamentoMapper::toResponse)
-                .toList();
+                .collect(Collectors.toMap(Agendamento::getId, Function.identity()));
+
+        return PaginaResponse.of(ids.map(id -> AgendamentoMapper.toResponse(porId.get(id))));
     }
 
     @Transactional(readOnly = true)
