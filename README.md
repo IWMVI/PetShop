@@ -1,5 +1,9 @@
 # PetShop
 
+[![back-end](https://img.shields.io/github/actions/workflow/status/IWMVI/PetShop/backend.yml?branch=main&label=back-end&logo=githubactions&style=flat&labelColor=2b2214&logoColor=f5b800)](https://github.com/IWMVI/PetShop/actions/workflows/backend.yml) [![front-end](https://img.shields.io/github/actions/workflow/status/IWMVI/PetShop/frontend.yml?branch=main&label=front-end&logo=githubactions&style=flat&labelColor=2b2214&logoColor=f5b800)](https://github.com/IWMVI/PetShop/actions/workflows/frontend.yml) [![Conventional Commits 1.0.0](https://img.shields.io/badge/Conventional%20Commits-1.0.0-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=conventionalcommits)](https://www.conventionalcommits.org/pt-br/v1.0.0/)
+
+[![Java 25](https://img.shields.io/badge/Java-25-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=openjdk)](https://openjdk.org/projects/jdk/25/) [![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=springboot)](https://spring.io/projects/spring-boot) [![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=postgresql)](https://www.postgresql.org/) [![Angular 20](https://img.shields.io/badge/Angular-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=angular)](https://angular.dev/) [![NG-ZORRO 20](https://img.shields.io/badge/NG--ZORRO-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=antdesign)](https://ng.ant.design/) [![Node.js 24](https://img.shields.io/badge/Node.js-24-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=nodedotjs)](https://nodejs.org/)
+
 Sistema de gerenciamento de um petshop: cadastro de tutores e seus pets, catálogo de
 serviços e agendamentos. O repositório tem duas partes, cada uma no seu diretório:
 
