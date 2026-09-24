@@ -8,6 +8,8 @@ import br.iwmvi.petshop.exception.EmailJaCadastradoException;
 import br.iwmvi.petshop.exception.TutorNotFoundException;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
+import br.iwmvi.petshop.tutor.dto.response.TutorResumoResponse;
+import br.iwmvi.petshop.exception.EntityNotFoundException;
 import br.iwmvi.petshop.tutor.mapper.TutorMapper;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import br.iwmvi.petshop.tutor.repository.TutorRepository;
@@ -89,6 +91,17 @@ public class TutorService extends CrudService<Tutor, Long, TutorRequest, TutorRe
 
     public void excluir(Long id) {
         delete(id);
+    }
+
+    /**
+     * Localiza o tutor dono do CPF, inclusive se tiver sido excluído, para que a interface
+     * ofereça a recuperação do cadastro em vez de apenas recusar o CPF duplicado.
+     */
+    public TutorResumoResponse buscarPorCpf(String cpf) {
+        String digitos = cpf.replaceAll("\\D", "");
+        return repository.findByCpf(digitos)
+                .map(t -> new TutorResumoResponse(t.getId(), t.getNome(), t.getEmail(), !t.isActive()))
+                .orElseThrow(() -> new EntityNotFoundException("Nenhum tutor com o CPF informado."));
     }
 
     public TutorResponse restaurar(Long id) {

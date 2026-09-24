@@ -422,6 +422,44 @@ public class TutorServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("Busca de tutor por CPF.")
+    class BuscaPorCpf {
+
+        @Test
+        @DisplayName("PCE - Deve encontrar tutor excluído pelo CPF com máscara, sinalizando a exclusão.")
+        void deveEncontrarTutorExcluido_quandoCpfPertencerAoTutor() {
+            var tutor = criarTutor();
+            tutor.setDeletedAt(LocalDateTime.now());
+
+            when(tutorRepository.findByCpf(CpfTestData.VALIDO)).thenReturn(Optional.of(tutor));
+
+            var resumo = tutorService.buscarPorCpf(CpfTestData.VALIDO_FORMATADO);
+
+            assertThat(resumo.id()).isEqualTo(1L);
+            assertThat(resumo.nome()).isEqualTo("Wallace");
+            assertThat(resumo.email()).isEqualTo("wallace@test.com");
+            assertThat(resumo.excluido()).isTrue();
+        }
+
+        @Test
+        @DisplayName("PCE - Deve indicar que o tutor está ativo.")
+        void deveIndicarTutorAtivo_quandoNaoExcluido() {
+            when(tutorRepository.findByCpf(CpfTestData.VALIDO)).thenReturn(Optional.of(criarTutor()));
+
+            assertThat(tutorService.buscarPorCpf(CpfTestData.VALIDO).excluido()).isFalse();
+        }
+
+        @Test
+        @DisplayName("ESE - Deve lançar exceção quando nenhum tutor tiver o CPF.")
+        void deveLancarExcecao_quandoCpfNaoEncontrado() {
+            when(tutorRepository.findByCpf(CpfTestData.VALIDO)).thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> tutorService.buscarPorCpf(CpfTestData.VALIDO))
+                    .isInstanceOf(EntityNotFoundException.class);
+        }
+    }
+
     private TutorRequest criarTutorRequest() {
         return new TutorRequest(
                 "Wallace",

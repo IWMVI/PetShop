@@ -38,3 +38,14 @@ Funcionalidade: Cadastro de tutor
     Dado que existe um tutor cadastrado com o CPF "529.982.247-25"
     Quando tentar cadastrar um tutor com o CPF "52998224725"
     Então o cadastro do tutor deve retornar o status 409
+
+  Cenário: Localizar pelo CPF um tutor excluído para recuperação
+    Dado que existe um tutor cadastrado com o CPF "111.444.777-35"
+    E o tutor cadastrado foi excluído
+    Quando buscar o tutor pelo CPF "11144477735"
+    Então a resposta deve retornar o status 200
+    E o tutor localizado deve estar marcado como excluído
+
+  Cenário: Buscar CPF sem tutor cadastrado
+    Quando buscar o tutor pelo CPF "39053344705"
+    Então a resposta deve retornar o status 404

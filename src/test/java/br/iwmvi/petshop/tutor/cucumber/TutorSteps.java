@@ -91,6 +91,24 @@ public class TutorSteps {
         resultado = realizarCadastro(request);
     }
 
+    @Dado("o tutor cadastrado foi excluído")
+    public void tutorCadastradoFoiExcluido() throws Exception {
+        excluirTutor(tutorId);
+    }
+
+    @Quando("buscar o tutor pelo CPF {string}")
+    public void buscarTutorPeloCpf(String cpf) throws Exception {
+        resultado = mockMvc.perform(get("/tutores/cpf/{cpf}", cpf)).andReturn();
+    }
+
+    @Entao("o tutor localizado deve estar marcado como excluído")
+    public void tutorLocalizadoDeveEstarExcluido() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("id").asLong()).isEqualTo(tutorId);
+        assertThat(response.get("excluido").asBoolean()).isTrue();
+    }
+
     @Quando("tentar cadastrar um tutor com o CEP {string}")
     @SuppressWarnings("unchecked")
     public void tentarCadastrarTutorComCep(String cep) throws Exception {
