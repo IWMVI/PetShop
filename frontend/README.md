@@ -147,6 +147,15 @@ Cada componente tem arquivos próprios de `.ts`, `.html`, `.scss` e `.spec.ts`.
   `<div nz-col>` e um `<nz-form-item>` dentro, para o espaçamento do grid funcionar.
   Máscaras: diretiva `appMascara` com `MASCARAS.cpf`, `MASCARAS.cep` ou `MASCARAS.telefone`.
   Valores em reais: diretiva `appMoeda`.
+- **Status:** exiba qualquer status com `<app-status>` (`shared/status`), escolhendo o tom:
+  `destaque` (amarelo), `sucesso`, `alerta`, `erro` ou `neutro`. Ex.:
+  `<app-status tom="sucesso">Concluído</app-status>`. O menu mostra a saúde da API
+  (`/actuator/health`) com o mesmo componente.
+- **Celular:** abaixo de 768px o menu lateral vira uma gaveta aberta pelo botão ☰. Nas
+  tabelas, marque colunas secundárias com `ocultar-celular` (< 768px) ou `ocultar-pequeno`
+  (< 576px), no `<th>` e no `<td>`, e use `so-pequeno` para repetir a informação essencial
+  em outra coluna. Botões do cabeçalho e dos formulários ocupam a largura toda
+  automaticamente. Para saber o tamanho da tela no código, use o `TelaService`.
 - **Avisos:** use o `ToastService` (`sucesso`/`erro`) e `mensagemDeErro()` para converter
   os erros da API.
 - **Ícones:** registre os ícones Lucide novos em `shared/icons.ts`.
