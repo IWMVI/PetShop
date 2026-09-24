@@ -77,3 +77,11 @@
     color: var(--amarelo);
   }
 }
+
+// Indicador de status da API no rodapé do menu.
+.status-api {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding: 1rem 0.75rem;
+}

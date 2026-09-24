@@ -5,16 +5,18 @@ import { MockApi } from './mock-api';
 test.use({ viewport: { width: 390, height: 844 } });
 
 test.describe('Layout de celular', () => {
-  test('navega pelo menu em gaveta', async ({ page }) => {
+  test('navega pelo menu em gaveta e mostra o status da API', async ({ page }) => {
     const api = await MockApi.instalar(page);
     api.servico({ nome: 'Banho' });
     await page.goto('/tutores');
 
     // O menu lateral dá lugar à barra superior com o botão de menu.
     await expect(page.locator('nz-sider')).toHaveCount(0);
+    await expect(page.getByRole('status', { name: 'API online' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Abrir menu' }).click();
     const gaveta = page.locator('.menu-celular');
+    await expect(gaveta.getByText('API online')).toBeVisible();
     await gaveta.getByText('Serviços').click();
 
     await expect(page).toHaveURL(/\/servicos$/);
@@ -40,7 +42,7 @@ test.describe('Layout de celular', () => {
     expect(larguraDaPagina).toBeLessThanOrEqual(390);
   });
 
-  test('resume serviços e total abaixo da data', async ({ page }) => {
+  test('resume serviços e total abaixo da data e mostra o status em badge', async ({ page }) => {
     const api = await MockApi.instalar(page);
     const tutor = api.tutor();
     const pet = api.pet(tutor.id, { nome: 'Rex' });
@@ -59,6 +61,7 @@ test.describe('Layout de celular', () => {
     const linha = page.getByRole('row', { name: /31\/12\/2099/ });
     await expect(linha.getByText('Banho · R$ 50,00')).toBeVisible();
     await expect(page.getByRole('columnheader', { name: 'Total' })).toBeHidden();
+    await expect(linha.getByRole('status')).toHaveText('Agendado');
   });
 
   test('empilha os botões do formulário com a ação principal em cima', async ({ page }) => {

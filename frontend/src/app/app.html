@@ -17,6 +17,15 @@
           }
         </a>
         <ng-container *ngTemplateOutlet="navegacao; context: { recolhido: recolhido() }" />
+        <div class="status-api" [class.recolhido]="recolhido()">
+          <app-status
+            [tom]="api().tom"
+            [pulsando]="api().pulsando"
+            [compacto]="recolhido()"
+            [rotulo]="api().rotulo"
+            >{{ api().rotulo }}</app-status
+          >
+        </div>
       </div>
     </nz-sider>
   }
@@ -38,6 +47,12 @@
           <lucide-icon name="paw-print" [size]="20" />
           <span>PetShop</span>
         </a>
+        <app-status
+          compacto
+          [tom]="api().tom"
+          [pulsando]="api().pulsando"
+          [rotulo]="api().rotulo"
+        />
       </nz-header>
     }
 
@@ -62,6 +77,9 @@
         <span>PetShop</span>
       </a>
       <ng-container *ngTemplateOutlet="navegacao; context: { recolhido: false }" />
+      <div class="status-api">
+        <app-status [tom]="api().tom" [pulsando]="api().pulsando">{{ api().rotulo }}</app-status>
+      </div>
     </ng-container>
   </nz-drawer>
 }

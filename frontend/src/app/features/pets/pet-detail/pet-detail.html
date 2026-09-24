@@ -67,7 +67,7 @@
                 }
               </td>
               <td>
-                <nz-tag [nzColor]="status[a.status].cor">{{ status[a.status].rotulo }}</nz-tag>
+                <app-status [tom]="status[a.status].tom">{{ status[a.status].rotulo }}</app-status>
               </td>
               <td class="nowrap ocultar-pequeno">{{ moeda(a.valorTotal) }}</td>
               <td>
