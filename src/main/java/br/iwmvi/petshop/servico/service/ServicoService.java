@@ -9,6 +9,8 @@ import br.iwmvi.petshop.servico.mapper.ServicoMapper;
 import br.iwmvi.petshop.servico.model.Servico;
 import br.iwmvi.petshop.servico.repository.ServicoRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -40,6 +42,21 @@ public class ServicoService extends CrudService<Servico, Long, ServicoRequest, S
                 request.descricao(),
                 request.preco(),
                 request.tempoEstimadoMinutos()
+        );
+    }
+
+    @Override
+    protected Sort getOrdenacaoPadrao() {
+        return Sort.by("nome").and(Sort.by("id"));
+    }
+
+    /** Busca pelo nome ou pela descrição do serviço. */
+    @Override
+    protected Specification<Servico> buscaPor(String termo) {
+        String padrao = "%" + termo.toLowerCase() + "%";
+        return (root, query, cb) -> cb.or(
+                cb.like(cb.lower(root.get("nome")), padrao),
+                cb.like(cb.lower(root.get("descricao")), padrao)
         );
     }
 

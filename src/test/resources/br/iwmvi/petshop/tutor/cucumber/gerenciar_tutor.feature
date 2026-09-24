@@ -89,3 +89,15 @@ Funcionalidade: Gerenciamento de tutores
   Cenário: Restaurar tutor por identificador inexistente
     Quando tentar restaurar o tutor de id 9999
     Então a resposta deve retornar o status 404
+
+  Cenário: Listar tutores de forma paginada com busca
+    Dado que existem 12 tutores cadastrados com o nome "Paginado"
+    Quando listar os tutores buscando por "paginado" na página 0
+    Então a página deve conter 10 tutores de um total de 12
+    Quando listar os tutores buscando por "paginado" na página 1
+    Então a página deve conter 2 tutores de um total de 12
+
+  Cenário: Buscar tutor pelo CPF na listagem
+    Dado que existe um tutor cadastrado com o CPF "390.533.447-05"
+    Quando listar os tutores buscando por "390.533.447-05" na página 0
+    Então a página deve conter 1 tutores de um total de 1

@@ -1,11 +1,10 @@
 package br.iwmvi.petshop.common.controller;
 
+import br.iwmvi.petshop.common.dto.PaginaResponse;
 import br.iwmvi.petshop.common.service.CrudService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * Controller REST base para operações CRUD padrão.
@@ -44,12 +43,17 @@ public abstract class CrudController<ID, REQ, RES> {
     }
 
     /**
-     * Lista todas as entidades ativas.
-     * @return lista de DTOs response
+     * Lista as entidades ativas de forma paginada.
+     * @param busca termo de busca opcional
+     * @param pagina índice da página (começa em 0)
+     * @param tamanho itens por página (padrão 10)
+     * @return a página de DTOs response
      */
     @GetMapping
-    public List<RES> listAll() {
-        return getService().findAll();
+    public PaginaResponse<RES> listAll(@RequestParam(required = false) String busca,
+                                       @RequestParam(defaultValue = "0") int pagina,
+                                       @RequestParam(defaultValue = "" + PaginaResponse.TAMANHO_PADRAO) int tamanho) {
+        return getService().findPage(busca, pagina, tamanho);
     }
 
     /**
