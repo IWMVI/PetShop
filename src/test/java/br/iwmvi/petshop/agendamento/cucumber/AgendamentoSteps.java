@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.agendamento.cucumber;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Entao;
@@ -206,6 +207,7 @@ public class AgendamentoSteps {
     private Long criarTutor() throws Exception {
         Map<String, Object> tutor = new LinkedHashMap<>();
         tutor.put("nome", "Wallace");
+        tutor.put("cpf", CpfTestData.gerar());
         tutor.put("email", "wallace+agendamento" + System.nanoTime() + "@test.com");
         tutor.put("telefone", "11999999999");
 

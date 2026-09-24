@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.pet.cucumber;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.pt.Dado;
 import io.cucumber.java.pt.Entao;
@@ -322,6 +323,7 @@ public class PetSteps {
                                                   String bairro, String cidade, String estado) {
         Map<String, Object> request = new LinkedHashMap<>();
         request.put("nome", nome);
+        request.put("cpf", CpfTestData.gerar());
         request.put("email", email);
         request.put("telefone", telefone);
 

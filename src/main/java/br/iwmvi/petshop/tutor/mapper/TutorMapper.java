@@ -14,16 +14,18 @@ public class TutorMapper implements RequestMapper<TutorRequest, Tutor>, Response
     public Tutor toEntity(TutorRequest request) {
         return new Tutor(
                 request.nome(),
+                apenasDigitos(request.cpf()),
                 request.email().toLowerCase(),
-                request.telefone().replaceAll("\\D", ""),
+                apenasDigitos(request.telefone()),
                 EnderecoMapper.toEntity(request.endereco())
         );
     }
 
     public void atualizarEntidade(Tutor tutor, TutorRequest request) {
         tutor.setNome(request.nome());
+        tutor.setCpf(apenasDigitos(request.cpf()));
         tutor.setEmail(request.email().toLowerCase());
-        tutor.setTelefone(request.telefone().replaceAll("\\D", ""));
+        tutor.setTelefone(apenasDigitos(request.telefone()));
         EnderecoMapper.atualizarEntidade(tutor.getEndereco(), request.endereco());
     }
 
@@ -32,9 +34,14 @@ public class TutorMapper implements RequestMapper<TutorRequest, Tutor>, Response
         return new TutorResponse(
                 tutor.getId(),
                 tutor.getNome(),
+                tutor.getCpf(),
                 tutor.getEmail(),
                 tutor.getTelefone(),
                 EnderecoMapper.toResponse(tutor.getEndereco())
         );
+    }
+
+    private static String apenasDigitos(String valor) {
+        return valor.replaceAll("\\D", "");
     }
 }

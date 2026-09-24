@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.mapper;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.dto.request.EnderecoRequest;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.model.Tutor;
@@ -17,10 +18,11 @@ class TutorMapperTest {
     class ConversaoParaEntidade {
 
         @Test
-        @DisplayName("PCE - Deve normalizar e-mail, telefone, CEP e estado.")
+        @DisplayName("PCE - Deve normalizar CPF, e-mail, telefone, CEP e estado.")
         void deveNormalizarCampos() {
             var request = new TutorRequest(
                     "Wallace",
+                    CpfTestData.VALIDO_FORMATADO,
                     "WALLACE@Test.Com",
                     "(11) 91111-2222",
                     new EnderecoRequest(
@@ -37,6 +39,7 @@ class TutorMapperTest {
             var tutor = new TutorMapper().toEntity(request);
 
             assertThat(tutor.getNome()).isEqualTo("Wallace");
+            assertThat(tutor.getCpf()).isEqualTo(CpfTestData.VALIDO);
             assertThat(tutor.getEmail()).isEqualTo("wallace@test.com");
             assertThat(tutor.getTelefone()).isEqualTo("11911112222");
             assertThat(tutor.getEndereco().getCep()).isEqualTo("01001010");
@@ -53,6 +56,7 @@ class TutorMapperTest {
         void deveMapearTodosOsCampos() {
             var tutor = new TutorMapper().toEntity(new TutorRequest(
                     "Wallace",
+                    CpfTestData.VALIDO,
                     "wallace@test.com",
                     "11911112222",
                     new EnderecoRequest(
@@ -72,6 +76,7 @@ class TutorMapperTest {
 
             assertThat(response.id()).isEqualTo(1L);
             assertThat(response.nome()).isEqualTo("Wallace");
+            assertThat(response.cpf()).isEqualTo(CpfTestData.VALIDO);
             assertThat(response.email()).isEqualTo("wallace@test.com");
             assertThat(response.telefone()).isEqualTo("11911112222");
             assertThat(response.endereco()).isNotNull();

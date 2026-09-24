@@ -6,4 +6,7 @@ import br.iwmvi.petshop.tutor.model.Tutor;
 public interface TutorRepository extends SoftDeleteRepository<Tutor, Long> {
 
     boolean existsByEmail(String email);
+
+    boolean existsByCpf(String cpf);
+
 }

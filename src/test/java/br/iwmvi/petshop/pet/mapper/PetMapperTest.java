@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.pet.mapper;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.model.Endereco;
 import br.iwmvi.petshop.pet.dto.request.PetRequest;
 import br.iwmvi.petshop.pet.PetTestData;
@@ -66,6 +67,7 @@ class PetMapperTest {
     private Tutor criarTutor() {
         var tutor = new Tutor(
                 "Wallace",
+                CpfTestData.VALIDO,
                 "wallace@test.com",
                 "11999999999",
                 new Endereco(

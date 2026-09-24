@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.pet.service;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.model.Endereco;
 import br.iwmvi.petshop.exception.PetNotFoundException;
 import br.iwmvi.petshop.exception.TutorNotFoundException;
@@ -262,6 +263,7 @@ public class PetServiceTest {
     private Tutor criarTutor() {
         var tutor = new Tutor(
                 "Wallace",
+                CpfTestData.VALIDO,
                 "wallace@test.com",
                 "11999999999",
                 new Endereco(

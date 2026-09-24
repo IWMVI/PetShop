@@ -1,7 +1,9 @@
 package br.iwmvi.petshop.tutor.service;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.EnderecoTestData;
 import br.iwmvi.petshop.endereco.model.Endereco;
+import br.iwmvi.petshop.exception.CpfJaCadastradoException;
 import br.iwmvi.petshop.exception.EmailJaCadastradoException;
 import br.iwmvi.petshop.exception.EntityNotFoundException;
 import br.iwmvi.petshop.exception.TutorNotFoundException;
@@ -59,10 +61,12 @@ public class TutorServiceTest {
             assertThat(response).isNotNull();
             assertThat(response.nome()).isEqualTo("Wallace");
             assertThat(response.email()).isEqualTo("wallace@test.com");
+            assertThat(response.cpf()).isEqualTo(CpfTestData.VALIDO);
             assertThat(response.telefone()).isEqualTo("11111111111");
             assertThat(response.endereco()).isNotNull();
 
             verify(tutorRepository).existsByEmail("wallace@test.com");
+            verify(tutorRepository).existsByCpf(CpfTestData.VALIDO);
             verify(tutorRepository).save(any(Tutor.class));
             verifyNoMoreInteractions(tutorRepository);
         }
@@ -83,10 +87,32 @@ public class TutorServiceTest {
         }
 
         @Test
+        @DisplayName("PCE - Não deve cadastrar tutor quando o CPF já estiver cadastrado.")
+        void naoDeveCadastrarTutor_quandoCpfJaEstiverCadastrado() {
+            var request = new TutorRequest(
+                    "Wallace",
+                    CpfTestData.VALIDO_FORMATADO,
+                    "wallace@test.com",
+                    "11111111111",
+                    EnderecoTestData.criarEnderecoRequest()
+            );
+
+            when(tutorRepository.existsByEmail("wallace@test.com")).thenReturn(false);
+            when(tutorRepository.existsByCpf(CpfTestData.VALIDO)).thenReturn(true);
+
+            assertThatThrownBy(() -> tutorService.cadastrar(request))
+                    .isInstanceOf(CpfJaCadastradoException.class)
+                    .hasMessage("CPF já cadastrado.");
+
+            verify(tutorRepository, never()).save(any());
+        }
+
+        @Test
         @DisplayName("PCE - Deve normalizar o e-mail antes de verificar duplicidade.")
         void deveNormalizarEmail_quandoEmailPossuiLetrasMaiusculas() {
             var request = new TutorRequest(
                     "wallace",
+                    CpfTestData.VALIDO,
                     "WALLACE@TEST.COM",
                     "11111111111",
                     EnderecoTestData.criarEnderecoRequest()
@@ -104,6 +130,7 @@ public class TutorServiceTest {
         void devePersistirTutorComDadosNormalizados_quandoCadastroForValido() {
             var request = new TutorRequest(
                     "Wallace",
+                    CpfTestData.VALIDO,
                     "WALLACE@test.com",
                     "11111111111",
                     EnderecoTestData.criarEnderecoRequest()
@@ -212,6 +239,7 @@ public class TutorServiceTest {
             var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace Atualizado",
+                    CpfTestData.VALIDO,
                     "NOVO@test.com",
                     "11 91111-2222",
                     EnderecoTestData.criarEnderecoRequest()
@@ -238,6 +266,7 @@ public class TutorServiceTest {
         void naoDeveAtualizarTutor_quandoIdNaoExistir() {
             var request = new TutorRequest(
                     "Wallace",
+                    CpfTestData.VALIDO,
                     "wallace@test.com",
                     "11111111111",
                     EnderecoTestData.criarEnderecoRequest()
@@ -257,6 +286,7 @@ public class TutorServiceTest {
             var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace",
+                    CpfTestData.VALIDO,
                     "outro@test.com",
                     "11111111111",
                     EnderecoTestData.criarEnderecoRequest()
@@ -273,11 +303,34 @@ public class TutorServiceTest {
         }
 
         @Test
+        @DisplayName("ESE - Não deve atualizar tutor quando o CPF já estiver em uso por outro tutor.")
+        void naoDeveAtualizarTutor_quandoCpfJaEstiverEmUso() {
+            var tutor = criarTutor();
+            var outroCpf = CpfTestData.gerar();
+            var request = new TutorRequest(
+                    "Wallace",
+                    outroCpf,
+                    "wallace@test.com",
+                    "11111111111",
+                    EnderecoTestData.criarEnderecoRequest()
+            );
+
+            when(tutorRepository.findActiveById(1L)).thenReturn(Optional.of(tutor));
+            when(tutorRepository.existsByCpf(outroCpf)).thenReturn(true);
+
+            assertThatThrownBy(() -> tutorService.atualizar(1L, request))
+                    .isInstanceOf(CpfJaCadastradoException.class);
+
+            verify(tutorRepository, never()).save(any());
+        }
+
+        @Test
         @DisplayName("AVL - Deve permitir atualizar quando o e-mail se mantém o mesmo do tutor.")
         void devePermitirAtualizar_quandoEmailSeManterDoMesmoTutor() {
             var tutor = criarTutor();
             var request = new TutorRequest(
                     "Wallace Atualizado",
+                    CpfTestData.VALIDO,
                     "wallace@test.com",
                     "11911112222",
                     EnderecoTestData.criarEnderecoRequest()
@@ -372,6 +425,7 @@ public class TutorServiceTest {
     private TutorRequest criarTutorRequest() {
         return new TutorRequest(
                 "Wallace",
+                CpfTestData.VALIDO,
                 "wallace@test.com",
                 "11111111111",
                 EnderecoTestData.criarEnderecoRequest()
@@ -381,6 +435,7 @@ public class TutorServiceTest {
     private Tutor criarTutor() {
         var tutor = new Tutor(
                 "Wallace",
+                CpfTestData.VALIDO,
                 "wallace@test.com",
                 "11999999999",
                 new Endereco(

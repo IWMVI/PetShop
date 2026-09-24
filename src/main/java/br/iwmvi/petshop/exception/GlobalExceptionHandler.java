@@ -22,6 +22,12 @@ public class GlobalExceptionHandler {
         return Map.of("mensagem", ex.getMessage());
     }
 
+    @ExceptionHandler(CpfJaCadastradoException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public Map<String, String> handleCpfJaCadastrado(CpfJaCadastradoException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
     @ExceptionHandler(PetNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handlePetNotFound(PetNotFoundException ex) {

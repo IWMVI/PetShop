@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.dto.request;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.dto.request.EnderecoRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -54,6 +55,40 @@ class TutorRequestTest {
             var violacoes = validator.validate(request);
 
             assertThat(possuiViolacao(violacoes, "nome")).isTrue();
+        }
+    }
+
+    @Nested
+    @DisplayName("CPF")
+    class Cpf {
+
+        @Test
+        @DisplayName("PCE - Deve aceitar CPF válido com ou sem máscara.")
+        void deveAceitarCpf_quandoValido() {
+            assertThat(validator.validate(comCpf(CpfTestData.VALIDO))).isEmpty();
+            assertThat(validator.validate(comCpf(CpfTestData.VALIDO_FORMATADO))).isEmpty();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar CPF vazio.")
+        void naoDeveAceitarCpf_quandoVazio() {
+            assertThat(possuiViolacao(validator.validate(comCpf("")), "cpf")).isTrue();
+        }
+
+        @Test
+        @DisplayName("PCE - Não deve aceitar CPF com dígitos verificadores inválidos.")
+        void naoDeveAceitarCpf_quandoDigitosVerificadoresInvalidos() {
+            assertThat(possuiViolacao(validator.validate(comCpf("52998224724")), "cpf")).isTrue();
+        }
+
+        @Test
+        @DisplayName("AVL - Não deve aceitar CPF com todos os dígitos iguais.")
+        void naoDeveAceitarCpf_quandoTodosDigitosIguais() {
+            assertThat(possuiViolacao(validator.validate(comCpf("11111111111")), "cpf")).isTrue();
+        }
+
+        private TutorRequest comCpf(String cpf) {
+            return new TutorRequest("Wallace", cpf, "wallace@test.com", "11999999999", criarEndereco());
         }
     }
 
@@ -187,7 +222,7 @@ class TutorRequestTest {
     }
 
     private TutorRequest criarTutor(String nome, String email, String telefone, EnderecoRequest endereco) {
-        return new TutorRequest(nome, email, telefone, endereco);
+        return new TutorRequest(nome, CpfTestData.VALIDO, email, telefone, endereco);
     }
 
     private EnderecoRequest criarEndereco() {

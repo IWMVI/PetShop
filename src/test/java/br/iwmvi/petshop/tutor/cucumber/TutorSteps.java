@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.cucumber;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.EnderecoTestData;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.pt.Dado;
@@ -65,6 +66,27 @@ public class TutorSteps {
         Map<String, Object> request = criarTutorRequestValido();
 
         request.put("email", email);
+
+        resultado = realizarCadastro(request);
+    }
+
+    @Dado("que existe um tutor cadastrado com o CPF {string}")
+    public void queExisteUmTutorCadastradoComCpf(String cpf) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("cpf", cpf);
+        request.put("email", "cpf" + System.nanoTime() + "@test.com");
+
+        resultado = realizarCadastro(request);
+        tutorId = obterId(resultado);
+    }
+
+    @Quando("tentar cadastrar um tutor com o CPF {string}")
+    public void tentarCadastrarTutorComCpf(String cpf) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("cpf", cpf);
+        request.put("email", "outro" + System.nanoTime() + "@test.com");
 
         resultado = realizarCadastro(request);
     }
@@ -363,6 +385,7 @@ public class TutorSteps {
         Map<String, Object> tutor = new LinkedHashMap<>();
 
         tutor.put("nome", nome);
+        tutor.put("cpf", CpfTestData.gerar());
         tutor.put("email", email);
         tutor.put("telefone", telefone);
         tutor.put("endereco", EnderecoTestData.criarEnderecoJson(

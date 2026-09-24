@@ -29,3 +29,12 @@ Funcionalidade: Cadastro de tutor
   Cenário: Não cadastrar tutor com CEP inválido
     Quando tentar cadastrar um tutor com o CEP "123"
     Então o cadastro do tutor deve retornar o status 400
+
+  Cenário: Não cadastrar tutor com CPF inválido
+    Quando tentar cadastrar um tutor com o CPF "123.456.789-00"
+    Então o cadastro do tutor deve retornar o status 400
+
+  Cenário: Não cadastrar tutor com CPF já cadastrado
+    Dado que existe um tutor cadastrado com o CPF "529.982.247-25"
+    Quando tentar cadastrar um tutor com o CPF "52998224725"
+    Então o cadastro do tutor deve retornar o status 409
