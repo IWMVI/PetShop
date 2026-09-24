@@ -1,7 +1,7 @@
 # PetShop — Front-end
 
-Aplicação Angular que consome a API do PetShop (back-end Spring Boot na raiz deste
-repositório). Permite gerenciar tutores, pets, serviços e agendamentos.
+Aplicação Angular que consome a API do PetShop (back-end Spring Boot em `backend/`, neste
+mesmo repositório). Permite gerenciar tutores, pets, serviços e agendamentos.
 
 > O guia geral (banco, back-end e front-end juntos) está no [README da raiz](../README.md).
 > Este arquivo detalha só o front-end.
@@ -23,11 +23,11 @@ repositório). Permite gerenciar tutores, pets, serviços e agendamentos.
 
 ## Como subir a aplicação
 
-1. Suba o banco e o back-end (na raiz do repositório):
+1. Suba o banco e o back-end (a partir da raiz do repositório):
 
    ```bash
    docker compose up -d
-   ./gradlew bootRun
+   cd backend && ./gradlew bootRun
    ```
 
 2. Instale as dependências e inicie o front-end (nesta pasta, `frontend/`):
