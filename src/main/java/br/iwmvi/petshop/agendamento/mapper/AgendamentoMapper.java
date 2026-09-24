@@ -40,6 +40,9 @@ public final class AgendamentoMapper {
                         agendamentoServico.getServico() != null
                                 ? agendamentoServico.getServico().getId()
                                 : agendamentoServico.getId().getServicoId(),
+                        agendamentoServico.getServico() != null
+                                ? agendamentoServico.getServico().getNome()
+                                : null,
                         agendamentoServico.getPrecoCobrado()
                 ))
                 .toList();
