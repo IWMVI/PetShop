@@ -1,0 +1,75 @@
+# Validação do front-end: formatação, lint, testes unitários, build e testes E2E.
+name: Front-end
+
+on:
+  push:
+    branches: [main]
+    paths: ['frontend/**', '.github/workflows/frontend.yml']
+  pull_request:
+    paths: ['frontend/**', '.github/workflows/frontend.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: frontend-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  qualidade:
+    name: Prettier, ESLint, Jest e build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      # format:check, lint, testes unitários (Jest) e build de produção.
+      - name: Validar
+        run: npm run check
+
+  e2e:
+    name: Testes E2E (Playwright)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - run: npm ci
+
+      - name: Instalar o Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+
+      # A API é simulada em memória (e2e/mock-api.ts): não precisa do back-end.
+      - name: Rodar testes E2E
+        run: npm run e2e
+
+      - name: Publicar relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorio-e2e
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+          retention-days: 7
