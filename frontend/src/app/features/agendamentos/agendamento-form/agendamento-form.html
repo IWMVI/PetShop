@@ -1,0 +1,74 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="dataHora">Data e hora</nz-form-label>
+        <nz-form-control nzErrorTip="Informe a data e a hora.">
+          <nz-date-picker
+            nzId="dataHora"
+            formControlName="dataHora"
+            [nzShowTime]="{ nzFormat: 'HH:mm', nzMinuteStep: 15 }"
+            nzFormat="dd/MM/yyyy HH:mm"
+            nzPlaceHolder="Selecione"
+            [nzDisabledDate]="dataDesabilitada"
+          />
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="servicos">Serviços</nz-form-label>
+        <nz-form-control nzErrorTip="Selecione ao menos um serviço.">
+          <nz-select
+            nzId="servicos"
+            formControlName="servicoIds"
+            nzMode="multiple"
+            nzShowSearch
+            nzServerSearch
+            nzAllowClear
+            nzPlaceHolder="Busque e selecione os serviços"
+            [nzLoading]="buscandoServicos()"
+            [nzNotFoundContent]="nadaEncontrado"
+            (nzOnSearch)="buscarServicos($event)"
+          >
+            @for (o of opcoes(); track o.id) {
+              <nz-option nzCustomContent [nzValue]="o.id" [nzLabel]="o.nome">
+                <div class="opcao">
+                  <span>{{ o.nome }}</span>
+                  <span class="muted">{{ moeda(o.preco) }}</span>
+                </div>
+              </nz-option>
+            }
+          </nz-select>
+          <ng-template #nadaEncontrado>
+            @if (buscandoServicos()) {
+              Buscando…
+            } @else {
+              Nenhum serviço encontrado. <a routerLink="/servicos/novo">Cadastrar serviço</a>
+            }
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzFor="observacoes">Observações</nz-form-label>
+        <nz-form-control nzErrorTip="Até 1000 caracteres.">
+          <textarea
+            nz-input
+            id="observacoes"
+            formControlName="observacoes"
+            rows="3"
+            maxlength="1000"
+          ></textarea>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-card>
+
+    <div class="form-actions">
+      <span class="total"
+        >Total estimado: <strong>{{ moeda(total()) }}</strong></span
+      >
+      <a nz-button [routerLink]="voltar()">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+</app-pagina>

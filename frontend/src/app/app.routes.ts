@@ -45,6 +45,22 @@ export const routes: Routes = [
         title: 'Editar pet',
         loadComponent: () => import('./features/pets/pet-form/pet-form').then((m) => m.PetForm),
       },
+      {
+        path: ':tutorId/pets/:petId/agendamentos/novo',
+        title: 'Novo agendamento',
+        loadComponent: () =>
+          import('./features/agendamentos/agendamento-form/agendamento-form').then(
+            (m) => m.AgendamentoForm,
+          ),
+      },
+      {
+        path: ':tutorId/pets/:petId/agendamentos/:id/editar',
+        title: 'Reagendar',
+        loadComponent: () =>
+          import('./features/agendamentos/agendamento-form/agendamento-form').then(
+            (m) => m.AgendamentoForm,
+          ),
+      },
     ],
   },
   {
