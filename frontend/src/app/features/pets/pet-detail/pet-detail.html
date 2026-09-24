@@ -1,0 +1,122 @@
+<app-pagina [titulo]="pet()?.nome ?? 'Pet'" [trilha]="trilha()">
+  @if (pet(); as p) {
+    <span paginaResumo>
+      {{ p.especie }}{{ p.raca ? ' · ' + p.raca : '' }}
+      {{ p.idade != null ? ' · ' + p.idade + (p.idade === 1 ? ' ano' : ' anos') : '' }}
+      {{ p.peso != null ? ' · ' + kg(p.peso) : '' }}
+    </span>
+  }
+  @if (pet(); as p) {
+    <div paginaAcoes class="grupo-acoes">
+      <a nz-button [routerLink]="['/tutores', tutorId(), 'pets', p.id, 'editar']">Editar</a>
+      <button nz-button nzDanger type="button" (click)="confirmarExclusao(p)">Excluir</button>
+    </div>
+  }
+
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" />
+  } @else if (pet(); as p) {
+    <header class="section-header">
+      <h2>Agendamentos</h2>
+      <a
+        nz-button
+        nzType="primary"
+        class="btn-novo"
+        [routerLink]="['/tutores', tutorId(), 'pets', p.id, 'agendamentos', 'novo']"
+      >
+        <lucide-icon name="plus" [size]="16" /> Novo agendamento
+      </a>
+    </header>
+
+    <nz-card class="table-card">
+      <nz-table
+        #tabela
+        [nzData]="agendamentos.itens()"
+        [nzLoading]="agendamentos.carregando()"
+        [nzFrontPagination]="false"
+        [nzTotal]="agendamentos.total()"
+        [nzPageSize]="agendamentos.tamanho"
+        [nzPageIndex]="agendamentos.pagina() + 1"
+        (nzPageIndexChange)="agendamentos.irPara($event - 1)"
+        [nzHideOnSinglePage]="true"
+        [nzNoResult]="vazio"
+        nzSize="middle"
+      >
+        <thead>
+          <tr>
+            <th>Data e hora</th>
+            <th>Serviços</th>
+            <th>Status</th>
+            <th>Total</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of tabela.data; track a.id) {
+            <tr>
+              <td class="nowrap">{{ dataHora(a.dataHora) }}</td>
+              <td>
+                {{ nomesServicos(a) }}
+                @if (a.observacoes) {
+                  <div class="muted">{{ a.observacoes }}</div>
+                }
+              </td>
+              <td>
+                <nz-tag [nzColor]="status[a.status].cor">{{ status[a.status].rotulo }}</nz-tag>
+              </td>
+              <td class="nowrap">{{ moeda(a.valorTotal) }}</td>
+              <td>
+                @if (a.status === 'AGENDADO') {
+                  <button
+                    nz-button
+                    nz-dropdown
+                    nzTrigger="click"
+                    nzPlacement="bottomRight"
+                    [nzDropdownMenu]="acoes"
+                    aria-label="Ações"
+                    class="menu-acoes"
+                  >
+                    <lucide-icon name="menu" [size]="18" />
+                  </button>
+                  <nz-dropdown-menu #acoes="nzDropdownMenu">
+                    <ul nz-menu>
+                      <li
+                        nz-menu-item
+                        [routerLink]="[
+                          '/tutores',
+                          tutorId(),
+                          'pets',
+                          p.id,
+                          'agendamentos',
+                          a.id,
+                          'editar',
+                        ]"
+                      >
+                        <lucide-icon name="calendar-clock" [size]="15" /> Reagendar
+                      </li>
+                      <li nz-menu-divider></li>
+                      <li
+                        nz-menu-item
+                        nzDanger
+                        tabindex="0"
+                        (click)="confirmarCancelamento(a)"
+                        (keydown.enter)="confirmarCancelamento(a)"
+                      >
+                        <lucide-icon name="calendar-x" [size]="15" /> Cancelar agendamento
+                      </li>
+                    </ul>
+                  </nz-dropdown-menu>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-card>
+    <ng-template #vazio
+      ><nz-empty nzNotFoundContent="Nenhum agendamento para este pet."
+    /></ng-template>
+  } @else {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  }
+</app-pagina>

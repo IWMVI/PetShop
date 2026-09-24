@@ -1,0 +1,66 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="nome">Nome</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o nome (até 150 caracteres).">
+              <input nz-input id="nome" formControlName="nome" maxlength="150" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzFor="descricao">Descrição</nz-form-label>
+            <nz-form-control nzErrorTip="Até 500 caracteres.">
+              <textarea
+                nz-input
+                id="descricao"
+                formControlName="descricao"
+                rows="3"
+                maxlength="500"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="preco">Preço</nz-form-label>
+            <nz-form-control nzErrorTip="Entre 0,01 e 9.999,99.">
+              <nz-input-group nzAddOnBefore="R$">
+                <input
+                  nz-input
+                  id="preco"
+                  formControlName="preco"
+                  appMoeda
+                  [maximo]="9999.99"
+                  placeholder="0,00"
+                />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="tempoEstimadoMinutos">Duração estimada (min)</nz-form-label>
+            <nz-form-control nzErrorTip="Não pode ser negativa.">
+              <nz-input-number
+                nzId="tempoEstimadoMinutos"
+                formControlName="tempoEstimadoMinutos"
+                [nzMin]="0"
+                [nzStep]="5"
+                [nzPrecision]="0"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button routerLink="/servicos">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+</app-pagina>

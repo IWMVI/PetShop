@@ -1,0 +1,84 @@
+.app {
+  min-height: 100vh;
+}
+
+.sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+// Menu lateral em marrom-escuro quente, com o item ativo em amarelo.
+:host ::ng-deep {
+  .ant-layout-sider,
+  .ant-menu-dark {
+    background: var(--menu-fundo);
+  }
+
+  .ant-layout-sider-trigger {
+    background: var(--menu-fundo-escuro);
+  }
+
+  .ant-menu-dark .ant-menu-item {
+    width: auto;
+    margin: 4px 8px;
+    border-radius: 8px;
+    color: rgb(255 255 255 / 0.75);
+    font-weight: 600;
+  }
+
+  .ant-menu-dark .ant-menu-item:hover {
+    color: #fff;
+  }
+
+  .ant-menu-dark .ant-menu-item-selected {
+    background: var(--amarelo) !important;
+    color: var(--sobre-amarelo) !important;
+  }
+
+  .item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .ant-menu-inline-collapsed .rotulo {
+    display: none;
+  }
+
+  .ant-menu-inline-collapsed .ant-menu-item {
+    display: flex;
+    justify-content: center;
+    padding: 0 !important;
+  }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  height: 64px;
+  padding: 0 0.75rem;
+  color: var(--amarelo);
+  font-size: 1.2rem;
+  font-weight: 800;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--amarelo);
+  }
+}
+
+.content {
+  // Sem largura máxima: o conteúdo (e as tabelas) ocupa o espaço liberado ao recolher o menu.
+  min-width: 0;
+  padding: 1.25rem 1.5rem 3rem;
+}
+
+@media (max-width: 575px) {
+  .content {
+    padding: 1rem 1rem 3rem;
+  }
+}

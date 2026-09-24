@@ -1,0 +1,10 @@
+// Estilos globais. Cada parte fica em src/styles/:
+//   _tokens    → paleta e variáveis (CSS custom properties)
+//   _base      → tipografia e elementos HTML
+//   _ng-zorro  → ajustes de tema dos componentes NG-ZORRO
+//   _layout    → classes de página compartilhadas (cabeçalho, cards de tabela, formulários)
+// Estilos específicos de uma tela ficam no .scss do próprio componente.
+@use 'styles/tokens';
+@use 'styles/base';
+@use 'styles/ng-zorro';
+@use 'styles/layout';

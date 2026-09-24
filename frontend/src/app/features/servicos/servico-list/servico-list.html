@@ -1,0 +1,77 @@
+<app-pagina titulo="Serviços">
+  <a paginaAcoes nz-button nzType="primary" class="btn-novo" routerLink="/servicos/novo">
+    <lucide-icon name="plus" [size]="16" /> Novo serviço
+  </a>
+
+  @if (lista.erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="lista.erro()!" class="erro" />
+  }
+  <nz-card class="table-card">
+    <nz-table
+      #tabela
+      [nzData]="lista.itens()"
+      [nzLoading]="lista.carregando()"
+      [nzFrontPagination]="false"
+      [nzTotal]="lista.total()"
+      [nzPageSize]="lista.tamanho"
+      [nzPageIndex]="lista.pagina() + 1"
+      (nzPageIndexChange)="lista.irPara($event - 1)"
+      [nzHideOnSinglePage]="true"
+      [nzNoResult]="vazio"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Descrição</th>
+          <th>Duração</th>
+          <th>Preço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (s of tabela.data; track s.id) {
+          <tr>
+            <td>{{ s.nome }}</td>
+            <td class="muted">{{ s.descricao || '—' }}</td>
+            <td class="nowrap">
+              {{ s.tempoEstimadoMinutos != null ? s.tempoEstimadoMinutos + ' min' : '—' }}
+            </td>
+            <td class="nowrap">{{ moeda(s.preco) }}</td>
+            <td>
+              <button
+                nz-button
+                nz-dropdown
+                nzTrigger="click"
+                nzPlacement="bottomRight"
+                [nzDropdownMenu]="acoes"
+                aria-label="Ações"
+                class="menu-acoes"
+              >
+                <lucide-icon name="menu" [size]="18" />
+              </button>
+              <nz-dropdown-menu #acoes="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item [routerLink]="['/servicos', s.id, 'editar']">
+                    <lucide-icon name="pencil" [size]="15" /> Editar
+                  </li>
+                  <li nz-menu-divider></li>
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    (click)="confirmarExclusao(s)"
+                    (keydown.enter)="confirmarExclusao(s)"
+                  >
+                    <lucide-icon name="trash-2" [size]="15" /> Excluir
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+  <ng-template #vazio><nz-empty nzNotFoundContent="Nenhum serviço cadastrado." /></ng-template>
+</app-pagina>

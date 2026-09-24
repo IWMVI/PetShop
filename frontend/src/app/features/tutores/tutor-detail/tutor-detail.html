@@ -1,0 +1,72 @@
+<app-pagina [titulo]="tutor()?.nome ?? 'Tutor'" [trilha]="trilha()">
+  @if (tutor(); as t) {
+    <div paginaAcoes class="grupo-acoes">
+      <a nz-button [routerLink]="['/tutores', t.id, 'editar']">Editar</a>
+      <button nz-button nzDanger type="button" (click)="confirmarExclusao(t)">Excluir</button>
+    </div>
+  }
+
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" />
+  } @else if (tutor(); as t) {
+    <nz-card>
+      <nz-descriptions
+        nzBordered
+        nzSize="small"
+        [nzColumn]="{ xxl: 3, xl: 3, lg: 2, md: 2, sm: 1, xs: 1 }"
+      >
+        <nz-descriptions-item nzTitle="CPF">{{ cpf(t.cpf) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="E-mail">{{ t.email }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Telefone">{{ telefone(t.telefone) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Endereço" [nzSpan]="2">
+          {{ t.endereco.logradouro }}{{ t.endereco.numero ? ', ' + t.endereco.numero : '' }}
+          {{ t.endereco.complemento ? ' — ' + t.endereco.complemento : '' }}
+          · {{ t.endereco.bairro }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Cidade">
+          {{ t.endereco.cidade }}{{ t.endereco.estado ? '/' + t.endereco.estado : '' }} · CEP
+          {{ t.endereco.cep }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+    </nz-card>
+
+    <header class="section-header">
+      <h2>Pets</h2>
+      <a
+        nz-button
+        nzType="primary"
+        class="btn-novo"
+        [routerLink]="['/tutores', t.id, 'pets', 'novo']"
+      >
+        <lucide-icon name="plus" [size]="16" /> Novo pet
+      </a>
+    </header>
+
+    @if (pets().length === 0) {
+      <nz-card><nz-empty nzNotFoundContent="Nenhum pet cadastrado para este tutor." /></nz-card>
+    } @else {
+      <div nz-row [nzGutter]="[16, 16]">
+        @for (p of pets(); track p.id) {
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzLg]="8">
+            <nz-card nzSize="small" [nzTitle]="p.nome" [nzExtra]="abrir" class="pet">
+              <p>{{ p.especie }}{{ p.raca ? ' · ' + p.raca : '' }}</p>
+              <p class="muted">
+                {{
+                  p.idade != null
+                    ? p.idade + (p.idade === 1 ? ' ano' : ' anos')
+                    : 'Idade não informada'
+                }}
+                · {{ p.peso != null ? kg(p.peso) : 'Peso não informado' }}
+              </p>
+            </nz-card>
+            <ng-template #abrir>
+              <a [routerLink]="['/tutores', t.id, 'pets', p.id]">Ver agendamentos</a>
+            </ng-template>
+          </div>
+        }
+      </div>
+    }
+  } @else {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  }
+</app-pagina>

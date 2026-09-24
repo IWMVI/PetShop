@@ -1,0 +1,33 @@
+<nz-layout class="app">
+  <nz-sider
+    class="sider"
+    nzCollapsible
+    nzBreakpoint="lg"
+    [nzWidth]="208"
+    [nzCollapsedWidth]="64"
+    [nzCollapsed]="recolhido()"
+    (nzCollapsedChange)="recolhido.set($event)"
+  >
+    <a routerLink="/" class="brand">
+      <lucide-icon name="paw-print" [size]="20" />
+      @if (!recolhido()) {
+        <span>PetShop</span>
+      }
+    </a>
+
+    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="recolhido()">
+      @for (item of menu; track item.rota) {
+        <li nz-menu-item nzMatchRouter [routerLink]="item.rota">
+          <span class="item">
+            <lucide-icon [name]="item.icone" [size]="18" />
+            <span class="rotulo">{{ item.rotulo }}</span>
+          </span>
+        </li>
+      }
+    </ul>
+  </nz-sider>
+
+  <nz-content class="content">
+    <router-outlet />
+  </nz-content>
+</nz-layout>
