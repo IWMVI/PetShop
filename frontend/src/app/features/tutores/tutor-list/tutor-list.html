@@ -1,0 +1,104 @@
+<app-pagina titulo="Tutores">
+  <a paginaAcoes nz-button nzType="primary" class="btn-novo" routerLink="/tutores/novo">
+    <lucide-icon name="plus" [size]="16" /> Novo tutor
+  </a>
+
+  @if (lista.erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="lista.erro()!" class="erro" />
+  }
+  <nz-card class="table-card" [nzExtra]="barraBusca">
+    <nz-table
+      #tabela
+      [nzData]="lista.itens()"
+      [nzLoading]="lista.carregando()"
+      [nzFrontPagination]="false"
+      [nzTotal]="lista.total()"
+      [nzPageSize]="lista.tamanho"
+      [nzPageIndex]="lista.pagina() + 1"
+      (nzPageIndexChange)="lista.irPara($event - 1)"
+      [nzHideOnSinglePage]="true"
+      [nzNoResult]="vazio"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>E-mail</th>
+          <th>Telefone</th>
+          <th>Endereço</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of tabela.data; track t.id) {
+          <tr>
+            <td>
+              <a [routerLink]="['/tutores', t.id]">{{ t.nome }}</a>
+            </td>
+            <td class="nowrap">{{ cpf(t.cpf) }}</td>
+            <td>{{ t.email }}</td>
+            <td class="nowrap">{{ telefone(t.telefone) }}</td>
+            <td>
+              {{ t.endereco.logradouro }}{{ t.endereco.numero ? ', ' + t.endereco.numero : '' }}
+            </td>
+            <td>
+              <button
+                nz-button
+                nz-dropdown
+                nzTrigger="click"
+                nzPlacement="bottomRight"
+                [nzDropdownMenu]="acoes"
+                aria-label="Ações"
+                class="menu-acoes"
+              >
+                <lucide-icon name="menu" [size]="18" />
+              </button>
+              <nz-dropdown-menu #acoes="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item [routerLink]="['/tutores', t.id]">
+                    <lucide-icon name="eye" [size]="15" /> Ver detalhes
+                  </li>
+                  <li nz-menu-item [routerLink]="['/tutores', t.id, 'editar']">
+                    <lucide-icon name="pencil" [size]="15" /> Editar
+                  </li>
+                  <li nz-menu-divider></li>
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    (click)="confirmarExclusao(t)"
+                    (keydown.enter)="confirmarExclusao(t)"
+                  >
+                    <lucide-icon name="trash-2" [size]="15" /> Excluir
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <ng-template #barraBusca>
+    <nz-input-group [nzPrefix]="iconeBusca" class="busca">
+      <input
+        nz-input
+        type="search"
+        placeholder="Buscar por nome, CPF, e-mail ou endereço"
+        aria-label="Buscar tutores"
+        (input)="lista.buscar($any($event.target).value)"
+      />
+    </nz-input-group>
+    <ng-template #iconeBusca><lucide-icon name="search" [size]="14" class="muted" /></ng-template>
+  </ng-template>
+
+  <ng-template #vazio>
+    <nz-empty
+      [nzNotFoundContent]="
+        lista.termo() ? 'Nenhum tutor corresponde à busca.' : 'Nenhum tutor cadastrado ainda.'
+      "
+    />
+  </ng-template>
+</app-pagina>

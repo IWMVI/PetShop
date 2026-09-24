@@ -1,6 +1,36 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'tutores' },
+  {
+    path: 'tutores',
+    children: [
+      {
+        path: '',
+        title: 'Tutores',
+        loadComponent: () =>
+          import('./features/tutores/tutor-list/tutor-list').then((m) => m.TutorList),
+      },
+      {
+        path: 'novo',
+        title: 'Novo tutor',
+        loadComponent: () =>
+          import('./features/tutores/tutor-form/tutor-form').then((m) => m.TutorForm),
+      },
+      {
+        path: ':id',
+        title: 'Tutor',
+        loadComponent: () =>
+          import('./features/tutores/tutor-detail/tutor-detail').then((m) => m.TutorDetail),
+      },
+      {
+        path: ':id/editar',
+        title: 'Editar tutor',
+        loadComponent: () =>
+          import('./features/tutores/tutor-form/tutor-form').then((m) => m.TutorForm),
+      },
+    ],
+  },
   {
     path: 'servicos',
     children: [
@@ -24,4 +54,5 @@ export const routes: Routes = [
       },
     ],
   },
+  { path: '**', redirectTo: 'tutores' },
 ];
