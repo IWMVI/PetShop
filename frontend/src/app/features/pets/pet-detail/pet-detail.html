@@ -45,17 +45,22 @@
         <thead>
           <tr>
             <th>Data e hora</th>
-            <th>Serviços</th>
+            <th class="ocultar-pequeno">Serviços</th>
             <th>Status</th>
-            <th>Total</th>
+            <th class="ocultar-pequeno">Total</th>
             <th>Ações</th>
           </tr>
         </thead>
         <tbody>
           @for (a of tabela.data; track a.id) {
             <tr>
-              <td class="nowrap">{{ dataHora(a.dataHora) }}</td>
-              <td>
+              <td class="nowrap">
+                {{ dataHora(a.dataHora) }}
+                <div class="so-pequeno resumo-celular">
+                  {{ nomesServicos(a) }} · {{ moeda(a.valorTotal) }}
+                </div>
+              </td>
+              <td class="ocultar-pequeno">
                 {{ nomesServicos(a) }}
                 @if (a.observacoes) {
                   <div class="muted">{{ a.observacoes }}</div>
@@ -64,7 +69,7 @@
               <td>
                 <nz-tag [nzColor]="status[a.status].cor">{{ status[a.status].rotulo }}</nz-tag>
               </td>
-              <td class="nowrap">{{ moeda(a.valorTotal) }}</td>
+              <td class="nowrap ocultar-pequeno">{{ moeda(a.valorTotal) }}</td>
               <td>
                 @if (a.status === 'AGENDADO') {
                   <button

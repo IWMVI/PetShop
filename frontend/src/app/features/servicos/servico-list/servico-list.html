@@ -23,8 +23,8 @@
       <thead>
         <tr>
           <th>Nome</th>
-          <th>Descrição</th>
-          <th>Duração</th>
+          <th class="ocultar-celular">Descrição</th>
+          <th class="ocultar-pequeno">Duração</th>
           <th>Preço</th>
           <th>Ações</th>
         </tr>
@@ -33,8 +33,8 @@
         @for (s of tabela.data; track s.id) {
           <tr>
             <td>{{ s.nome }}</td>
-            <td class="muted">{{ s.descricao || '—' }}</td>
-            <td class="nowrap">
+            <td class="muted ocultar-celular">{{ s.descricao || '—' }}</td>
+            <td class="nowrap ocultar-pequeno">
               {{ s.tempoEstimadoMinutos != null ? s.tempoEstimadoMinutos + ' min' : '—' }}
             </td>
             <td class="nowrap">{{ moeda(s.preco) }}</td>
