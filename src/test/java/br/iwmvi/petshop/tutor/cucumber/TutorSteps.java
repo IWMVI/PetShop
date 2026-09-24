@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.tutor.cucumber;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.endereco.EnderecoTestData;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.pt.Dado;
@@ -67,6 +68,45 @@ public class TutorSteps {
         request.put("email", email);
 
         resultado = realizarCadastro(request);
+    }
+
+    @Dado("que existe um tutor cadastrado com o CPF {string}")
+    public void queExisteUmTutorCadastradoComCpf(String cpf) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("cpf", cpf);
+        request.put("email", "cpf" + System.nanoTime() + "@test.com");
+
+        resultado = realizarCadastro(request);
+        tutorId = obterId(resultado);
+    }
+
+    @Quando("tentar cadastrar um tutor com o CPF {string}")
+    public void tentarCadastrarTutorComCpf(String cpf) throws Exception {
+        Map<String, Object> request = criarTutorRequestValido();
+
+        request.put("cpf", cpf);
+        request.put("email", "outro" + System.nanoTime() + "@test.com");
+
+        resultado = realizarCadastro(request);
+    }
+
+    @Dado("o tutor cadastrado foi excluído")
+    public void tutorCadastradoFoiExcluido() throws Exception {
+        excluirTutor(tutorId);
+    }
+
+    @Quando("buscar o tutor pelo CPF {string}")
+    public void buscarTutorPeloCpf(String cpf) throws Exception {
+        resultado = mockMvc.perform(get("/tutores/cpf/{cpf}", cpf)).andReturn();
+    }
+
+    @Entao("o tutor localizado deve estar marcado como excluído")
+    public void tutorLocalizadoDeveEstarExcluido() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("id").asLong()).isEqualTo(tutorId);
+        assertThat(response.get("excluido").asBoolean()).isTrue();
     }
 
     @Quando("tentar cadastrar um tutor com o CEP {string}")
@@ -363,6 +403,7 @@ public class TutorSteps {
         Map<String, Object> tutor = new LinkedHashMap<>();
 
         tutor.put("nome", nome);
+        tutor.put("cpf", CpfTestData.gerar());
         tutor.put("email", email);
         tutor.put("telefone", telefone);
         tutor.put("endereco", EnderecoTestData.criarEnderecoJson(

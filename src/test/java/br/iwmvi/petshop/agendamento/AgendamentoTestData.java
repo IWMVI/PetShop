@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.agendamento;
 
+import br.iwmvi.petshop.tutor.CpfTestData;
 import br.iwmvi.petshop.agendamento.dto.request.AgendamentoRequest;
 import br.iwmvi.petshop.agendamento.model.Agendamento;
 import br.iwmvi.petshop.agendamento.model.AgendamentoStatus;
@@ -26,6 +27,7 @@ public class AgendamentoTestData {
     public static Pet criarPet() {
         var tutor = new Tutor(
                 "Wallace",
+                CpfTestData.VALIDO,
                 "wallace@test.com",
                 "11999999999",
                 new Endereco("01001010", "Praça da Sé", "1", null, "Sé", "São Paulo", "SP")

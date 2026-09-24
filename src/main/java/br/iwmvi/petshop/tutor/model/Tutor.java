@@ -25,6 +25,9 @@ public class Tutor extends SoftDeleteEntity {
     @Column(nullable = false, length = 150)
     private String nome;
 
+    @Column(length = 11, unique = true)
+    private String cpf;
+
     @Column(nullable = false, length = 150, unique = true)
     private String email;
 
@@ -38,8 +41,9 @@ public class Tutor extends SoftDeleteEntity {
     @JoinColumn(name = "endereco_id", unique = true)
     private Endereco endereco;
 
-    public Tutor(String nome, String email, String telefone, Endereco endereco) {
+    public Tutor(String nome, String cpf, String email, String telefone, Endereco endereco) {
         this.nome = nome;
+        this.cpf = cpf;
         this.email = email;
         this.telefone = telefone;
         this.endereco = endereco;

@@ -4,8 +4,10 @@ import br.iwmvi.petshop.common.controller.CrudController;
 import br.iwmvi.petshop.common.service.CrudService;
 import br.iwmvi.petshop.tutor.dto.request.TutorRequest;
 import br.iwmvi.petshop.tutor.dto.response.TutorResponse;
+import br.iwmvi.petshop.tutor.dto.response.TutorResumoResponse;
 import br.iwmvi.petshop.tutor.service.TutorService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +26,11 @@ public class TutorController extends CrudController<Long, TutorRequest, TutorRes
     @Override
     protected CrudService<?, Long, TutorRequest, TutorResponse> getService() {
         return tutorService;
+    }
+
+    @GetMapping("/cpf/{cpf}")
+    public TutorResumoResponse buscarPorCpf(@PathVariable String cpf) {
+        return tutorService.buscarPorCpf(cpf);
     }
 
     @PostMapping("/{id}/restaurar")
