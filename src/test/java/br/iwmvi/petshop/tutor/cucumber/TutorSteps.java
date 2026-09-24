@@ -122,6 +122,32 @@ public class TutorSteps {
         resultado = realizarCadastro(request);
     }
 
+    @Dado("que existem {int} tutores cadastrados com o nome {string}")
+    public void queExistemTutoresCadastradosComONome(int quantidade, String nome) throws Exception {
+        for (int i = 0; i < quantidade; i++) {
+            Map<String, Object> request = criarTutorRequestValido();
+            request.put("nome", nome + " " + i);
+            request.put("email", nome.toLowerCase() + i + "." + System.nanoTime() + "@test.com");
+            realizarCadastro(request);
+        }
+    }
+
+    @Quando("listar os tutores buscando por {string} na página {int}")
+    public void listarTutoresBuscandoNaPagina(String busca, int pagina) throws Exception {
+        resultado = mockMvc.perform(get("/tutores")
+                .param("busca", busca)
+                .param("pagina", String.valueOf(pagina))).andReturn();
+    }
+
+    @Entao("a página deve conter {int} tutores de um total de {int}")
+    public void paginaDeveConterTutoresDeUmTotal(int quantidade, int total) throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("itens").size()).isEqualTo(quantidade);
+        assertThat(response.get("total").asLong()).isEqualTo(total);
+        assertThat(response.get("tamanho").asInt()).isEqualTo(10);
+    }
+
     @Quando("listar os tutores")
     public void listarTutores() throws Exception {
         resultado = mockMvc.perform(get("/tutores")).andReturn();
@@ -245,7 +271,7 @@ public class TutorSteps {
     public void respostaDeveConterListaDeTutores() throws Exception {
         JsonNode response = objectMapper.readTree(
                 resultado.getResponse().getContentAsString()
-        );
+        ).get("itens");
 
         assertThat(response.isArray())
                 .as("Resposta deve ser uma lista")
@@ -309,7 +335,7 @@ public class TutorSteps {
     public void listaNaoDeveConterTutorExcluido() throws Exception {
         JsonNode response = objectMapper.readTree(
                 resultado.getResponse().getContentAsString()
-        );
+        ).get("itens");
 
         assertThat(response.isArray())
                 .as("Resposta deve ser uma lista")

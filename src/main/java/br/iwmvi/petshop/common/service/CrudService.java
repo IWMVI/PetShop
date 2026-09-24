@@ -1,9 +1,12 @@
 package br.iwmvi.petshop.common.service;
 
+import br.iwmvi.petshop.common.dto.PaginaResponse;
 import br.iwmvi.petshop.common.entity.SoftDeleteEntity;
 import br.iwmvi.petshop.common.mapper.ResponseMapper;
 import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
 import br.iwmvi.petshop.exception.EntityNotFoundException;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -164,4 +167,39 @@ public abstract class CrudService<T extends SoftDeleteEntity, ID, REQ, RES> {
      * @return o nome da entidade
      */
     protected abstract String getEntityName();
+
+    /**
+     * Lista uma página de entidades ativas, opcionalmente filtradas por um termo de busca.
+     * Somente a página solicitada é carregada do banco.
+     *
+     * @param busca   termo livre (pode ser nulo ou vazio)
+     * @param pagina  índice da página, começando em 0
+     * @param tamanho itens por página (limitado a {@link PaginaResponse#TAMANHO_MAXIMO})
+     */
+    @Transactional(readOnly = true)
+    public PaginaResponse<RES> findPage(String busca, int pagina, int tamanho) {
+        Specification<T> filtro = ativos();
+        if (busca != null && !busca.isBlank()) {
+            filtro = filtro.and(buscaPor(busca.trim()));
+        }
+        var pageable = PaginaResponse.pageable(pagina, tamanho, getOrdenacaoPadrao());
+        return PaginaResponse.of(getRepository().findAll(filtro, pageable).map(getMapper()::toResponse));
+    }
+
+    /** Ordenação das listagens paginadas. Sobrescreva para ordenar por outro campo. */
+    protected Sort getOrdenacaoPadrao() {
+        return Sort.by("id");
+    }
+
+    /**
+     * Filtro aplicado quando há termo de busca. Por padrão não filtra;
+     * sobrescreva para definir os campos pesquisáveis da entidade.
+     */
+    protected Specification<T> buscaPor(String termo) {
+        return (root, query, cb) -> cb.conjunction();
+    }
+
+    private Specification<T> ativos() {
+        return (root, query, cb) -> cb.isNull(root.get("deletedAt"));
+    }
 }

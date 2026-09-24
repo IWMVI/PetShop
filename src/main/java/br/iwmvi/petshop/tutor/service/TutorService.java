@@ -13,7 +13,10 @@ import br.iwmvi.petshop.exception.EntityNotFoundException;
 import br.iwmvi.petshop.tutor.mapper.TutorMapper;
 import br.iwmvi.petshop.tutor.model.Tutor;
 import br.iwmvi.petshop.tutor.repository.TutorRepository;
+import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -69,6 +72,29 @@ public class TutorService extends CrudService<Tutor, Long, TutorRequest, TutorRe
         if (!novoCpf.equals(entity.getCpf()) && repository.existsByCpf(novoCpf)) {
             throw new CpfJaCadastradoException();
         }
+    }
+
+    @Override
+    protected Sort getOrdenacaoPadrao() {
+        return Sort.by("nome").and(Sort.by("id"));
+    }
+
+    /** Busca por nome, e-mail, endereço (logradouro) ou CPF (com ou sem máscara). */
+    @Override
+    protected Specification<Tutor> buscaPor(String termo) {
+        String padrao = "%" + termo.toLowerCase() + "%";
+        String digitos = termo.replaceAll("\\D", "");
+        return (root, query, cb) -> {
+            var endereco = root.join("endereco", JoinType.LEFT);
+            var porTexto = cb.or(
+                    cb.like(cb.lower(root.get("nome")), padrao),
+                    cb.like(cb.lower(root.get("email")), padrao),
+                    cb.like(cb.lower(endereco.get("logradouro")), padrao)
+            );
+            return digitos.isEmpty()
+                    ? porTexto
+                    : cb.or(porTexto, cb.like(root.get("cpf"), "%" + digitos + "%"));
+        };
     }
 
     @Override

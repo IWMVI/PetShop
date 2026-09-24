@@ -177,14 +177,14 @@ public class AgendamentoSteps {
 
     @Entao("a lista de agendamentos deve conter ao menos um item")
     public void aListaDeAgendamentosDeveConterAoMenosUmItem() throws Exception {
-        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString()).get("itens");
         assertThat(response.isArray()).isTrue();
         assertThat(response.size()).isPositive();
     }
 
     @Entao("a lista de agendamentos deve estar vazia")
     public void aListaDeAgendamentosDeveEstarVazia() throws Exception {
-        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString()).get("itens");
         assertThat(response.isArray()).isTrue();
         assertThat(response.size()).isZero();
     }

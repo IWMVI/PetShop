@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 
 public record AgendamentoServicoResponse(
         Long servicoId,
+        String nome,
         BigDecimal precoCobrado
 ) {
 }

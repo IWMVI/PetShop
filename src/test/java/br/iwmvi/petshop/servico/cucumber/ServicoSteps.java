@@ -192,7 +192,7 @@ public class ServicoSteps {
     public void respostaDeveConterUmaListaDeServicos() throws Exception {
         JsonNode response = objectMapper.readTree(
                 resultado.getResponse().getContentAsString()
-        );
+        ).get("itens");
 
         assertThat(response.isArray())
                 .as("Resposta deve ser uma lista")
@@ -207,7 +207,7 @@ public class ServicoSteps {
     public void respostaDeveConterUmaListaVaziaDeServicos() throws Exception {
         JsonNode response = objectMapper.readTree(
                 resultado.getResponse().getContentAsString()
-        );
+        ).get("itens");
 
         assertThat(response.isArray())
                 .as("Resposta deve ser uma lista")
