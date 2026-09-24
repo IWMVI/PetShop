@@ -69,6 +69,43 @@ serviços e agendamentos. O repositório tem duas partes, cada uma no seu diret�
 Para parar: `Ctrl+C` no back-end e no front-end, e `docker compose down` para o banco. Os
 dados continuam no volume `petshop-pgdata`.
 
+### Acesso por outros dispositivos na mesma rede
+
+Por padrão, o back-end já escuta em todas as interfaces (`0.0.0.0:8080`) e o front-end
+(`npm start`) também sobe em `0.0.0.0:4200`, graças à opção `host` configurada em
+`frontend/angular.json`. Isso permite acessar a aplicação a partir de outro computador
+ou celular conectado à mesma rede Wi-Fi/local.
+
+Para isso:
+
+1. Descubra o IP da máquina que está rodando o back-end e o front-end na rede local:
+
+   ```bash
+   # Linux/macOS
+   ip addr show | grep "inet " | grep -v 127.0.0.1
+
+   # Windows
+   ipconfig
+   ```
+
+   Normalmente é algo como `192.168.0.10` ou `192.168.1.42`.
+
+2. Nos outros dispositivos da rede, acesse `http://SEU_IP:4200` (substituindo `SEU_IP`
+   pelo IP encontrado no passo anterior). O proxy do Angular já repassa as chamadas
+   `/api/**` para o back-end na mesma máquina, então não é necessário configurar nada
+   a mais no front-end.
+
+3. Verifique se o firewall da máquina host permite conexões entrantes nas portas `4200`
+   (front-end) e `8080` (back-end). No Linux, por exemplo:
+
+   ```bash
+   sudo ufw allow 4200/tcp
+   sudo ufw allow 8080/tcp
+   ```
+
+> Se quiser mudar a porta ou o endereço do back-end, use as variáveis de ambiente
+> `SERVER_ADDRESS` e `SERVER_PORT` (veja a seção [Configuração](#configuração)).
+
 ### Build de produção
 
 ```bash
@@ -174,13 +211,15 @@ npm run check
 
 Variáveis de ambiente do perfil `dev`:
 
-| Variável      | Padrão      | Descrição           |
-| ------------- | ----------- | ------------------- |
-| `DB_HOST`     | `localhost` | Host do PostgreSQL  |
-| `DB_PORT`     | `5432`      | Porta do PostgreSQL |
-| `DB_NAME`     | `petshop`   | Nome do banco       |
-| `DB_USERNAME` | `postgres`  | Usuário do banco    |
-| `DB_PASSWORD` | `postgres`  | Senha do banco      |
+| Variável         | Padrão      | Descrição                                                  |
+| ---------------- | ----------- | ----------------------------------------------------------- |
+| `DB_HOST`        | `localhost` | Host do PostgreSQL                                           |
+| `DB_PORT`        | `5432`      | Porta do PostgreSQL                                          |
+| `DB_NAME`        | `petshop`   | Nome do banco                                                |
+| `DB_USERNAME`    | `postgres`  | Usuário do banco                                             |
+| `DB_PASSWORD`    | `postgres`  | Senha do banco                                               |
+| `SERVER_ADDRESS` | `0.0.0.0`   | Endereço em que o back-end escuta (acesso pela rede local)   |
+| `SERVER_PORT`    | `8080`      | Porta em que o back-end escuta                               |
 
 ### Expurgo de tutores excluídos
 

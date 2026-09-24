@@ -50,6 +50,18 @@ no back-end durante o desenvolvimento.
 > Alterações no `angular.json` (por exemplo, na lista de estilos) só valem depois de
 > reiniciar o `npm start`.
 
+### Acesso por outros dispositivos na mesma rede
+
+O `npm start` sobe o servidor de desenvolvimento em `0.0.0.0:4200` (veja a opção `host`
+em `angular.json`), então a aplicação também pode ser acessada por outros dispositivos
+conectados à mesma rede local, usando o IP da máquina que está rodando o front-end e o
+back-end (ex.: `http://192.168.0.10:4200`). O proxy `/api` continua funcionando normalmente,
+pois é resolvido pelo próprio processo do `ng serve`, sempre em relação a `localhost:8080`
+na mesma máquina.
+
+Veja o [README da raiz](../README.md#acesso-por-outros-dispositivos-na-mesma-rede) para o
+passo a passo completo, incluindo como liberar as portas no firewall.
+
 A busca de CEP usa a API pública e gratuita do [ViaCEP](https://viacep.com.br), chamada
 direto pelo navegador.
 
