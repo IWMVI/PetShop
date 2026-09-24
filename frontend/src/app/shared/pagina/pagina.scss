@@ -1,0 +1,19 @@
+:host {
+  display: block;
+}
+
+.titulo ::ng-deep [paginaResumo] {
+  display: block;
+  margin-top: 0.25rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  &:empty {
+    display: none;
+  }
+}

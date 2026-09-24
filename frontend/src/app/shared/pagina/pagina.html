@@ -1,0 +1,25 @@
+@if (trilha().length > 1) {
+  <nz-breadcrumb>
+    @for (item of trilha(); track $index) {
+      <nz-breadcrumb-item>
+        @if (item.link) {
+          <a [routerLink]="item.link">{{ item.rotulo }}</a>
+        } @else {
+          {{ item.rotulo }}
+        }
+      </nz-breadcrumb-item>
+    }
+  </nz-breadcrumb>
+}
+
+<header class="page-header">
+  <div class="titulo">
+    <h1>{{ titulo() }}</h1>
+    <ng-content select="[paginaResumo]" />
+  </div>
+  <div class="acoes">
+    <ng-content select="[paginaAcoes]" />
+  </div>
+</header>
+
+<ng-content />
