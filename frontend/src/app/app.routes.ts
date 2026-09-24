@@ -29,6 +29,22 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/tutores/tutor-form/tutor-form').then((m) => m.TutorForm),
       },
+      {
+        path: ':tutorId/pets/novo',
+        title: 'Novo pet',
+        loadComponent: () => import('./features/pets/pet-form/pet-form').then((m) => m.PetForm),
+      },
+      {
+        path: ':tutorId/pets/:petId',
+        title: 'Pet',
+        loadComponent: () =>
+          import('./features/pets/pet-detail/pet-detail').then((m) => m.PetDetail),
+      },
+      {
+        path: ':tutorId/pets/:petId/editar',
+        title: 'Editar pet',
+        loadComponent: () => import('./features/pets/pet-form/pet-form').then((m) => m.PetForm),
+      },
     ],
   },
   {
