@@ -53,10 +53,22 @@
       display: none;
     }
 
+    // Sem o rótulo, o link ficaria só com o tamanho do ícone, colado no topo do item.
+    // O invólucro do NG-ZORRO passa a preencher o item e o link ocupa todo ele,
+    // centralizando o ícone nos dois eixos (e ampliando a área de toque).
     .ant-menu-item {
       display: flex;
       justify-content: center;
       padding: 0 !important;
+    }
+
+    .ant-menu-title-content {
+      display: flex;
+      flex: 1;
+    }
+
+    .item {
+      justify-content: center;
     }
   }
 }
