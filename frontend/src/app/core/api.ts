@@ -4,6 +4,10 @@ import {
   Agendamento,
   AgendamentoRequest,
   ConsultaPaginada,
+  Funcionario,
+  FuncionarioRequest,
+  HistoricoPet,
+  HistoricoPetRequest,
   Pagina,
   Pet,
   PetRequest,
@@ -123,6 +127,48 @@ export class AgendamentoApi {
   }
   cancelar(petId: number, id: number) {
     return this.http.delete<void>(`${this.url(petId)}/${id}`);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class FuncionarioApi {
+  private readonly http = inject(HttpClient);
+  private readonly url = `${API_URL}/funcionarios`;
+
+  listar(consulta?: ConsultaPaginada) {
+    return this.http.get<Pagina<Funcionario>>(this.url, { params: paramsDe(consulta) });
+  }
+  buscar(id: number) {
+    return this.http.get<Funcionario>(`${this.url}/${id}`);
+  }
+  criar(body: FuncionarioRequest) {
+    return this.http.post<Funcionario>(this.url, body);
+  }
+  atualizar(id: number, body: FuncionarioRequest) {
+    return this.http.put<Funcionario>(`${this.url}/${id}`, body);
+  }
+  excluir(id: number) {
+    return this.http.delete<void>(`${this.url}/${id}`);
+  }
+}
+
+/** Histórico do pet: só registra e consulta, pois os eventos são imutáveis na API. */
+@Injectable({ providedIn: 'root' })
+export class HistoricoPetApi {
+  private readonly http = inject(HttpClient);
+  private url(petId: number) {
+    return `${API_URL}/pets/${petId}/historico`;
+  }
+
+  /** Eventos do pet, dos mais recentes para os mais antigos. */
+  listar(petId: number) {
+    return this.http.get<HistoricoPet[]>(this.url(petId));
+  }
+  buscar(petId: number, id: number) {
+    return this.http.get<HistoricoPet>(`${this.url(petId)}/${id}`);
+  }
+  registrar(petId: number, body: HistoricoPetRequest) {
+    return this.http.post<HistoricoPet>(this.url(petId), body);
   }
 }
 

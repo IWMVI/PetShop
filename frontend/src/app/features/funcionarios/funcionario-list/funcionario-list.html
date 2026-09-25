@@ -1,0 +1,97 @@
+<app-pagina titulo="Funcionários">
+  <a paginaAcoes nz-button nzType="primary" class="btn-novo" routerLink="/funcionarios/novo">
+    <lucide-icon name="plus" [size]="16" /> Novo funcionário
+  </a>
+
+  @if (lista.erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="lista.erro()!" class="erro" />
+  }
+  <nz-card class="table-card" [nzExtra]="barraBusca">
+    <nz-table
+      #tabela
+      [nzData]="lista.itens()"
+      [nzLoading]="lista.carregando()"
+      [nzFrontPagination]="false"
+      [nzTotal]="lista.total()"
+      [nzPageSize]="lista.tamanho"
+      [nzPageIndex]="lista.pagina() + 1"
+      (nzPageIndexChange)="lista.irPara($event - 1)"
+      [nzHideOnSinglePage]="true"
+      [nzNoResult]="vazio"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Cargo</th>
+          <th class="ocultar-celular">CPF</th>
+          <th class="ocultar-pequeno">Telefone</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (f of tabela.data; track f.id) {
+          <tr>
+            <td>{{ f.nome }}</td>
+            <td>{{ cargos[f.cargo] }}</td>
+            <td class="nowrap ocultar-celular">{{ cpf(f.cpf) }}</td>
+            <td class="nowrap ocultar-pequeno">{{ telefone(f.telefone) }}</td>
+            <td>
+              <button
+                nz-button
+                nz-dropdown
+                nzTrigger="click"
+                nzPlacement="bottomRight"
+                [nzDropdownMenu]="acoes"
+                aria-label="Ações"
+                class="menu-acoes"
+              >
+                <lucide-icon name="menu" [size]="18" />
+              </button>
+              <nz-dropdown-menu #acoes="nzDropdownMenu">
+                <ul nz-menu>
+                  <li nz-menu-item [routerLink]="['/funcionarios', f.id, 'editar']">
+                    <lucide-icon name="pencil" [size]="15" /> Editar
+                  </li>
+                  <li nz-menu-divider></li>
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    (click)="confirmarExclusao(f)"
+                    (keydown.enter)="confirmarExclusao(f)"
+                  >
+                    <lucide-icon name="trash-2" [size]="15" /> Excluir
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+
+  <ng-template #barraBusca>
+    <nz-input-group [nzPrefix]="iconeBusca" class="busca">
+      <input
+        nz-input
+        type="search"
+        placeholder="Buscar por nome"
+        aria-label="Buscar funcionários"
+        (input)="lista.buscar($any($event.target).value)"
+      />
+    </nz-input-group>
+    <ng-template #iconeBusca><lucide-icon name="search" [size]="14" class="muted" /></ng-template>
+  </ng-template>
+
+  <ng-template #vazio>
+    <nz-empty
+      [nzNotFoundContent]="
+        lista.termo()
+          ? 'Nenhum funcionário corresponde à busca.'
+          : 'Nenhum funcionário cadastrado ainda.'
+      "
+    />
+  </ng-template>
+</app-pagina>

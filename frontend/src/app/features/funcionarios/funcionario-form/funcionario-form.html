@@ -1,0 +1,71 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="16">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="nome">Nome</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o nome (de 3 a 150 caracteres).">
+              <input nz-input id="nome" formControlName="nome" maxlength="150" autocomplete="off" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="cargo">Cargo</nz-form-label>
+            <nz-form-control nzErrorTip="Selecione o cargo.">
+              <nz-select nzId="cargo" formControlName="cargo" nzPlaceHolder="Selecione">
+                @for (c of cargos; track c.valor) {
+                  <nz-option [nzValue]="c.valor" [nzLabel]="c.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="cpf">CPF</nz-form-label>
+            <nz-form-control [nzErrorTip]="erroCpf">
+              <input
+                nz-input
+                id="cpf"
+                formControlName="cpf"
+                [appMascara]="mascaras.cpf"
+                inputmode="numeric"
+                placeholder="000.000.000-00"
+              />
+              <ng-template #erroCpf let-control>
+                @if (control.errors?.required) {
+                  Informe o CPF.
+                } @else {
+                  CPF inválido.
+                }
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="telefone">Telefone</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o telefone com DDD.">
+              <input
+                nz-input
+                id="telefone"
+                formControlName="telefone"
+                [appMascara]="mascaras.telefone"
+                inputmode="numeric"
+                autocomplete="tel-national"
+                placeholder="(11) 99999-8888"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button routerLink="/funcionarios">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+</app-pagina>

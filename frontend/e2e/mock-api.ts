@@ -41,6 +41,9 @@ export class MockApi {
   readonly pets = new Map<number, Registro[]>();
   readonly servicos: Registro[] = [];
   readonly agendamentos = new Map<number, Registro[]>();
+  readonly funcionarios: Registro[] = [];
+  /** Eventos do histórico por pet, na ordem de registro. */
+  readonly historico = new Map<number, Registro[]>();
 
   static async instalar(page: Page) {
     const api = new MockApi();
@@ -98,6 +101,7 @@ export class MockApi {
     };
     this.pets.get(tutorId)!.push(p);
     this.agendamentos.set(p.id, []);
+    this.historico.set(p.id, []);
     return p;
   }
 
@@ -112,6 +116,19 @@ export class MockApi {
     };
     this.servicos.push(s);
     return s;
+  }
+
+  funcionario(dados: Partial<Registro> = {}) {
+    const f = {
+      id: ++this.seq,
+      nome: 'Dra. Ana',
+      cpf: `${this.seq}`.padStart(11, '0'),
+      cargo: 'VETERINARIO',
+      telefone: '11988887777',
+      ...dados,
+    };
+    this.funcionarios.push(f);
+    return f;
   }
 
   private async responder(route: Route) {
@@ -165,6 +182,7 @@ export class MockApi {
         return this.crud(route, pets, partes[3], metodo, body, (dados) => {
           const p = { id: ++this.seq, ...dados };
           this.agendamentos.set(p.id, []);
+          this.historico.set(p.id, []);
           return p;
         });
       }
@@ -201,6 +219,71 @@ export class MockApi {
         );
       }
       return this.crud(route, this.servicos, partes[1], metodo, body);
+    }
+
+    if (partes[0] === 'funcionarios') {
+      if (metodo === 'GET' && !partes[1]) {
+        return json(
+          200,
+          paginar(
+            buscar(this.funcionarios, url, (f) => [f['nome']]),
+            url,
+          ),
+        );
+      }
+      const cpfEmUso = (cpf: unknown, ignorarId?: number) =>
+        this.funcionarios.some((f) => f['cpf'] === cpf && f.id !== ignorarId);
+      if (metodo === 'POST' && !partes[1] && cpfEmUso(body?.['cpf'])) {
+        return json(409, { mensagem: 'CPF já cadastrado.' });
+      }
+      if (metodo === 'PUT' && cpfEmUso(body?.['cpf'], Number(partes[1]))) {
+        return json(409, { mensagem: 'CPF já cadastrado.' });
+      }
+      return this.crud(route, this.funcionarios, partes[1], metodo, body);
+    }
+
+    // /pets/{petId}/historico[/id] — registro imutável: só POST e GET, o resto é 405
+    if (partes[0] === 'pets' && partes[2] === 'historico') {
+      const lista = this.historico.get(Number(partes[1]));
+      if (!lista) return json(404, { mensagem: 'Pet não encontrado.' });
+      const montar = (id: number, dados: Record<string, unknown>) => {
+        const funcionario = this.funcionarios.find((f) => f.id === dados['funcionarioId']);
+        return {
+          id,
+          petId: Number(partes[1]),
+          tipoEvento: dados['tipoEvento'],
+          descricao: dados['descricao'],
+          dataEvento: dados['dataEvento'],
+          funcionarioId: funcionario?.id ?? null,
+          funcionarioNome: funcionario?.['nome'] ?? null,
+          createdAt: new Date().toISOString(),
+        };
+      };
+      if (metodo === 'POST' && !partes[3]) {
+        if (String(body?.['dataEvento']) > new Date().toISOString()) {
+          return json(400, { mensagem: 'Data do evento não pode estar no futuro.' });
+        }
+        if (
+          body?.['funcionarioId'] != null &&
+          !this.funcionarios.some((f) => f.id === body['funcionarioId'])
+        ) {
+          return json(404, { mensagem: 'Funcionário não encontrado.' });
+        }
+        const evento = montar(++this.seq, body!);
+        lista.push(evento);
+        return json(201, evento);
+      }
+      if (metodo === 'GET' && !partes[3]) {
+        const recentes = [...lista].sort((a, b) =>
+          String(b['dataEvento']).localeCompare(String(a['dataEvento'])),
+        );
+        return json(200, recentes);
+      }
+      if (metodo === 'GET') {
+        const evento = lista.find((e) => e.id === Number(partes[3]));
+        return evento ? json(200, evento) : naoEncontrado();
+      }
+      return json(405);
     }
 
     // /pets/{petId}/agendamentos[/id]

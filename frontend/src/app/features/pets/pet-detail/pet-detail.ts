@@ -8,14 +8,15 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { AgendamentoApi, PetApi, mensagemDeErro } from '../../../core/api';
-import { Agendamento, AgendamentoStatus, Pet } from '../../../core/models';
+import { AgendamentoApi, HistoricoPetApi, PetApi, mensagemDeErro } from '../../../core/api';
+import { Agendamento, AgendamentoStatus, HistoricoPet, Pet } from '../../../core/models';
 import { formatarDataHora, formatarMoeda, formatarPeso } from '../../../shared/format';
 import { ConfirmacaoService } from '../../../shared/confirmacao.service';
 import { listagemPaginada } from '../../../shared/listagem/listagem-paginada';
 import { Status, TomStatus } from '../../../shared/status/status';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
+import { TIPOS_EVENTO } from '../../../shared/rotulos/rotulos';
 
 const STATUS: Record<AgendamentoStatus, { rotulo: string; tom: TomStatus }> = {
   AGENDADO: { rotulo: 'Agendado', tom: 'destaque' },
@@ -47,6 +48,7 @@ export class PetDetail implements OnInit {
 
   private readonly petApi = inject(PetApi);
   private readonly agendamentoApi = inject(AgendamentoApi);
+  private readonly historicoApi = inject(HistoricoPetApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly confirmacao = inject(ConfirmacaoService);
@@ -57,6 +59,11 @@ export class PetDetail implements OnInit {
     this.agendamentoApi.listar(this.petId(), consulta),
   );
   protected readonly erro = signal<string | null>(null);
+  /** Histórico do pet: a API devolve a lista completa, dos eventos mais recentes aos mais antigos. */
+  protected readonly eventos = signal<HistoricoPet[]>([]);
+  protected readonly carregandoHistorico = signal(true);
+  protected readonly erroHistorico = signal<string | null>(null);
+  protected readonly tiposEvento = TIPOS_EVENTO;
   protected readonly moeda = formatarMoeda;
   protected readonly kg = formatarPeso;
   protected readonly dataHora = formatarDataHora;
@@ -73,6 +80,16 @@ export class PetDetail implements OnInit {
       error: (e) => this.erro.set(mensagemDeErro(e)),
     });
     this.agendamentos.recarregar();
+    this.historicoApi.listar(this.petId()).subscribe({
+      next: (eventos) => {
+        this.eventos.set(eventos);
+        this.carregandoHistorico.set(false);
+      },
+      error: (e) => {
+        this.erroHistorico.set(mensagemDeErro(e));
+        this.carregandoHistorico.set(false);
+      },
+    });
   }
 
   nomesServicos(a: Agendamento) {

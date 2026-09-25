@@ -1,0 +1,93 @@
+<app-pagina titulo="Novo evento" [trilha]="trilha()">
+  <span paginaResumo
+    >O evento fica gravado no histórico do pet e não pode ser alterado depois.</span
+  >
+
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="tipoEvento">Tipo do evento</nz-form-label>
+            <nz-form-control nzErrorTip="Selecione o tipo do evento.">
+              <nz-select nzId="tipoEvento" formControlName="tipoEvento" nzPlaceHolder="Selecione">
+                @for (t of tipos; track t.valor) {
+                  <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="dataEvento">Data e hora do evento</nz-form-label>
+            <nz-form-control [nzErrorTip]="erroData">
+              <nz-date-picker
+                nzId="dataEvento"
+                formControlName="dataEvento"
+                [nzShowTime]="{ nzFormat: 'HH:mm' }"
+                nzFormat="dd/MM/yyyy HH:mm"
+                nzPlaceHolder="Selecione"
+                [nzDisabledDate]="dataDesabilitada"
+              />
+              <ng-template #erroData let-control>
+                @if (control.errors?.futura) {
+                  A data do evento não pode estar no futuro.
+                } @else {
+                  Informe a data e a hora do evento.
+                }
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="funcionarioId">Funcionário</nz-form-label>
+            <nz-form-control
+              nzExtra="Deixe em branco para eventos externos, como uma vacina em outra clínica."
+            >
+              <nz-select
+                nzId="funcionarioId"
+                formControlName="funcionarioId"
+                nzShowSearch
+                nzServerSearch
+                nzAllowClear
+                nzPlaceHolder="Busque pelo nome"
+                [nzLoading]="buscandoFuncionarios()"
+                [nzNotFoundContent]="nadaEncontrado"
+                (nzOnSearch)="buscarFuncionarios($event)"
+              >
+                @for (f of funcionarios(); track f.id) {
+                  <nz-option [nzValue]="f.id" [nzLabel]="f.rotulo" />
+                }
+              </nz-select>
+              <ng-template #nadaEncontrado>
+                @if (buscandoFuncionarios()) {
+                  Buscando…
+                } @else {
+                  Nenhum funcionário encontrado.
+                  <a routerLink="/funcionarios/novo">Cadastrar funcionário</a>
+                }
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="descricao">Descrição</nz-form-label>
+            <nz-form-control nzErrorTip="Descreva o que aconteceu.">
+              <textarea nz-input id="descricao" formControlName="descricao" rows="4"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button [routerLink]="voltar()">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">
+        Registrar evento
+      </button>
+    </div>
+  </form>
+</app-pagina>

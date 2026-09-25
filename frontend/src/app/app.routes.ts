@@ -46,6 +46,12 @@ export const routes: Routes = [
         loadComponent: () => import('./features/pets/pet-form/pet-form').then((m) => m.PetForm),
       },
       {
+        path: ':tutorId/pets/:petId/historico/novo',
+        title: 'Novo evento',
+        loadComponent: () =>
+          import('./features/historico/historico-form/historico-form').then((m) => m.HistoricoForm),
+      },
+      {
         path: ':tutorId/pets/:petId/agendamentos/novo',
         title: 'Novo agendamento',
         loadComponent: () =>
@@ -83,6 +89,35 @@ export const routes: Routes = [
         title: 'Editar serviço',
         loadComponent: () =>
           import('./features/servicos/servico-form/servico-form').then((m) => m.ServicoForm),
+      },
+    ],
+  },
+  {
+    path: 'funcionarios',
+    children: [
+      {
+        path: '',
+        title: 'Funcionários',
+        loadComponent: () =>
+          import('./features/funcionarios/funcionario-list/funcionario-list').then(
+            (m) => m.FuncionarioList,
+          ),
+      },
+      {
+        path: 'novo',
+        title: 'Novo funcionário',
+        loadComponent: () =>
+          import('./features/funcionarios/funcionario-form/funcionario-form').then(
+            (m) => m.FuncionarioForm,
+          ),
+      },
+      {
+        path: ':id/editar',
+        title: 'Editar funcionário',
+        loadComponent: () =>
+          import('./features/funcionarios/funcionario-form/funcionario-form').then(
+            (m) => m.FuncionarioForm,
+          ),
       },
     ],
   },
