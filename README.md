@@ -5,7 +5,7 @@
 [![Java 25](https://img.shields.io/badge/Java-25-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=openjdk)](https://openjdk.org/projects/jdk/25/) [![Spring Boot 4.1](https://img.shields.io/badge/Spring%20Boot-4.1-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=springboot)](https://spring.io/projects/spring-boot) [![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=postgresql)](https://www.postgresql.org/) [![Angular 20](https://img.shields.io/badge/Angular-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=angular)](https://angular.dev/) [![NG-ZORRO 20](https://img.shields.io/badge/NG--ZORRO-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=antdesign)](https://ng.ant.design/) [![Node.js 24](https://img.shields.io/badge/Node.js-24-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=nodedotjs)](https://nodejs.org/)
 
 Sistema de gerenciamento de um petshop: cadastro de tutores e seus pets, catálogo de
-serviços e agendamentos. O repositório tem duas partes, cada uma no seu diretório:
+serviços, funcionários, agendamentos e histórico de eventos dos pets. O repositório tem duas partes, cada uma no seu diretório:
 
 | Parte     | Pasta                    | Tecnologia                                 | Porta  |
 | --------- | ------------------------ | ------------------------------------------ | ------ |
@@ -211,19 +211,27 @@ Com o back-end rodando, a documentação interativa fica em:
 | Pets         | `GET/POST /tutores/{tutorId}/pets`, `GET/PUT/DELETE /tutores/{tutorId}/pets/{petId}`    |
 | Serviços     | `GET/POST /servicos`, `GET/PUT/DELETE /servicos/{id}`                                   |
 | Agendamentos | `GET/POST /pets/{petId}/agendamentos`, `GET/PUT/DELETE /pets/{petId}/agendamentos/{id}` |
+| Funcionários | `GET/POST /funcionarios`, `GET/PUT/DELETE /funcionarios/{id}`                           |
+| Histórico    | `GET/POST /pets/{petId}/historico`, `GET /pets/{petId}/historico/{id}`                  |
 
 Os erros de negócio retornam `{ "mensagem": "..." }`: `404` para registro não encontrado,
 `409` para e-mail ou CPF já cadastrado, `400` para dados inválidos.
 
+O histórico do pet é **imutável**: só permite registrar e consultar eventos, e `PUT` e
+`DELETE` respondem `405`. O funcionário do evento é opcional (ex.: vacina aplicada em outra
+clínica) e, quando informado, precisa estar ativo. A exclusão de funcionário é lógica, então
+os eventos antigos continuam mostrando quem os executou.
+
 ### Listagens paginadas
 
-`GET /tutores`, `GET /servicos` e `GET /pets/{petId}/agendamentos` são paginados:
+`GET /tutores`, `GET /servicos`, `GET /funcionarios` e `GET /pets/{petId}/agendamentos` são
+paginados (o histórico do pet devolve a lista completa, dos eventos mais recentes aos mais antigos):
 
-| Parâmetro | Padrão | Descrição                                                             |
-| --------- | ------ | --------------------------------------------------------------------- |
-| `pagina`  | `0`    | Índice da página (começa em 0)                                        |
-| `tamanho` | `10`   | Itens por página (máximo 50)                                          |
-| `busca`   | —      | Tutores: nome, e-mail, logradouro ou CPF. Serviços: nome ou descrição |
+| Parâmetro | Padrão | Descrição                                                                                 |
+| --------- | ------ | ----------------------------------------------------------------------------------------- |
+| `pagina`  | `0`    | Índice da página (começa em 0)                                                            |
+| `tamanho` | `10`   | Itens por página (máximo 50)                                                              |
+| `busca`   | —      | Tutores: nome, e-mail, logradouro ou CPF. Serviços: nome ou descrição. Funcionários: nome |
 
 ```bash
 curl "http://localhost:8080/tutores?pagina=0&tamanho=10&busca=wallace"
@@ -292,6 +300,20 @@ curl -X POST http://localhost:8080/pets/1/agendamentos \
   }'
 ```
 
+Registrar um evento no histórico do pet (`tipoEvento`: `VACINACAO`, `CONSULTA`,
+`PROCEDIMENTO`, `SERVICO` ou `OUTRO`; a data não pode estar no futuro):
+
+```bash
+curl -X POST http://localhost:8080/pets/1/historico \
+  -H "Content-Type: application/json" \
+  -d '{
+    "tipoEvento": "VACINACAO",
+    "descricao": "Vacina V10 - primeira dose",
+    "dataEvento": "2026-01-10T14:30:00",
+    "funcionarioId": 1
+  }'
+```
+
 ## Estrutura do projeto
 
 ```
@@ -311,8 +333,10 @@ curl -X POST http://localhost:8080/pets/1/agendamentos \
 │       │   ├── endereco/        # endereço do tutor
 │       │   ├── pet/             # pets de cada tutor
 │       │   ├── servico/         # catálogo de serviços
+│       │   ├── funcionario/     # funcionários (cargo como enum)
+│       │   ├── historico/       # histórico imutável de eventos do pet
 │       │   └── agendamento/     # agendamentos (validadores em agendamento/validator)
-│       ├── main/resources/db/migration/   # migrações Flyway (V1…V14)
+│       ├── main/resources/db/migration/   # migrações Flyway (V1…V16)
 │       └── test/                # testes JUnit, integração e Cucumber (.feature)
 └── frontend/                    # aplicação Angular (veja frontend/README.md)
 ```
