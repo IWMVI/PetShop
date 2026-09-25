@@ -58,9 +58,12 @@ class ExpurgoTutoresIntegrationTest {
 
         // O serviço é compartilhado entre tutores e não deve ser apagado.
         assertThat(existe("servicos", expirado.servicoId())).isTrue();
+        // O funcionário também é compartilhado: sai o histórico do pet, mas o funcionário permanece.
+        assertThat(existe("funcionarios", expirado.funcionarioId())).isTrue();
     }
 
-    private record Dados(long tutorId, long enderecoId, long petId, long agendamentoId, long servicoId) {
+    private record Dados(long tutorId, long enderecoId, long petId, long agendamentoId, long servicoId,
+                         long funcionarioId) {
     }
 
     private Dados criarTutorCompleto(LocalDateTime excluidoEm) {
@@ -82,8 +85,12 @@ class ExpurgoTutoresIntegrationTest {
         new SimpleJdbcInsert(jdbc).withTableName("agendamento_servicos")
                 .execute(Map.of("agendamento_id", agendamentoId, "servico_id", servicoId, "preco_cobrado", 50));
         inserir("pagamentos", Map.of("agendamento_id", agendamentoId, "valor", 50));
-        inserir("historico_pets", Map.of("pet_id", petId, "tipo_servico", "Banho"));
-        return new Dados(tutorId, enderecoId, petId, agendamentoId, servicoId);
+        long funcionarioId = inserir("funcionarios", Map.of(
+                "nome", "Tosador", "cpf", CpfTestData.gerar(), "cargo", "TOSADOR", "telefone", "11988887777"));
+        inserir("historico_pets", Map.of(
+                "pet_id", petId, "funcionario_id", funcionarioId, "tipo_evento", "SERVICO",
+                "descricao", "Banho", "data_evento", LocalDateTime.now().minusDays(40)));
+        return new Dados(tutorId, enderecoId, petId, agendamentoId, servicoId, funcionarioId);
     }
 
     private long inserir(String tabela, Map<String, ?> valores) {
