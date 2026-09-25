@@ -5,7 +5,8 @@
 [![Angular 20](https://img.shields.io/badge/Angular-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=angular)](https://angular.dev/) [![NG-ZORRO 20](https://img.shields.io/badge/NG--ZORRO-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=antdesign)](https://ng.ant.design/) [![Node.js 24](https://img.shields.io/badge/Node.js-24-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=nodedotjs)](https://nodejs.org/) [![Jest 30](https://img.shields.io/badge/Jest-30-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=jest)](https://jestjs.io/) [![Playwright 1.63](https://img.shields.io/badge/Playwright-1.63-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800)](https://playwright.dev/)
 
 Aplicação Angular que consome a API do PetShop (back-end Spring Boot em `backend/`, neste
-mesmo repositório). Permite gerenciar tutores, pets, serviços e agendamentos.
+mesmo repositório). Permite gerenciar tutores, pets, serviços, funcionários, agendamentos e o histórico de
+eventos dos pets.
 
 > O guia geral (banco, back-end e front-end juntos) está no [README da raiz](../README.md).
 > Este arquivo detalha só o front-end.
@@ -118,7 +119,7 @@ src/
 └── app/
     ├── core/              # modelos, clientes da API e consulta de CEP
     ├── shared/            # peças reutilizáveis (veja abaixo)
-    └── features/          # telas: tutores, pets, serviços e agendamentos
+    └── features/          # telas: tutores, pets, serviços, funcionários, agendamentos e histórico
 ```
 
 Cada componente tem arquivos próprios de `.ts`, `.html`, `.scss` e `.spec.ts`.
@@ -156,6 +157,10 @@ Cada componente tem arquivos próprios de `.ts`, `.html`, `.scss` e `.spec.ts`.
   (< 576px), no `<th>` e no `<td>`, e use `so-pequeno` para repetir a informação essencial
   em outra coluna. Botões do cabeçalho e dos formulários ocupam a largura toda
   automaticamente. Para saber o tamanho da tela no código, use o `TelaService`.
+- **Registros imutáveis:** o histórico do pet só registra e consulta (`HistoricoPetApi` não
+  tem `atualizar` nem `excluir`, como a API). Por isso a tabela de eventos não tem coluna de
+  ações e a correção de um erro é um novo evento. Rótulos e tons dos enums (`Cargo`,
+  `TipoEvento`) ficam em `shared/rotulos`.
 - **Avisos:** use o `ToastService` (`sucesso`/`erro`) e `mensagemDeErro()` para converter
   os erros da API.
 - **Ícones:** registre os ícones Lucide novos em `shared/icons.ts`.
