@@ -1,7 +1,15 @@
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AgendamentoApi, PetApi, ServicoApi, TutorApi, mensagemDeErro } from './api';
+import {
+  AgendamentoApi,
+  FuncionarioApi,
+  HistoricoPetApi,
+  PetApi,
+  ServicoApi,
+  TutorApi,
+  mensagemDeErro,
+} from './api';
 
 describe('APIs', () => {
   let http: HttpTestingController;
@@ -64,6 +72,88 @@ describe('APIs', () => {
   it('AgendamentoApi cancela via DELETE sob o pet', () => {
     TestBed.inject(AgendamentoApi).cancelar(7, 9).subscribe();
     http.expectOne({ method: 'DELETE', url: '/api/pets/7/agendamentos/9' }).flush(null);
+  });
+});
+
+describe('FuncionarioApi', () => {
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => http.verify());
+
+  it('lista de forma paginada e envia a busca', () => {
+    TestBed.inject(FuncionarioApi).listar({ pagina: 1, busca: ' ana ' }).subscribe();
+    const req = http.expectOne((r) => r.method === 'GET' && r.url === '/api/funcionarios');
+    expect(req.request.params.get('pagina')).toBe('1');
+    expect(req.request.params.get('busca')).toBe('ana');
+    req.flush({ itens: [], pagina: 1, tamanho: 10, total: 0, totalPaginas: 0 });
+  });
+
+  it('cria, atualiza e exclui por id', () => {
+    const api = TestBed.inject(FuncionarioApi);
+    const dados = {
+      nome: 'Ana',
+      cpf: '52998224725',
+      cargo: 'TOSADOR' as const,
+      telefone: '11988887777',
+    };
+    api.criar(dados).subscribe();
+    api.atualizar(4, dados).subscribe();
+    api.excluir(4).subscribe();
+    expect(http.expectOne({ method: 'POST', url: '/api/funcionarios' }).request.body).toEqual(
+      dados,
+    );
+    http.expectOne({ method: 'PUT', url: '/api/funcionarios/4' }).flush({});
+    http.expectOne({ method: 'DELETE', url: '/api/funcionarios/4' }).flush(null);
+  });
+});
+
+describe('HistoricoPetApi', () => {
+  let http: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    http = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => http.verify());
+
+  it('lista os eventos do pet', () => {
+    TestBed.inject(HistoricoPetApi).listar(7).subscribe();
+    http.expectOne({ method: 'GET', url: '/api/pets/7/historico' }).flush([]);
+  });
+
+  it('consulta um evento específico', () => {
+    TestBed.inject(HistoricoPetApi).buscar(7, 3).subscribe();
+    http.expectOne({ method: 'GET', url: '/api/pets/7/historico/3' }).flush({});
+  });
+
+  it('registra um evento sob o pet', () => {
+    const evento = {
+      tipoEvento: 'VACINACAO' as const,
+      descricao: 'V10',
+      dataEvento: '2026-01-10T14:30:00',
+      funcionarioId: null,
+    };
+    TestBed.inject(HistoricoPetApi).registrar(7, evento).subscribe();
+    const req = http.expectOne({ method: 'POST', url: '/api/pets/7/historico' });
+    expect(req.request.body).toEqual(evento);
+    req.flush({});
+  });
+
+  it('não oferece alteração nem exclusão, pois o histórico é imutável', () => {
+    const api = TestBed.inject(HistoricoPetApi) as unknown as Record<string, unknown>;
+    for (const metodo of ['atualizar', 'excluir', 'editar', 'cancelar']) {
+      expect(api[metodo]).toBeUndefined();
+    }
   });
 });
 

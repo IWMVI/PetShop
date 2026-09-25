@@ -89,3 +89,38 @@ export interface AgendamentoRequest {
   observacoes?: string | null;
   servicoIds: number[];
 }
+
+export type Cargo = 'VETERINARIO' | 'TOSADOR' | 'BANHISTA' | 'ATENDENTE' | 'GERENTE';
+
+export interface Funcionario {
+  id: number;
+  nome: string;
+  /** Apenas dígitos na resposta; a API também aceita com máscara. */
+  cpf: string;
+  cargo: Cargo;
+  telefone: string;
+}
+
+export type FuncionarioRequest = Omit<Funcionario, 'id'>;
+
+export type TipoEvento = 'VACINACAO' | 'CONSULTA' | 'PROCEDIMENTO' | 'SERVICO' | 'OUTRO';
+
+/** Evento do histórico do pet. Registro imutável: a API não permite alterar nem excluir. */
+export interface HistoricoPet {
+  id: number;
+  petId: number;
+  tipoEvento: TipoEvento;
+  descricao: string;
+  dataEvento: string;
+  /** Nulo em eventos externos (ex.: vacina aplicada em outra clínica). */
+  funcionarioId: number | null;
+  funcionarioNome: string | null;
+  createdAt: string;
+}
+
+export interface HistoricoPetRequest {
+  tipoEvento: TipoEvento;
+  descricao: string;
+  dataEvento: string;
+  funcionarioId: number | null;
+}

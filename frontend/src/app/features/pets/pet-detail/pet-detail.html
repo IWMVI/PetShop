@@ -121,6 +121,63 @@
     <ng-template #vazio
       ><nz-empty nzNotFoundContent="Nenhum agendamento para este pet."
     /></ng-template>
+
+    <header class="section-header secao-historico">
+      <h2>Histórico</h2>
+      <a
+        nz-button
+        class="btn-novo"
+        [routerLink]="['/tutores', tutorId(), 'pets', p.id, 'historico', 'novo']"
+      >
+        <lucide-icon name="history" [size]="16" /> Novo evento
+      </a>
+    </header>
+
+    @if (erroHistorico()) {
+      <nz-alert nzType="error" nzShowIcon [nzMessage]="erroHistorico()!" />
+    } @else {
+      <nz-card class="table-card">
+        <nz-table
+          #tabelaHistorico
+          [nzData]="eventos()"
+          [nzLoading]="carregandoHistorico()"
+          [nzFrontPagination]="false"
+          [nzNoResult]="historicoVazio"
+          nzSize="middle"
+        >
+          <thead>
+            <tr>
+              <th>Data e hora</th>
+              <th>Tipo</th>
+              <th>Descrição</th>
+              <th class="ocultar-pequeno">Funcionário</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (e of tabelaHistorico.data; track e.id) {
+              <tr>
+                <td class="nowrap">{{ dataHora(e.dataEvento) }}</td>
+                <td>
+                  <app-status [tom]="tiposEvento[e.tipoEvento].tom">{{
+                    tiposEvento[e.tipoEvento].rotulo
+                  }}</app-status>
+                </td>
+                <td class="descricao-evento">
+                  {{ e.descricao }}
+                  @if (e.funcionarioNome) {
+                    <div class="so-pequeno muted">{{ e.funcionarioNome }}</div>
+                  }
+                </td>
+                <td class="ocultar-pequeno">{{ e.funcionarioNome || '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+      <ng-template #historicoVazio
+        ><nz-empty nzNotFoundContent="Nenhum evento registrado para este pet."
+      /></ng-template>
+    }
   } @else {
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
   }

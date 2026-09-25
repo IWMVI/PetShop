@@ -46,6 +46,7 @@ export class App {
   protected readonly menu = [
     { rota: '/tutores', rotulo: 'Tutores', icone: 'users' },
     { rota: '/servicos', rotulo: 'Serviços', icone: 'wrench' },
+    { rota: '/funcionarios', rotulo: 'Funcionários', icone: 'id-card' },
   ];
 
   protected readonly api = computed(() => {
