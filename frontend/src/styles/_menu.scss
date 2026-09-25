@@ -1,0 +1,87 @@
+// Menu da aplicação (lateral no desktop e gaveta no celular) em marrom-escuro quente,
+// com o item ativo em amarelo. Fica global porque a gaveta é renderizada fora do componente.
+
+.ant-layout-sider,
+.ant-layout-sider .ant-menu-dark,
+.menu-celular .ant-drawer-content {
+  background: var(--menu-fundo);
+}
+
+.ant-layout-sider-trigger {
+  background: var(--menu-fundo-escuro);
+}
+
+.menu-celular .ant-drawer-body {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.menu-app.ant-menu-dark {
+  background: transparent;
+  border-inline-end: 0;
+
+  .ant-menu-item {
+    width: auto;
+    margin: 4px 8px;
+    border-radius: 8px;
+    color: rgb(255 255 255 / 0.75);
+    font-weight: 600;
+
+    &:hover {
+      color: #fff;
+    }
+  }
+
+  .ant-menu-item-selected {
+    background: var(--amarelo) !important;
+    color: var(--sobre-amarelo) !important;
+  }
+
+  // O link ocupa o item inteiro (área de toque) e herda a cor do item: branco no menu,
+  // escuro sobre o amarelo do item ativo.
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    color: inherit !important;
+  }
+
+  &.ant-menu-inline-collapsed {
+    .rotulo {
+      display: none;
+    }
+
+    .ant-menu-item {
+      display: flex;
+      justify-content: center;
+      padding: 0 !important;
+    }
+  }
+}
+
+.marca-app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.625rem;
+  height: 64px;
+  padding: 0 0.75rem;
+  color: var(--amarelo);
+  font-size: 1.2rem;
+  font-weight: 800;
+  white-space: nowrap;
+
+  &:hover {
+    color: var(--amarelo);
+  }
+}
+
+// Indicador de status da API no rodapé do menu.
+.status-api {
+  display: flex;
+  justify-content: center;
+  margin-top: auto;
+  padding: 1rem 0.75rem;
+}

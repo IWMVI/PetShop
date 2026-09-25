@@ -1,33 +1,98 @@
 <nz-layout class="app">
-  <nz-sider
-    class="sider"
-    nzCollapsible
-    nzBreakpoint="lg"
-    [nzWidth]="208"
-    [nzCollapsedWidth]="64"
-    [nzCollapsed]="recolhido()"
-    (nzCollapsedChange)="recolhido.set($event)"
-  >
-    <a routerLink="/" class="brand">
-      <lucide-icon name="paw-print" [size]="20" />
-      @if (!recolhido()) {
-        <span>PetShop</span>
-      }
-    </a>
+  @if (!celular()) {
+    <nz-sider
+      class="sider"
+      nzCollapsible
+      nzBreakpoint="lg"
+      [nzWidth]="208"
+      [nzCollapsedWidth]="64"
+      [nzCollapsed]="recolhido()"
+      (nzCollapsedChange)="recolhido.set($event)"
+    >
+      <div class="sider-conteudo">
+        <a routerLink="/" class="brand marca-app">
+          <lucide-icon name="paw-print" [size]="20" />
+          @if (!recolhido()) {
+            <span>PetShop</span>
+          }
+        </a>
+        <ng-container *ngTemplateOutlet="navegacao; context: { recolhido: recolhido() }" />
+        <div class="status-api" [class.recolhido]="recolhido()">
+          <app-status
+            [tom]="api().tom"
+            [pulsando]="api().pulsando"
+            [compacto]="recolhido()"
+            [rotulo]="api().rotulo"
+            >{{ api().rotulo }}</app-status
+          >
+        </div>
+      </div>
+    </nz-sider>
+  }
 
-    <ul nz-menu nzTheme="dark" nzMode="inline" [nzInlineCollapsed]="recolhido()">
-      @for (item of menu; track item.rota) {
-        <li nz-menu-item nzMatchRouter [routerLink]="item.rota">
-          <span class="item">
-            <lucide-icon [name]="item.icone" [size]="18" />
-            <span class="rotulo">{{ item.rotulo }}</span>
-          </span>
-        </li>
-      }
-    </ul>
-  </nz-sider>
+  <nz-layout>
+    @if (celular()) {
+      <nz-header class="topo">
+        <button
+          nz-button
+          nzType="text"
+          class="abrir-menu"
+          aria-label="Abrir menu"
+          [attr.aria-expanded]="menuAberto()"
+          (click)="menuAberto.set(true)"
+        >
+          <lucide-icon name="menu" [size]="22" />
+        </button>
+        <a routerLink="/" class="brand marca-app">
+          <lucide-icon name="paw-print" [size]="20" />
+          <span>PetShop</span>
+        </a>
+        <app-status
+          compacto
+          [tom]="api().tom"
+          [pulsando]="api().pulsando"
+          [rotulo]="api().rotulo"
+        />
+      </nz-header>
+    }
 
-  <nz-content class="content">
-    <router-outlet />
-  </nz-content>
+    <nz-content class="content">
+      <router-outlet />
+    </nz-content>
+  </nz-layout>
 </nz-layout>
+
+@if (celular()) {
+  <nz-drawer
+    [nzVisible]="menuAberto()"
+    nzPlacement="left"
+    [nzWidth]="264"
+    [nzClosable]="false"
+    nzWrapClassName="menu-celular"
+    (nzOnClose)="menuAberto.set(false)"
+  >
+    <ng-container *nzDrawerContent>
+      <a routerLink="/" class="brand marca-app" (click)="fecharMenu()">
+        <lucide-icon name="paw-print" [size]="20" />
+        <span>PetShop</span>
+      </a>
+      <ng-container *ngTemplateOutlet="navegacao; context: { recolhido: false }" />
+      <div class="status-api">
+        <app-status [tom]="api().tom" [pulsando]="api().pulsando">{{ api().rotulo }}</app-status>
+      </div>
+    </ng-container>
+  </nz-drawer>
+}
+
+<ng-template #navegacao let-recolhido="recolhido">
+  <ul nz-menu nzTheme="dark" nzMode="inline" class="menu-app" [nzInlineCollapsed]="recolhido">
+    @for (item of menu; track item.rota) {
+      <li nz-menu-item nzMatchRouter>
+        <a class="item" [routerLink]="item.rota" (click)="fecharMenu()">
+          <lucide-icon [name]="item.icone" [size]="18" />
+          <span class="rotulo">{{ item.rotulo }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+</ng-template>

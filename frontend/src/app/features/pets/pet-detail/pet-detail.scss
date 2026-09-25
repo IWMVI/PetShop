@@ -2,3 +2,16 @@
   display: flex;
   gap: 0.5rem;
 }
+
+.resumo-celular {
+  margin-top: 2px;
+  color: rgba(0, 0, 0, 0.5);
+  font-size: 12px;
+  white-space: normal;
+}
+
+@media (max-width: 767.98px) {
+  .grupo-acoes > * {
+    flex: 1;
+  }
+}
