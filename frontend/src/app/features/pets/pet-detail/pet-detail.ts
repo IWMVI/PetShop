@@ -8,19 +8,19 @@ import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { AgendamentoApi, PetApi, mensagemDeErro } from '../../../core/api';
 import { Agendamento, AgendamentoStatus, Pet } from '../../../core/models';
 import { formatarDataHora, formatarMoeda, formatarPeso } from '../../../shared/format';
 import { ConfirmacaoService } from '../../../shared/confirmacao.service';
 import { listagemPaginada } from '../../../shared/listagem/listagem-paginada';
+import { Status, TomStatus } from '../../../shared/status/status';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
 
-const STATUS: Record<AgendamentoStatus, { rotulo: string; cor: string }> = {
-  AGENDADO: { rotulo: 'Agendado', cor: 'gold' },
-  CONCLUIDO: { rotulo: 'Concluído', cor: 'green' },
-  CANCELADO: { rotulo: 'Cancelado', cor: 'default' },
+const STATUS: Record<AgendamentoStatus, { rotulo: string; tom: TomStatus }> = {
+  AGENDADO: { rotulo: 'Agendado', tom: 'destaque' },
+  CONCLUIDO: { rotulo: 'Concluído', tom: 'sucesso' },
+  CANCELADO: { rotulo: 'Cancelado', tom: 'neutro' },
 };
 
 @Component({
@@ -36,7 +36,7 @@ const STATUS: Record<AgendamentoStatus, { rotulo: string; cor: string }> = {
     NzEmptyModule,
     NzSkeletonModule,
     NzTableModule,
-    NzTagModule,
+    Status,
   ],
   templateUrl: './pet-detail.html',
   styleUrl: './pet-detail.scss',

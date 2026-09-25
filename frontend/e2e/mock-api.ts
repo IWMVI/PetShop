@@ -128,6 +128,11 @@ export class MockApi {
       });
     const naoEncontrado = () => json(404, { mensagem: 'Registro não encontrado.' });
 
+    // Saúde da API (Spring Boot Actuator), usada pelo indicador de status do menu.
+    if (partes[0] === 'actuator' && partes[1] === 'health') {
+      return json(200, { status: 'UP' });
+    }
+
     // /tutores[/id][/pets[/petId]] — tutores excluídos ficam com "excluido: true" (exclusão lógica)
     if (partes[0] === 'tutores') {
       const ativos = this.tutores.filter((t) => !t['excluido']);

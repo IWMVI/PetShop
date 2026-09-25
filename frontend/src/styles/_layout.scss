@@ -74,3 +74,98 @@ form[nz-form] {
     font-weight: 600;
   }
 }
+
+// ---------- Responsividade ----------
+// Cortes: celular < 768px (mesmo "md" do NG-ZORRO) e celular estreito < 576px ("sm").
+// Nas tabelas, marque colunas secundárias com .ocultar-celular ou .ocultar-pequeno
+// (no <th> e no <td>) e use .so-pequeno para repetir a informação em outra coluna.
+
+.so-pequeno {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .ocultar-celular {
+    display: none !important;
+  }
+
+  .page-header {
+    align-items: stretch;
+
+    h1 {
+      font-size: 20px;
+    }
+  }
+
+  // Ações do cabeçalho (ex.: "Novo tutor") ocupam a largura toda, fáceis de tocar.
+  .page-header .acoes,
+  .page-header .acoes > *,
+  .btn-novo {
+    width: 100%;
+  }
+
+  .section-header .btn-novo {
+    width: 100%;
+    min-width: 0;
+  }
+
+  // Cabeçalho do card de tabela: a busca desce para uma linha própria.
+  .table-card .ant-card-head-wrapper {
+    flex-wrap: wrap;
+  }
+
+  .table-card .ant-card-extra {
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 0;
+  }
+
+  .ant-table-middle .ant-table-thead > tr > th,
+  .ant-table-middle .ant-table-tbody > tr > td {
+    padding: 10px 8px;
+  }
+
+  // Botões do formulário empilhados, com a ação principal em cima.
+  .form-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    .ant-btn {
+      width: 100%;
+    }
+  }
+
+  form[nz-form] .ant-card-body {
+    padding: 1rem 1rem 0.25rem;
+  }
+
+  // Calendário com horário: no celular o horário fica abaixo do calendário,
+  // porque lado a lado os dois passam da largura da tela.
+  .ant-picker-datetime-panel {
+    flex-direction: column;
+  }
+
+  .ant-picker-datetime-panel .ant-picker-time-panel {
+    border-inline-start: 0;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .ant-picker-datetime-panel .ant-picker-time-panel-column {
+    height: 120px;
+
+    // O NG-ZORRO reserva uma área vazia abaixo da lista para rolar a última opção até o topo.
+    &::after {
+      height: 28px;
+    }
+  }
+}
+
+@media (max-width: 575.98px) {
+  .ocultar-pequeno {
+    display: none !important;
+  }
+
+  .so-pequeno {
+    display: block;
+  }
+}

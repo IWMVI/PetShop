@@ -1,5 +1,9 @@
 # PetShop — Front-end
 
+[![front-end](https://img.shields.io/github/actions/workflow/status/IWMVI/PetShop/frontend.yml?branch=main&label=front-end&logo=githubactions&style=flat&labelColor=2b2214&logoColor=f5b800)](https://github.com/IWMVI/PetShop/actions/workflows/frontend.yml) [![Conventional Commits 1.0.0](https://img.shields.io/badge/Conventional%20Commits-1.0.0-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=conventionalcommits)](https://www.conventionalcommits.org/pt-br/v1.0.0/)
+
+[![Angular 20](https://img.shields.io/badge/Angular-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=angular)](https://angular.dev/) [![NG-ZORRO 20](https://img.shields.io/badge/NG--ZORRO-20-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=antdesign)](https://ng.ant.design/) [![Node.js 24](https://img.shields.io/badge/Node.js-24-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=nodedotjs)](https://nodejs.org/) [![Jest 30](https://img.shields.io/badge/Jest-30-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800&logo=jest)](https://jestjs.io/) [![Playwright 1.63](https://img.shields.io/badge/Playwright-1.63-f5b800?style=flat&labelColor=2b2214&logoColor=f5b800)](https://playwright.dev/)
+
 Aplicação Angular que consome a API do PetShop (back-end Spring Boot em `backend/`, neste
 mesmo repositório). Permite gerenciar tutores, pets, serviços e agendamentos.
 
@@ -143,6 +147,15 @@ Cada componente tem arquivos próprios de `.ts`, `.html`, `.scss` e `.spec.ts`.
   `<div nz-col>` e um `<nz-form-item>` dentro, para o espaçamento do grid funcionar.
   Máscaras: diretiva `appMascara` com `MASCARAS.cpf`, `MASCARAS.cep` ou `MASCARAS.telefone`.
   Valores em reais: diretiva `appMoeda`.
+- **Status:** exiba qualquer status com `<app-status>` (`shared/status`), escolhendo o tom:
+  `destaque` (amarelo), `sucesso`, `alerta`, `erro` ou `neutro`. Ex.:
+  `<app-status tom="sucesso">Concluído</app-status>`. O menu mostra a saúde da API
+  (`/actuator/health`) com o mesmo componente.
+- **Celular:** abaixo de 768px o menu lateral vira uma gaveta aberta pelo botão ☰. Nas
+  tabelas, marque colunas secundárias com `ocultar-celular` (< 768px) ou `ocultar-pequeno`
+  (< 576px), no `<th>` e no `<td>`, e use `so-pequeno` para repetir a informação essencial
+  em outra coluna. Botões do cabeçalho e dos formulários ocupam a largura toda
+  automaticamente. Para saber o tamanho da tela no código, use o `TelaService`.
 - **Avisos:** use o `ToastService` (`sucesso`/`erro`) e `mensagemDeErro()` para converter
   os erros da API.
 - **Ícones:** registre os ícones Lucide novos em `shared/icons.ts`.

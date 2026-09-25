@@ -23,10 +23,10 @@
       <thead>
         <tr>
           <th>Nome</th>
-          <th>CPF</th>
-          <th>E-mail</th>
+          <th class="ocultar-celular">CPF</th>
+          <th class="ocultar-celular">E-mail</th>
           <th>Telefone</th>
-          <th>Endereço</th>
+          <th class="ocultar-celular">Endereço</th>
           <th>Ações</th>
         </tr>
       </thead>
@@ -36,10 +36,10 @@
             <td>
               <a [routerLink]="['/tutores', t.id]">{{ t.nome }}</a>
             </td>
-            <td class="nowrap">{{ cpf(t.cpf) }}</td>
-            <td>{{ t.email }}</td>
+            <td class="nowrap ocultar-celular">{{ cpf(t.cpf) }}</td>
+            <td class="ocultar-celular">{{ t.email }}</td>
             <td class="nowrap">{{ telefone(t.telefone) }}</td>
-            <td>
+            <td class="ocultar-celular">
               {{ t.endereco.logradouro }}{{ t.endereco.numero ? ', ' + t.endereco.numero : '' }}
             </td>
             <td>

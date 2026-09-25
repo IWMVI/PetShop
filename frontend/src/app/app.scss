@@ -6,68 +6,47 @@
   position: sticky;
   top: 0;
   height: 100vh;
-  overflow: auto;
 }
 
-// Menu lateral em marrom-escuro quente, com o item ativo em amarelo.
-:host ::ng-deep {
-  .ant-layout-sider,
-  .ant-menu-dark {
-    background: var(--menu-fundo);
-  }
-
-  .ant-layout-sider-trigger {
-    background: var(--menu-fundo-escuro);
-  }
-
-  .ant-menu-dark .ant-menu-item {
-    width: auto;
-    margin: 4px 8px;
-    border-radius: 8px;
-    color: rgb(255 255 255 / 0.75);
-    font-weight: 600;
-  }
-
-  .ant-menu-dark .ant-menu-item:hover {
-    color: #fff;
-  }
-
-  .ant-menu-dark .ant-menu-item-selected {
-    background: var(--amarelo) !important;
-    color: var(--sobre-amarelo) !important;
-  }
-
-  .item {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.75rem;
-  }
-
-  .ant-menu-inline-collapsed .rotulo {
-    display: none;
-  }
-
-  .ant-menu-inline-collapsed .ant-menu-item {
-    display: flex;
-    justify-content: center;
-    padding: 0 !important;
-  }
-}
-
-.brand {
+// Coluna do menu: marca no topo, itens e status da API no rodapé (acima do botão de recolher).
+.sider-conteudo {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.625rem;
-  height: 64px;
-  padding: 0 0.75rem;
-  color: var(--amarelo);
-  font-size: 1.2rem;
-  font-weight: 800;
-  white-space: nowrap;
+  flex-direction: column;
+  height: calc(100vh - 48px);
+  overflow-y: auto;
+}
 
-  &:hover {
+// Barra superior do layout de celular.
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  height: 56px;
+  padding: 0 0.5rem;
+  background: var(--menu-fundo);
+  line-height: normal;
+
+  .marca-app {
+    height: 56px;
+  }
+
+  app-status {
+    justify-self: center;
+  }
+}
+
+.abrir-menu {
+  width: 44px;
+  height: 44px;
+  color: #fff;
+
+  &:hover,
+  &:focus {
     color: var(--amarelo);
+    background: rgb(255 255 255 / 0.08);
   }
 }
 
@@ -77,8 +56,8 @@
   padding: 1.25rem 1.5rem 3rem;
 }
 
-@media (max-width: 575px) {
+@media (max-width: 767.98px) {
   .content {
-    padding: 1rem 1rem 3rem;
+    padding: 1rem 0.75rem 3rem;
   }
 }
