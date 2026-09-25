@@ -93,14 +93,41 @@ classDiagram
     }
 
     class HistoricoPet {
-        <<planned>>
+        <<immutable>>
         -Long id
         -Pet pet
-        -String tipoEvento
+        -Funcionario funcionario
+        -TipoEvento tipoEvento
         -String descricao
         -LocalDateTime dataEvento
-        -String profissional
         -LocalDateTime createdAt
+    }
+
+    class TipoEvento {
+        <<enumeration>>
+        VACINACAO
+        CONSULTA
+        PROCEDIMENTO
+        SERVICO
+        OUTRO
+    }
+
+    class Funcionario {
+        -Long id
+        -String nome
+        -String cpf
+        -Cargo cargo
+        -String telefone
+        +atualizar(nome, cpf, cargo, telefone) void
+    }
+
+    class Cargo {
+        <<enumeration>>
+        VETERINARIO
+        TOSADOR
+        BANHISTA
+        ATENDENTE
+        GERENTE
     }
 
     class Pagamento {
@@ -119,6 +146,7 @@ classDiagram
     SoftDeleteEntity <|-- Pet
     SoftDeleteEntity <|-- Agendamento
     SoftDeleteEntity <|-- Servico
+    SoftDeleteEntity <|-- Funcionario
     SoftDeleteEntity <|.. Pagamento : planejado
 
     %% Relacionamentos do domínio
@@ -133,7 +161,12 @@ classDiagram
 
     %% Enum
     Agendamento --> AgendamentoStatus : possui
+    HistoricoPet --> TipoEvento : possui
+    Funcionario --> Cargo : possui
+
+    %% Histórico do pet
+    Pet "1" --> "*" HistoricoPet : possui
+    Funcionario "0..1" --> "*" HistoricoPet : executou
 
     %% Funcionalidades planejadas
-    Pet "1" --> "*" HistoricoPet : possui
     Agendamento "1" --> "*" Pagamento : possui

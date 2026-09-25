@@ -1,6 +1,6 @@
 %% Diagrama de Entidades do Projeto PetShop
-%% Entidades implementadas: Tutor, Endereco, Pet, Agendamento, AgendamentoServico, Servico
-%% Entidades planejadas (issues abertas): HistoricoPet (#7), Pagamento (#8)
+%% Entidades implementadas: Tutor, Endereco, Pet, Agendamento, AgendamentoServico, Servico, Funcionario, HistoricoPet
+%% Entidades planejadas (issues abertas): Pagamento (#8)
 
 erDiagram
     tutores {
@@ -62,13 +62,23 @@ erDiagram
         DECIMAL preco_cobrado
     }
 
+    funcionarios {
+        BIGINT id PK
+        VARCHAR nome
+        VARCHAR cpf UK
+        VARCHAR cargo
+        VARCHAR telefone
+        TIMESTAMP created_at
+        TIMESTAMP deleted_at
+    }
+
     historico_pets {
         BIGINT id PK
         BIGINT pet_id FK
+        BIGINT funcionario_id FK
         VARCHAR tipo_evento
         TEXT descricao
         TIMESTAMP data_evento
-        VARCHAR profissional
         TIMESTAMP created_at
     }
 
@@ -88,4 +98,5 @@ erDiagram
     agendamentos ||--o{ agendamento_servicos : "agendamento_id (1:N)"
     servicos ||--o{ agendamento_servicos : "servico_id (1:N)"
     pets ||--o{ historico_pets : "pet_id (1:N)"
+    funcionarios |o--o{ historico_pets : "funcionario_id (0..1:N)"
     agendamentos ||--o{ pagamentos : "agendamento_id (1:N)"
