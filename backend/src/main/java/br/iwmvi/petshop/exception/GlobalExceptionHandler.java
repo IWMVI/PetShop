@@ -34,6 +34,12 @@ public class GlobalExceptionHandler {
         return Map.of("mensagem", ex.getMessage());
     }
 
+    @ExceptionHandler(HistoricoPetNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleHistoricoPetNotFound(HistoricoPetNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
     @ExceptionHandler(ServicoNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Map<String, String> handleServicoNotFound(ServicoNotFoundException ex) {
