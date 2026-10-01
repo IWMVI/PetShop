@@ -1,1 +1,0 @@
-ALTER TABLE servicos ADD COLUMN deleted_at TIMESTAMP;
