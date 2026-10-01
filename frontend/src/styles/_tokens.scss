@@ -1,0 +1,15 @@
+// Paleta em tons de amarelo. A cor primária (#f5b800) é registrada no tema do NG-ZORRO
+// (app.config.ts); aqui ficam os tons de apoio. Sobre o amarelo o texto é escuro
+// (--sobre-amarelo) e links usam um âmbar mais fechado para continuarem legíveis.
+:root {
+  --amarelo: #f5b800;
+  --amarelo-hover: #ffc933;
+  --amarelo-ativo: #d69e00;
+  --amarelo-claro: #fff4cc;
+  --ambar-texto: #8a5a00;
+  --ambar-texto-hover: #6b4600;
+  --sobre-amarelo: #2e2200;
+  --menu-fundo: #2b2214;
+  --menu-fundo-escuro: #211a0f;
+  --fundo: #fbf8f1;
+}

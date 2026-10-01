@@ -1,0 +1,218 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card nzTitle="Dados pessoais">
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="cpf">CPF</nz-form-label>
+            <nz-form-control [nzErrorTip]="erroCpf">
+              <input
+                nz-input
+                id="cpf"
+                formControlName="cpf"
+                [appMascara]="mascaras.cpf"
+                inputmode="numeric"
+                placeholder="000.000.000-00"
+              />
+              <ng-template #erroCpf let-control>
+                @if (control.errors?.required) {
+                  Informe o CPF.
+                } @else {
+                  CPF inválido.
+                }
+              </ng-template>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="16">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="nome">Nome</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o nome.">
+              <input nz-input id="nome" formControlName="nome" autocomplete="name" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="16">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="email">E-mail</nz-form-label>
+            <nz-form-control nzErrorTip="Informe um e-mail válido.">
+              <input
+                nz-input
+                id="email"
+                type="email"
+                formControlName="email"
+                autocomplete="email"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="telefone">Telefone</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o telefone com DDD.">
+              <input
+                nz-input
+                id="telefone"
+                formControlName="telefone"
+                [appMascara]="mascaras.telefone"
+                inputmode="numeric"
+                autocomplete="tel-national"
+                placeholder="(11) 99999-8888"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <nz-card nzTitle="Endereço" formGroupName="endereco" class="secao">
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="cep">CEP</nz-form-label>
+            <nz-form-control
+              nzErrorTip="Formato 01001-000."
+              nzHasFeedback
+              [nzValidateStatus]="
+                statusCep() === 'buscando' ? 'validating' : form.controls.endereco.controls.cep
+              "
+              [nzExtra]="extraCep"
+            >
+              <input
+                nz-input
+                id="cep"
+                formControlName="cep"
+                [appMascara]="mascaras.cep"
+                inputmode="numeric"
+                placeholder="01001-000"
+              />
+            </nz-form-control>
+            <ng-template #extraCep>
+              @switch (statusCep()) {
+                @case ('buscando') {
+                  <span>Buscando endereço…</span>
+                }
+                @case ('encontrado') {
+                  <span class="cep-ok">Endereço preenchido pelo CEP.</span>
+                }
+                @case ('nao-encontrado') {
+                  <span class="cep-aviso"
+                    >CEP não encontrado. Preencha o endereço manualmente.</span
+                  >
+                }
+                @default {
+                  <span>O endereço é preenchido automaticamente.</span>
+                }
+              }
+            </ng-template>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="16">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="logradouro">Logradouro</nz-form-label>
+            <nz-form-control nzErrorTip="Obrigatório.">
+              <input nz-input id="logradouro" formControlName="logradouro" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzFor="numero">Número</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="numero" formControlName="numero" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="16">
+          <nz-form-item>
+            <nz-form-label nzFor="complemento">Complemento</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="complemento" formControlName="complemento" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="bairro">Bairro</nz-form-label>
+            <nz-form-control nzErrorTip="Obrigatório.">
+              <input nz-input id="bairro" formControlName="bairro" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="cidade">Cidade</nz-form-label>
+            <nz-form-control nzErrorTip="Obrigatória.">
+              <input nz-input id="cidade" formControlName="cidade" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="4">
+          <nz-form-item>
+            <nz-form-label nzFor="estado">UF</nz-form-label>
+            <nz-form-control nzErrorTip="2 letras.">
+              <input
+                nz-input
+                id="estado"
+                formControlName="estado"
+                maxlength="2"
+                placeholder="SP"
+                class="uf"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button [routerLink]="id() ? ['/tutores', id()] : '/tutores'">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+
+  <nz-modal
+    [nzVisible]="!!cpfExistente()"
+    [nzTitle]="cpfExistente()?.excluido ? 'Recuperar cadastro' : 'CPF já cadastrado'"
+    [nzFooter]="rodapeCpf"
+    (nzOnCancel)="informarOutroCpf()"
+  >
+    <ng-container *nzModalContent>
+      @if (cpfExistente(); as t) {
+        @if (t.excluido) {
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            nzMessage="Este CPF pertence a um tutor que foi excluído."
+            nzDescription="Restaure o cadastro para reativá-lo com os pets e agendamentos. Depois, revise os dados. Cadastros excluídos há mais de 30 dias são apagados definitivamente."
+          />
+        } @else {
+          <nz-alert nzType="info" nzShowIcon nzMessage="Este CPF já pertence a um tutor ativo." />
+        }
+        <nz-descriptions nzBordered nzSize="small" [nzColumn]="1" class="resumo-cpf">
+          <nz-descriptions-item nzTitle="Nome">{{ t.nome }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="E-mail">{{ t.email }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="CPF">{{ form.controls.cpf.value }}</nz-descriptions-item>
+        </nz-descriptions>
+      }
+    </ng-container>
+    <ng-template #rodapeCpf>
+      <button nz-button type="button" (click)="informarOutroCpf()">Informar outro CPF</button>
+      @if (cpfExistente()?.excluido) {
+        <button
+          nz-button
+          nzType="primary"
+          type="button"
+          [nzLoading]="restaurando()"
+          (click)="restaurarCadastro()"
+        >
+          Restaurar cadastro
+        </button>
+      } @else {
+        <button nz-button nzType="primary" type="button" (click)="verCadastro()">
+          Ver cadastro
+        </button>
+      }
+    </ng-template>
+  </nz-modal>
+</app-pagina>

@@ -1,0 +1,152 @@
+// Ajustes de tema dos componentes NG-ZORRO (cores sobre amarelo, raios, menus, tabelas).
+
+.ant-layout {
+  background: var(--fundo);
+}
+
+.ant-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+// Botão primário na paleta amarela, fixado aqui além do tema para não depender
+// do CSS de variáveis do NG-ZORRO (evita o azul padrão do Ant Design).
+.ant-btn-primary:not(.ant-btn-dangerous):not([disabled]) {
+  border-color: var(--amarelo);
+  background: var(--amarelo);
+  color: var(--sobre-amarelo);
+  box-shadow: 0 2px 0 rgb(43 34 20 / 0.08);
+
+  &:hover,
+  &:focus {
+    border-color: var(--amarelo-hover);
+    background: var(--amarelo-hover);
+    color: var(--sobre-amarelo);
+  }
+
+  &:active {
+    border-color: var(--amarelo-ativo);
+    background: var(--amarelo-ativo);
+    color: var(--sobre-amarelo);
+  }
+}
+
+.ant-input,
+.ant-input-affix-wrapper,
+.ant-input-number,
+.ant-picker,
+.ant-input-group-addon {
+  border-radius: 8px;
+}
+
+.ant-input-group-addon:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.ant-input-group > .ant-input:last-child {
+  border-radius: 0 8px 8px 0;
+}
+
+.ant-card {
+  border-radius: 10px;
+}
+
+.ant-card-head {
+  font-weight: 700;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: var(--sobre-amarelo);
+}
+
+.ant-picker-cell-in-view.ant-picker-cell-selected .ant-picker-cell-inner,
+.ant-picker-time-panel-column
+  > li.ant-picker-time-panel-cell-selected
+  .ant-picker-time-panel-cell-inner {
+  color: var(--sobre-amarelo);
+}
+
+.ant-pagination-item-active a {
+  color: var(--ambar-texto);
+}
+
+// Botões "Novo ...": mesma largura em todas as telas, a do maior rótulo.
+.btn-novo {
+  min-width: 210px;
+}
+
+// Menu de ações das linhas (hambúrguer), no mesmo visual dos botões e do menu lateral.
+.menu-acoes {
+  width: 34px;
+  height: 32px;
+  padding: 0;
+
+  &.ant-dropdown-open {
+    border-color: var(--amarelo);
+    background: var(--amarelo-claro);
+    color: var(--sobre-amarelo);
+  }
+}
+
+.ant-dropdown-menu {
+  min-width: 190px;
+  padding: 6px;
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgb(43 34 20 / 0.14);
+}
+
+.ant-dropdown-menu-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--menu-fundo);
+
+  lucide-icon {
+    color: var(--ambar-texto);
+  }
+
+  &:hover {
+    background: var(--amarelo-claro);
+  }
+}
+
+.ant-dropdown-menu-item-danger {
+  &,
+  lucide-icon {
+    color: #d4380d;
+  }
+
+  &:hover {
+    background: #fff1ec;
+  }
+}
+
+.ant-dropdown-menu-item-divider {
+  margin: 4px 6px;
+}
+
+.ant-dropdown-menu-title-content {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+// Modais no mesmo padrão dos cards.
+.ant-modal-content {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+// Nomes de colunas e conteúdo das células sempre centralizados.
+.ant-table-thead > tr > th {
+  text-align: center !important;
+  font-weight: 700;
+}
+
+.ant-table-tbody > tr > td {
+  text-align: center;
+}

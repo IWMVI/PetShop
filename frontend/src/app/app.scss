@@ -1,0 +1,63 @@
+.app {
+  min-height: 100vh;
+}
+
+.sider {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+// Coluna do menu: marca no topo, itens e status da API no rodapé (acima do botão de recolher).
+.sider-conteudo {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 48px);
+  overflow-y: auto;
+}
+
+// Barra superior do layout de celular.
+.topo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  height: 56px;
+  padding: 0 0.5rem;
+  background: var(--menu-fundo);
+  line-height: normal;
+
+  .marca-app {
+    height: 56px;
+  }
+
+  app-status {
+    justify-self: center;
+  }
+}
+
+.abrir-menu {
+  width: 44px;
+  height: 44px;
+  color: #fff;
+
+  &:hover,
+  &:focus {
+    color: var(--amarelo);
+    background: rgb(255 255 255 / 0.08);
+  }
+}
+
+.content {
+  // Sem largura máxima: o conteúdo (e as tabelas) ocupa o espaço liberado ao recolher o menu.
+  min-width: 0;
+  padding: 1.25rem 1.5rem 3rem;
+}
+
+@media (max-width: 767.98px) {
+  .content {
+    padding: 1rem 0.75rem 3rem;
+  }
+}

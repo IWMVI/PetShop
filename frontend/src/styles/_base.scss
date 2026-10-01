@@ -1,0 +1,33 @@
+// Tipografia e elementos HTML base.
+body {
+  margin: 0;
+  background: var(--fundo);
+  font-family:
+    'Nunito',
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    sans-serif;
+  font-size: 15px;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+lucide-icon {
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+a {
+  color: var(--ambar-texto);
+
+  &:hover {
+    color: var(--ambar-texto-hover);
+  }
+}

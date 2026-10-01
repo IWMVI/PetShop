@@ -1,0 +1,74 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="nome">Nome</nz-form-label>
+            <nz-form-control nzErrorTip="Informe o nome (até 150 caracteres).">
+              <input nz-input id="nome" formControlName="nome" maxlength="150" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="especie">Espécie</nz-form-label>
+            <nz-form-control nzErrorTip="Informe a espécie.">
+              <input
+                nz-input
+                id="especie"
+                formControlName="especie"
+                maxlength="50"
+                placeholder="Cachorro"
+                [nzAutocomplete]="listaEspecies"
+              />
+              <nz-autocomplete #listaEspecies [nzDataSource]="especies" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzFor="raca">Raça</nz-form-label>
+            <nz-form-control>
+              <input nz-input id="raca" formControlName="raca" maxlength="100" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label nzFor="idade">Idade (anos)</nz-form-label>
+            <nz-form-control nzErrorTip="Não pode ser negativa.">
+              <nz-input-number
+                nzId="idade"
+                formControlName="idade"
+                [nzMin]="0"
+                [nzStep]="1"
+                [nzPrecision]="0"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label nzFor="peso">Peso (kg)</nz-form-label>
+            <nz-form-control nzErrorTip="Entre 0,01 e 999,99.">
+              <nz-input-number
+                nzId="peso"
+                formControlName="peso"
+                [nzMin]="0.01"
+                [nzMax]="999.99"
+                [nzStep]="0.1"
+                [nzPrecision]="2"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button [routerLink]="cancelarLink()">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+</app-pagina>

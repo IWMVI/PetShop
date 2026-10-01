@@ -1,0 +1,41 @@
+%% Diagrama de Arquitetura do Projeto PetShop
+%% Camadas, componentes e fluxo da API Spring Boot
+
+flowchart TB
+    subgraph Cliente["Clientes"]
+        A["Swagger UI (springdoc-openapi)"]
+        B["Requisições HTTP REST"]
+    end
+
+    subgraph API["Aplicação Spring Boot 4.1.1 / Java 25 — porta 8080"]
+        C["Controllers (REST)"]
+        D["DTOs Request/Response<br/>(Jakarta Validation @Valid)"]
+        E["Services<br/>(regras de negócio + validações)"]
+        F["Mappers<br/>(DTO &lt;-&gt; Entidade)"]
+        G["Repositories<br/>(Spring Data JPA + Soft Delete)"]
+        H["Entidades JPA/Hibernate"]
+        I["GlobalExceptionHandler<br/>(@RestControllerAdvice)"]
+    end
+
+    subgraph Dados["Persistência"]
+        J[("PostgreSQL 17 — banco petshop")]
+        K["Flyway migrations<br/>(V1..V12)"]
+    end
+
+    B --> C --> D --> E
+    E --> F
+    E --> I
+    G --> H
+    F --> H
+    F --> G
+    G --> J
+    K --> J
+    C -. "validação falha" .-> I
+    I -. "HTTP 400/404/409" .-> B
+    E -. "exceções de domínio" .-> I
+
+    subgraph Perfis["Perfis"]
+        P_dev["dev — localhost:5432"]
+        P_prod["prod — DB_URL/DB_USERNAME/DB_PASSWORD"]
+        P_test["test — H2 (modo PostgreSQL)"]
+    end
