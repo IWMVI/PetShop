@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Restauração de tutores." tests="1" skipped="0" failures="0" errors="0" timestamp="2026-09-16T02:13:04.891Z" hostname="Wallace" time="1.661">
+  <properties/>
+  <testcase name="Deve retornar 200 com o corpo do tutor restaurado." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$RestauracaoTutor" time="0.15"/>
+  <system-out><![CDATA[23:13:04.894 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$RestauracaoTutor]: RestauracaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+23:13:04.900 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$RestauracaoTutor
+23:13:04.901 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$RestauracaoTutor]: RestauracaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+23:13:04.901 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest]: TutorControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+23:13:04.906 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$RestauracaoTutor
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.1.1)
+
+2026-09-15T23:13:05.169-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.TutorControllerTest$RestauracaoTutor : Starting TutorControllerTest.RestauracaoTutor using Java 25.0.4.1 with PID 131919 (started by wallace in /home/wallace/IdeaProjects/PetShop)
+2026-09-15T23:13:05.170-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.TutorControllerTest$RestauracaoTutor : No active profile set, falling back to 1 default profile: "dev"
+2026-09-15T23:13:06.371-03:00  INFO 131919 --- [PetShop] [    Test worker] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-09-15T23:13:06.371-03:00  INFO 131919 --- [PetShop] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-09-15T23:13:06.373-03:00  INFO 131919 --- [PetShop] [    Test worker] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-09-15T23:13:06.392-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.TutorControllerTest$RestauracaoTutor : Started TutorControllerTest.RestauracaoTutor in 1.455 seconds (process running for 2.321)
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (/home/wallace/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy-agent/1.18.11/82212e5b3633e7a65fca8bec525762cfb6c9bae4/byte-buddy-agent-1.18.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

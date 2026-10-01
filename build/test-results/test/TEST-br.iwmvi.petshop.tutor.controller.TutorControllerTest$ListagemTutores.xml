@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Listagem de tutores." tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-16T02:13:06.726Z" hostname="Wallace" time="0.034">
+  <properties/>
+  <testcase name="Deve retornar 200 com a lista de tutores cadastrados." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores" time="0.013"/>
+  <testcase name="Deve retornar 200 com lista vazia quando não houver tutores." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores" time="0.008"/>
+  <system-out><![CDATA[2026-09-15T23:13:06.728-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores]: ListagemTutores does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.731-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores
+2026-09-15T23:13:06.731-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores]: ListagemTutores does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.731-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest]: TutorControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.734-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$ListagemTutores
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

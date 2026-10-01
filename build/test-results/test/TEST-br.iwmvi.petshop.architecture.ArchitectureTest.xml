@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="br.iwmvi.petshop.architecture.ArchitectureTest" tests="13" skipped="0" failures="1" errors="0" timestamp="2026-09-16T02:13:06.793Z" hostname="Wallace" time="0.75">
+  <properties/>
+  <testcase name="camadas_devem_seguir_o_fluxo_controller_service_repository" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.706"/>
+  <testcase name="controladores_devem_estar_no_pacote_controller" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.002"/>
+  <testcase name="controladores_devem_terminar_com_controller" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.001"/>
+  <testcase name="servicos_devem_terminar_com_service" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.0"/>
+  <testcase name="repositorios_devem_terminar_com_repository" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.0"/>
+  <testcase name="mappers_devem_terminar_com_mapper" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.0"/>
+  <testcase name="controladores_nao_devem_depender_de_modelos_repositorios_ou_mappers" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.001"/>
+  <testcase name="repositorios_devem_ser_interfaces" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.0"/>
+  <testcase name="modelos_devem_ser_entidades_jpa" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.001"/>
+  <testcase name="modelos_nao_devem_depender_das_camadas_superiores" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.001"/>
+  <testcase name="dtos_devem_ser_records" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.0"/>
+  <testcase name="pacote_de_exceptions_deve_ser_isolado" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.001"/>
+  <testcase name="modulos_nao_devem_apresentar_ciclos_entre_si" classname="br.iwmvi.petshop.architecture.ArchitectureTest" time="0.036">
+    <failure message="java.lang.AssertionError: Architecture Violation [Priority: MEDIUM] - Rule 'slices matching 'br.iwmvi.petshop.(*)..' should be free of cycles' was violated (1 times):&#10;Cycle detected: Slice pet -&gt; &#10;                Slice tutor -&gt; &#10;                Slice pet&#10;  1. Dependencies of Slice pet&#10;    - Constructor &lt;br.iwmvi.petshop.pet.model.Pet.&lt;init&gt;(java.lang.String, java.lang.String, java.math.BigDecimal, java.lang.String, java.lang.Integer, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)&#10;    - Constructor &lt;br.iwmvi.petshop.pet.service.PetService.&lt;init&gt;(br.iwmvi.petshop.pet.repository.PetRepository, br.iwmvi.petshop.tutor.repository.TutorRepository)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)&#10;    - Field &lt;br.iwmvi.petshop.pet.model.Pet.tutor&gt; has type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)&#10;    - Field &lt;br.iwmvi.petshop.pet.service.PetService.tutorRepository&gt; has type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)&#10;    - Method &lt;br.iwmvi.petshop.pet.mapper.PetMapper.toEntity(br.iwmvi.petshop.pet.dto.request.PetRequest, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (PetMapper.java:0)&#10;    - Method &lt;br.iwmvi.petshop.pet.model.Pet.getTutor()&gt; has return type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)&#10;    - Method &lt;br.iwmvi.petshop.pet.service.PetService.cadastrar(br.iwmvi.petshop.pet.dto.request.PetRequest, java.lang.Long)&gt; calls method &lt;br.iwmvi.petshop.tutor.repository.TutorRepository.findByIdAndDeletedAtIsNull(java.lang.Long)&gt; in (PetService.java:22)&#10;  2. Dependencies of Slice tutor&#10;    - Field &lt;br.iwmvi.petshop.tutor.model.Tutor.pets&gt; has generic type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)&#10;    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.getPets()&gt; has generic return type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)&#10;    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.setPets(java.util.List)&gt; has generic parameter type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)" type="java.lang.AssertionError">java.lang.AssertionError: Architecture Violation [Priority: MEDIUM] - Rule 'slices matching 'br.iwmvi.petshop.(*)..' should be free of cycles' was violated (1 times):
+Cycle detected: Slice pet -&gt; 
+                Slice tutor -&gt; 
+                Slice pet
+  1. Dependencies of Slice pet
+    - Constructor &lt;br.iwmvi.petshop.pet.model.Pet.&lt;init&gt;(java.lang.String, java.lang.String, java.math.BigDecimal, java.lang.String, java.lang.Integer, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Constructor &lt;br.iwmvi.petshop.pet.service.PetService.&lt;init&gt;(br.iwmvi.petshop.pet.repository.PetRepository, br.iwmvi.petshop.tutor.repository.TutorRepository)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)
+    - Field &lt;br.iwmvi.petshop.pet.model.Pet.tutor&gt; has type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Field &lt;br.iwmvi.petshop.pet.service.PetService.tutorRepository&gt; has type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.mapper.PetMapper.toEntity(br.iwmvi.petshop.pet.dto.request.PetRequest, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (PetMapper.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.model.Pet.getTutor()&gt; has return type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.service.PetService.cadastrar(br.iwmvi.petshop.pet.dto.request.PetRequest, java.lang.Long)&gt; calls method &lt;br.iwmvi.petshop.tutor.repository.TutorRepository.findByIdAndDeletedAtIsNull(java.lang.Long)&gt; in (PetService.java:22)
+  2. Dependencies of Slice tutor
+    - Field &lt;br.iwmvi.petshop.tutor.model.Tutor.pets&gt; has generic type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.getPets()&gt; has generic return type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.setPets(java.util.List)&gt; has generic parameter type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.assertNoViolation(ArchRule.java:94)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.check(ArchRule.java:86)
+	at com.tngtech.archunit.lang.ArchRule$Factory$SimpleArchRule.check(ArchRule.java:165)
+	at com.tngtech.archunit.lang.syntax.ObjectsShouldInternal.check(ObjectsShouldInternal.java:81)
+	at com.tngtech.archunit.library.dependencies.SliceRule.check(SliceRule.java:81)
+	at com.tngtech.archunit.junit.internal.ArchUnitTestDescriptor$ArchUnitRuleDescriptor.execute(ArchUnitTestDescriptor.java:168)
+	at com.tngtech.archunit.junit.internal.ArchUnitTestDescriptor$ArchUnitRuleDescriptor.execute(ArchUnitTestDescriptor.java:151)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</failure>
+  </testcase>
+  <system-out><![CDATA[2026-09-15T23:13:06.798-03:00  INFO 131919 --- [PetShop] [    Test worker] com.tngtech.archunit.core.PluginLoader   : Detected Java version 25.0.4.1
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Atualização de tutores." tests="2" skipped="0" failures="1" errors="0" timestamp="2026-09-16T02:13:06.590Z" hostname="Wallace" time="0.112">
+  <properties/>
+  <testcase name="Deve retornar 409 com a mensagem de e-mail já cadastrado." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor" time="0.078"/>
+  <testcase name="Deve retornar 200 com o corpo do tutor atualizado." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor" time="0.019">
+    <failure message="org.opentest4j.AssertionFailedError: JSON documents are different:&#10;Different value found in node &quot;telefone&quot;, expected: &lt;11911112222&gt; but was: &lt;&quot;11911112222&quot;&gt;.&#10;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: JSON documents are different:
+Different value found in node &quot;telefone&quot;, expected: &lt;11911112222&gt; but was: &lt;&quot;11911112222&quot;&gt;.
+
+	at net.javacrumbs.jsonunit.core.internal.Opentest4jExceptionFactory.createException(ExceptionFactory.java:25)
+	at net.javacrumbs.jsonunit.core.internal.ExceptionUtils.createException(ExceptionUtils.java:43)
+	at net.javacrumbs.jsonunit.core.internal.Diff.failIfDifferent(Diff.java:724)
+	at net.javacrumbs.jsonunit.assertj.JsonAssert.isEqualTo(JsonAssert.java:133)
+	at br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor.deveRetornarTutorAtualizado(TutorControllerTest.java:148)
+</failure>
+  </testcase>
+  <system-out><![CDATA[2026-09-15T23:13:06.591-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor]: AtualizacaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.596-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor
+2026-09-15T23:13:06.596-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor]: AtualizacaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.596-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest]: TutorControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.599-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$AtualizacaoTutor
+
+MockHttpServletRequest:
+      HTTP Method = PUT
+      Request URI = /tutores/1
+       Parameters = {}
+          Headers = [Content-Type:"application/json;charset=UTF-8", Content-Length:"250"]
+             Body = {
+  "nome": "Wallace",
+  "email": "wallace@test.com",
+  "telefone": "11111111111",
+  "endereco": {
+    "cep": "01001010",
+    "logradouro": "Praça da Sé",
+    "numero": "1",
+    "bairro": "Sé",
+    "cidade": "São Paulo",
+    "estado": "SP"
+  }
+}
+
+    Session Attrs = {}
+
+Handler:
+             Type = br.iwmvi.petshop.tutor.controller.TutorController
+           Method = br.iwmvi.petshop.tutor.controller.TutorController#atualizar(Long, TutorRequest)
+
+Async:
+    Async started = false
+     Async result = null
+
+Resolved Exception:
+             Type = null
+
+ModelAndView:
+        View name = null
+             View = null
+            Model = null
+
+FlashMap:
+       Attributes = null
+
+MockHttpServletResponse:
+           Status = 200
+    Error message = null
+          Headers = [Content-Type:"application/json"]
+     Content type = application/json
+             Body = {"id":1,"nome":"Wallace Atualizado","email":"wallace@test.com","telefone":"11911112222","endereco":{"cep":"01001010","logradouro":"Praça da Sé","numero":"1","complemento":null,"bairro":"Sé","cidade":"São Paulo","estado":"SP"}}
+    Forwarded URL = null
+   Redirected URL = null
+          Cookies = []
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

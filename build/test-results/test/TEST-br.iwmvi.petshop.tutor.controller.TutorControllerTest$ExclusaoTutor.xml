@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="Exclusão de tutores." tests="2" skipped="0" failures="0" errors="0" timestamp="2026-09-16T02:13:06.555Z" hostname="Wallace" time="0.033">
+  <properties/>
+  <testcase name="Deve retornar 204 sem corpo." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor" time="0.005"/>
+  <testcase name="Deve retornar 404 com a mensagem de tutor não encontrado." classname="br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor" time="0.011"/>
+  <system-out><![CDATA[2026-09-15T23:13:06.557-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor]: ExclusaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.561-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor
+2026-09-15T23:13:06.561-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor]: ExclusaoTutor does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.561-03:00  INFO 131919 --- [PetShop] [    Test worker] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [br.iwmvi.petshop.tutor.controller.TutorControllerTest]: TutorControllerTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-09-15T23:13:06.565-03:00  INFO 131919 --- [PetShop] [    Test worker] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration br.iwmvi.petshop.PetShopApplication for test class br.iwmvi.petshop.tutor.controller.TutorControllerTest$ExclusaoTutor
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

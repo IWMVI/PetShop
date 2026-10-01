@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<meta http-equiv="x-ua-compatible" content="IE=edge"/>
+<title>Test results - modulos_nao_devem_apresentar_ciclos_entre_si</title>
+<link href="../css/base-style.css" rel="stylesheet" type="text/css"/>
+<link href="../css/style.css" rel="stylesheet" type="text/css"/>
+<script src="../js/report.js" type="text/javascript"></script>
+</head>
+<body>
+<div id="content">
+<div class="breadcrumbs">
+<a class="breadcrumb" href="../index.html">all</a> &gt; 
+<a class="breadcrumb" href="index.html">br.iwmvi.petshop.architecture.ArchitectureTest</a> &gt; 
+<span class="breadcrumb">modulos_nao_devem_apresentar_ciclos_entre_si</span>
+</div>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a class="failureGroup" href="#">Gradle Test Run :test</a>
+</li>
+</ul>
+<div class="tab">
+<h2>Gradle Test Run :test</h2>
+<h1>modulos_nao_devem_apresentar_ciclos_entre_si</h1>
+<div class="tab-container">
+<ul class="tabLinks">
+<li>
+<a class="" href="#">summary</a>
+</li>
+</ul>
+<div class="tab">
+<h2>summary</h2>
+<div>
+<div class="summary">
+<table>
+<tr>
+<td>
+<div class="summaryGroup">
+<table>
+<tr>
+<td>
+<div class="infoBox">
+<div class="counter">1</div>
+<p>tests</p>
+</div>
+</td>
+<td>
+<div class="infoBox">
+<div class="counter">1</div>
+<p>failures</p>
+</div>
+</td>
+<td>
+<div class="infoBox">
+<div class="counter">0</div>
+<p>skipped</p>
+</div>
+</td>
+<td>
+<div class="infoBox duration">
+<div class="counter">0.036s</div>
+<p>duration</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+</td>
+<td>
+<div class="infoBox failures successRate">
+<div class="percent">0%</div>
+<p>successful</p>
+</div>
+</td>
+</tr>
+</table>
+</div>
+<div class="result-details">
+<h3>Failure details</h3>
+<span class="code">
+<pre id="root-0-test-failure-modulos_nao_devem_apresentar_ciclos_entre_si">java.lang.AssertionError: Architecture Violation [Priority: MEDIUM] - Rule 'slices matching 'br.iwmvi.petshop.(*)..' should be free of cycles' was violated (1 times):
+Cycle detected: Slice pet -&gt; 
+                Slice tutor -&gt; 
+                Slice pet
+  1. Dependencies of Slice pet
+    - Constructor &lt;br.iwmvi.petshop.pet.model.Pet.&lt;init&gt;(java.lang.String, java.lang.String, java.math.BigDecimal, java.lang.String, java.lang.Integer, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Constructor &lt;br.iwmvi.petshop.pet.service.PetService.&lt;init&gt;(br.iwmvi.petshop.pet.repository.PetRepository, br.iwmvi.petshop.tutor.repository.TutorRepository)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)
+    - Field &lt;br.iwmvi.petshop.pet.model.Pet.tutor&gt; has type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Field &lt;br.iwmvi.petshop.pet.service.PetService.tutorRepository&gt; has type &lt;br.iwmvi.petshop.tutor.repository.TutorRepository&gt; in (PetService.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.mapper.PetMapper.toEntity(br.iwmvi.petshop.pet.dto.request.PetRequest, br.iwmvi.petshop.tutor.model.Tutor)&gt; has parameter of type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (PetMapper.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.model.Pet.getTutor()&gt; has return type &lt;br.iwmvi.petshop.tutor.model.Tutor&gt; in (Pet.java:0)
+    - Method &lt;br.iwmvi.petshop.pet.service.PetService.cadastrar(br.iwmvi.petshop.pet.dto.request.PetRequest, java.lang.Long)&gt; calls method &lt;br.iwmvi.petshop.tutor.repository.TutorRepository.findByIdAndDeletedAtIsNull(java.lang.Long)&gt; in (PetService.java:22)
+  2. Dependencies of Slice tutor
+    - Field &lt;br.iwmvi.petshop.tutor.model.Tutor.pets&gt; has generic type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.getPets()&gt; has generic return type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+    - Method &lt;br.iwmvi.petshop.tutor.model.Tutor.setPets(java.util.List)&gt; has generic parameter type &lt;java.util.List&lt;br.iwmvi.petshop.pet.model.Pet&gt;&gt; with type argument depending on &lt;br.iwmvi.petshop.pet.model.Pet&gt; in (Tutor.java:0)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.assertNoViolation(ArchRule.java:94)
+	at com.tngtech.archunit.lang.ArchRule$Assertions.check(ArchRule.java:86)
+	at com.tngtech.archunit.lang.ArchRule$Factory$SimpleArchRule.check(ArchRule.java:165)
+	at com.tngtech.archunit.lang.syntax.ObjectsShouldInternal.check(ObjectsShouldInternal.java:81)
+	at com.tngtech.archunit.library.dependencies.SliceRule.check(SliceRule.java:81)
+	at com.tngtech.archunit.junit.internal.ArchUnitTestDescriptor$ArchUnitRuleDescriptor.execute(ArchUnitTestDescriptor.java:168)
+	at com.tngtech.archunit.junit.internal.ArchUnitTestDescriptor$ArchUnitRuleDescriptor.execute(ArchUnitTestDescriptor.java:151)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+</pre>
+<button class="clipboard-copy-btn" aria-label="Copy to clipboard" data-copy-element-id="root-0-test-failure-modulos_nao_devem_apresentar_ciclos_entre_si">Copy</button>
+</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<p>
+<div>
+<label class="hidden" id="label-for-line-wrapping-toggle" for="line-wrapping-toggle">Wrap lines
+<input id="line-wrapping-toggle" type="checkbox" autocomplete="off"/>
+</label>
+</div>Generated by 
+<a href="https://www.gradle.org">Gradle 9.7.1</a> at 15 de set. de 2026 23:13:07</p>
+</div>
+</div>
+</body>
+</html>
