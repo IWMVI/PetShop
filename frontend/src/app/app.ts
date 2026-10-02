@@ -47,6 +47,7 @@ export class App {
     { rota: '/tutores', rotulo: 'Tutores', icone: 'users' },
     { rota: '/servicos', rotulo: 'Serviços', icone: 'wrench' },
     { rota: '/funcionarios', rotulo: 'Funcionários', icone: 'id-card' },
+    { rota: '/financeiro', rotulo: 'Financeiro', icone: 'wallet' },
   ];
 
   protected readonly api = computed(() => {

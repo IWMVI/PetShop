@@ -36,11 +36,11 @@ describe('App', () => {
     fixture.detectChanges();
   };
 
-  it('no desktop exibe o menu lateral com Tutores, Serviços e Funcionários', () => {
+  it('no desktop exibe o menu lateral com Tutores, Serviços, Funcionários e Financeiro', () => {
     const itens = Array.from(el().querySelectorAll('nz-sider [nz-menu-item]')).map((a) =>
       a.textContent?.trim(),
     );
-    expect(itens).toEqual(['Tutores', 'Serviços', 'Funcionários']);
+    expect(itens).toEqual(['Tutores', 'Serviços', 'Funcionários', 'Financeiro']);
     expect(el().querySelector('.topo')).toBeNull();
   });
 
@@ -76,6 +76,6 @@ describe('App', () => {
     const gaveta = document.querySelector('.menu-celular')!;
     expect(
       Array.from(gaveta.querySelectorAll('[nz-menu-item]')).map((i) => i.textContent?.trim()),
-    ).toEqual(['Tutores', 'Serviços', 'Funcionários']);
+    ).toEqual(['Tutores', 'Serviços', 'Funcionários', 'Financeiro']);
   });
 });

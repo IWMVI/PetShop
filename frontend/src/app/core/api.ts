@@ -7,8 +7,12 @@ import {
   Funcionario,
   FuncionarioRequest,
   AtualizarStatusPagamentoRequest,
+  CategoriaLancamento,
+  ExtratoResponse,
   HistoricoPet,
   HistoricoPetRequest,
+  LancamentoFinanceiro,
+  LancamentoFinanceiroRequest,
   Pagamento,
   PagamentoRequest,
   Pagina,
@@ -16,6 +20,7 @@ import {
   PetRequest,
   Servico,
   ServicoRequest,
+  TipoLancamento,
   Tutor,
   TutorRequest,
   TutorResumo,
@@ -202,6 +207,57 @@ export class HistoricoPetApi {
   }
   registrar(petId: number, body: HistoricoPetRequest) {
     return this.http.post<HistoricoPet>(this.url(petId), body);
+  }
+}
+
+/** Filtros opcionais do extrato financeiro, além da paginação (que tem padrão). */
+export interface ConsultaExtrato {
+  inicio?: string;
+  fim?: string;
+  tipo?: TipoLancamento;
+  categoria?: CategoriaLancamento;
+  pagina?: number;
+  tamanho?: number;
+}
+
+function paramsDeExtrato(c: ConsultaExtrato = {}): HttpParams {
+  let params = new HttpParams()
+    .set('pagina', c.pagina ?? 0)
+    .set('tamanho', c.tamanho ?? TAMANHO_PAGINA);
+  if (c.inicio) params = params.set('inicio', c.inicio);
+  if (c.fim) params = params.set('fim', c.fim);
+  if (c.tipo) params = params.set('tipo', c.tipo);
+  if (c.categoria) params = params.set('categoria', c.categoria);
+  return params;
+}
+
+/**
+ * Lançamentos financeiros (caixa do pet shop): entradas e saídas manuais, mais o
+ * extrato com os totais do período. Lançamentos com `pagamentoId` preenchido foram
+ * gerados automaticamente por um pagamento e não podem ser editados nem cancelados
+ * por aqui (a API recusa com 400).
+ */
+@Injectable({ providedIn: 'root' })
+export class FinanceiroApi {
+  private readonly http = inject(HttpClient);
+  private readonly url = `${API_URL}/financeiro`;
+
+  criar(body: LancamentoFinanceiroRequest) {
+    return this.http.post<LancamentoFinanceiro>(`${this.url}/lancamentos`, body);
+  }
+  buscar(id: number) {
+    return this.http.get<LancamentoFinanceiro>(`${this.url}/lancamentos/${id}`);
+  }
+  atualizar(id: number, body: LancamentoFinanceiroRequest) {
+    return this.http.put<LancamentoFinanceiro>(`${this.url}/lancamentos/${id}`, body);
+  }
+  cancelar(id: number) {
+    return this.http.delete<void>(`${this.url}/lancamentos/${id}`);
+  }
+  extrato(consulta?: ConsultaExtrato) {
+    return this.http.get<ExtratoResponse>(`${this.url}/extrato`, {
+      params: paramsDeExtrato(consulta),
+    });
   }
 }
 

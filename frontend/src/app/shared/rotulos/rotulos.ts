@@ -1,4 +1,11 @@
-import { Cargo, MetodoPagamento, StatusPagamento, TipoEvento } from '../../core/models';
+import {
+  Cargo,
+  CategoriaLancamento,
+  MetodoPagamento,
+  StatusPagamento,
+  TipoEvento,
+  TipoLancamento,
+} from '../../core/models';
 import { TomStatus } from '../status/status';
 
 /** Rótulos dos cargos, na ordem em que aparecem nos formulários. */
@@ -33,6 +40,42 @@ export const STATUS_PAGAMENTO: Record<StatusPagamento, { rotulo: string; tom: To
   PAGO: { rotulo: 'Pago', tom: 'sucesso' },
   CANCELADO: { rotulo: 'Cancelado', tom: 'neutro' },
 };
+
+/** Rótulo e tom de cada tipo de lançamento financeiro, exibidos com o <app-status>. */
+export const TIPOS_LANCAMENTO: Record<TipoLancamento, { rotulo: string; tom: TomStatus }> = {
+  ENTRADA: { rotulo: 'Entrada', tom: 'sucesso' },
+  SAIDA: { rotulo: 'Saída', tom: 'erro' },
+};
+
+/** Rótulos das categorias de lançamento financeiro. */
+export const CATEGORIAS_LANCAMENTO: Record<CategoriaLancamento, string> = {
+  PAGAMENTO_SERVICO: 'Pagamento de serviço',
+  VENDA_PRODUTO: 'Venda de produto',
+  OUTRA_RECEITA: 'Outra receita',
+  ALUGUEL: 'Aluguel',
+  SALARIO: 'Salário',
+  FORNECEDOR: 'Fornecedor',
+  MANUTENCAO: 'Manutenção',
+  IMPOSTO: 'Imposto',
+  OUTRA_DESPESA: 'Outra despesa',
+};
+
+/** Categorias válidas para lançamentos do tipo ENTRADA, na ordem do formulário. */
+export const CATEGORIAS_ENTRADA: CategoriaLancamento[] = [
+  'PAGAMENTO_SERVICO',
+  'VENDA_PRODUTO',
+  'OUTRA_RECEITA',
+];
+
+/** Categorias válidas para lançamentos do tipo SAIDA, na ordem do formulário. */
+export const CATEGORIAS_SAIDA: CategoriaLancamento[] = [
+  'ALUGUEL',
+  'SALARIO',
+  'FORNECEDOR',
+  'MANUTENCAO',
+  'IMPOSTO',
+  'OUTRA_DESPESA',
+];
 
 /** Lista de opções {valor, rótulo} para selects, preservando a ordem de declaração. */
 export function opcoes<T extends string>(mapa: Record<T, string | { rotulo: string }>) {

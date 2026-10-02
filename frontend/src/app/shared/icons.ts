@@ -14,6 +14,7 @@ import {
   Search,
   Trash2,
   Users,
+  Wallet,
   Wrench,
 } from 'lucide-angular';
 
@@ -35,6 +36,7 @@ export function provideAppIcons(): Provider {
       Search,
       Trash2,
       Users,
+      Wallet,
       Wrench,
     }),
   };

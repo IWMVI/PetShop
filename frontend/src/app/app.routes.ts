@@ -137,5 +137,31 @@ export const routes: Routes = [
       },
     ],
   },
+  {
+    path: 'financeiro',
+    children: [
+      {
+        path: '',
+        title: 'Financeiro',
+        loadComponent: () => import('./features/financeiro/extrato/extrato').then((m) => m.Extrato),
+      },
+      {
+        path: 'novo',
+        title: 'Novo lançamento',
+        loadComponent: () =>
+          import('./features/financeiro/lancamento-form/lancamento-form').then(
+            (m) => m.LancamentoForm,
+          ),
+      },
+      {
+        path: ':id/editar',
+        title: 'Editar lançamento',
+        loadComponent: () =>
+          import('./features/financeiro/lancamento-form/lancamento-form').then(
+            (m) => m.LancamentoForm,
+          ),
+      },
+    ],
+  },
   { path: '**', redirectTo: 'tutores' },
 ];

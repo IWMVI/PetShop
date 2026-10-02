@@ -1,0 +1,88 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  @if (bloqueado()) {
+    <nz-alert
+      nzType="warning"
+      nzShowIcon
+      nzMessage="Lançamento gerado automaticamente"
+      nzDescription="Este lançamento foi gerado a partir de um pagamento e não pode ser editado nem cancelado por aqui. Para alterá-lo, mude o status do pagamento de origem."
+      class="aviso-bloqueado"
+    />
+  }
+
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <div nz-row [nzGutter]="[24, 0]">
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="tipo">Tipo</nz-form-label>
+            <nz-form-control nzErrorTip="Selecione o tipo do lançamento.">
+              <nz-select nzId="tipo" formControlName="tipo" nzPlaceHolder="Selecione">
+                @for (t of tipos; track t.valor) {
+                  <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="categoria">Categoria</nz-form-label>
+            <nz-form-control nzErrorTip="Selecione a categoria.">
+              <nz-select nzId="categoria" formControlName="categoria" nzPlaceHolder="Selecione">
+                @for (c of categorias(); track c.valor) {
+                  <nz-option [nzValue]="c.valor" [nzLabel]="c.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="valor">Valor</nz-form-label>
+            <nz-form-control nzErrorTip="Informe um valor maior que zero.">
+              <nz-input-group nzAddOnBefore="R$">
+                <input nz-input id="valor" formControlName="valor" appMoeda placeholder="0,00" />
+              </nz-input-group>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="descricao">Descrição</nz-form-label>
+            <nz-form-control nzErrorTip="Informe a descrição (até 255 caracteres).">
+              <input nz-input id="descricao" formControlName="descricao" maxlength="255" />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24" [nzMd]="12">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="data">Data e hora</nz-form-label>
+            <nz-form-control nzErrorTip="Informe a data e a hora.">
+              <nz-date-picker
+                nzId="data"
+                formControlName="data"
+                [nzShowTime]="{ nzFormat: 'HH:mm' }"
+                nzFormat="dd/MM/yyyy HH:mm"
+                nzPlaceHolder="Selecione"
+                style="width: 100%"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button routerLink="/financeiro">Cancelar</a>
+      <button
+        nz-button
+        nzType="primary"
+        type="submit"
+        [nzLoading]="salvando()"
+        [disabled]="bloqueado()"
+      >
+        Salvar
+      </button>
+    </div>
+  </form>
+</app-pagina>

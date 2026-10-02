@@ -1,0 +1,161 @@
+<app-pagina titulo="Financeiro" [trilha]="[{ rotulo: 'Financeiro' }]">
+  <a paginaAcoes nz-button nzType="primary" class="btn-novo" routerLink="/financeiro/novo">
+    <lucide-icon name="plus" [size]="16" /> Novo lançamento
+  </a>
+
+  <nz-card class="resumo-financeiro">
+    <div class="resumo-item">
+      <span class="muted">Entradas</span>
+      <strong class="valor-entrada">{{ moeda(totalEntradas()) }}</strong>
+    </div>
+    <div class="resumo-item">
+      <span class="muted">Saídas</span>
+      <strong class="valor-saida">{{ moeda(totalSaidas()) }}</strong>
+    </div>
+    <div class="resumo-item">
+      <span class="muted">Saldo</span>
+      <strong>{{ moeda(saldo()) }}</strong>
+    </div>
+  </nz-card>
+
+  <form nz-form nzLayout="vertical" [formGroup]="filtros" class="filtros-extrato">
+    <div nz-row [nzGutter]="[16, 0]">
+      <div nz-col [nzXs]="12" [nzMd]="6">
+        <nz-form-item>
+          <nz-form-label>Início</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker
+              formControlName="inicio"
+              nzFormat="dd/MM/yyyy"
+              nzPlaceHolder="Início"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col [nzXs]="12" [nzMd]="6">
+        <nz-form-item>
+          <nz-form-label>Fim</nz-form-label>
+          <nz-form-control>
+            <nz-date-picker
+              formControlName="fim"
+              nzFormat="dd/MM/yyyy"
+              nzPlaceHolder="Fim"
+              style="width: 100%"
+            />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col [nzXs]="12" [nzMd]="6">
+        <nz-form-item>
+          <nz-form-label>Tipo</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="tipo" nzAllowClear nzPlaceHolder="Todos">
+              @for (t of tipos; track t.valor) {
+                <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+      <div nz-col [nzXs]="12" [nzMd]="6">
+        <nz-form-item>
+          <nz-form-label>Categoria</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="categoria" nzAllowClear nzPlaceHolder="Todas">
+              @for (c of categorias; track c.valor) {
+                <nz-option [nzValue]="c.valor" [nzLabel]="c.rotulo" />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+  </form>
+
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" class="erro" />
+  }
+  <nz-card class="table-card">
+    <nz-table
+      #tabela
+      [nzData]="itens()"
+      [nzLoading]="carregando()"
+      [nzFrontPagination]="false"
+      [nzTotal]="total()"
+      [nzPageSize]="tamanho"
+      [nzPageIndex]="pagina() + 1"
+      (nzPageIndexChange)="irPara($event - 1)"
+      [nzHideOnSinglePage]="true"
+      [nzNoResult]="vazio"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Data</th>
+          <th>Descrição</th>
+          <th class="ocultar-pequeno">Categoria</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of tabela.data; track l.id) {
+          <tr>
+            <td class="nowrap">{{ dataHora(l.data) }}</td>
+            <td>
+              {{ l.descricao }}
+              <div class="so-pequeno muted">{{ categoriasLancamento[l.categoria] }}</div>
+            </td>
+            <td class="ocultar-pequeno">{{ categoriasLancamento[l.categoria] }}</td>
+            <td>
+              <app-status [tom]="tiposLancamento[l.tipo].tom">{{
+                tiposLancamento[l.tipo].rotulo
+              }}</app-status>
+            </td>
+            <td class="nowrap">{{ moeda(l.valor) }}</td>
+            <td>
+              @if (l.pagamentoId == null) {
+                <button
+                  nz-button
+                  nz-dropdown
+                  nzTrigger="click"
+                  nzPlacement="bottomRight"
+                  [nzDropdownMenu]="acoes"
+                  aria-label="Ações"
+                  class="menu-acoes"
+                >
+                  <lucide-icon name="menu" [size]="18" />
+                </button>
+                <nz-dropdown-menu #acoes="nzDropdownMenu">
+                  <ul nz-menu>
+                    <li nz-menu-item [routerLink]="['/financeiro', l.id, 'editar']">
+                      <lucide-icon name="pencil" [size]="15" /> Editar
+                    </li>
+                    <li nz-menu-divider></li>
+                    <li
+                      nz-menu-item
+                      nzDanger
+                      tabindex="0"
+                      (click)="confirmarCancelamento(l)"
+                      (keydown.enter)="confirmarCancelamento(l)"
+                    >
+                      <lucide-icon name="trash-2" [size]="15" /> Cancelar
+                    </li>
+                  </ul>
+                </nz-dropdown-menu>
+              } @else {
+                <span class="muted">Gerado automaticamente</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+  <ng-template #vazio
+    ><nz-empty
+      nzNotFoundContent="Nenhum lançamento encontrado para o período e os filtros selecionados."
+  /></ng-template>
+</app-pagina>

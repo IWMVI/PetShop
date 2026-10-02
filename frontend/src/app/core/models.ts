@@ -146,3 +146,39 @@ export interface HistoricoPetRequest {
   dataEvento: string;
   funcionarioId: number | null;
 }
+
+export type TipoLancamento = 'ENTRADA' | 'SAIDA';
+
+export type CategoriaLancamento =
+  // Categorias de ENTRADA
+  | 'PAGAMENTO_SERVICO'
+  | 'VENDA_PRODUTO'
+  | 'OUTRA_RECEITA'
+  // Categorias de SAIDA
+  | 'ALUGUEL'
+  | 'SALARIO'
+  | 'FORNECEDOR'
+  | 'MANUTENCAO'
+  | 'IMPOSTO'
+  | 'OUTRA_DESPESA';
+
+export interface LancamentoFinanceiro {
+  id: number;
+  tipo: TipoLancamento;
+  categoria: CategoriaLancamento;
+  descricao: string;
+  valor: number;
+  data: string;
+  /** Preenchido quando o lançamento foi gerado automaticamente por um pagamento; nesse caso é imutável por aqui. */
+  pagamentoId: number | null;
+}
+
+export type LancamentoFinanceiroRequest = Omit<LancamentoFinanceiro, 'id' | 'pagamentoId'>;
+
+/** Extrato financeiro de um período: lançamentos paginados e os totais do período. */
+export interface ExtratoResponse {
+  lancamentos: Pagina<LancamentoFinanceiro>;
+  totalEntradas: number;
+  totalSaidas: number;
+  saldo: number;
+}
