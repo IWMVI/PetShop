@@ -9,6 +9,7 @@ import {
   AtualizarStatusPagamentoRequest,
   CategoriaLancamento,
   ContaFinanceiraRequest,
+  Dashboard,
   ExtratoResponse,
   HistoricoPet,
   HistoricoPetRequest,
@@ -291,6 +292,9 @@ export class FinanceiroApi {
   }
   marcarComoPaga(id: number, body: MarcarComoPagaRequest) {
     return this.http.put<LancamentoFinanceiro>(`${this.url}/contas/${id}/pagar`, body);
+  }
+  dashboard() {
+    return this.http.get<Dashboard>(`${this.url}/dashboard`);
   }
 }
 

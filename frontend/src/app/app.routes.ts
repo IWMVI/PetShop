@@ -140,7 +140,13 @@ export const routes: Routes = [
   {
     path: 'financeiro',
     children: [
-      { path: '', pathMatch: 'full', redirectTo: 'extrato' },
+      { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+      {
+        path: 'dashboard',
+        title: 'Dashboard',
+        loadComponent: () =>
+          import('./features/financeiro/dashboard/dashboard').then((m) => m.Dashboard),
+      },
       {
         path: 'extrato',
         title: 'Extrato',

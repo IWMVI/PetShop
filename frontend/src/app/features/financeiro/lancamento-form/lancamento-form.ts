@@ -61,7 +61,7 @@ export class LancamentoForm implements OnInit {
 
   protected readonly titulo = computed(() => (this.id() ? 'Editar lançamento' : 'Novo lançamento'));
   protected readonly trilha = computed<ItemTrilha[]>(() => [
-    { rotulo: 'Financeiro', link: '/financeiro/extrato' },
+    { rotulo: 'Financeiro', link: '/financeiro/dashboard' },
     { rotulo: this.id() ? 'Editar' : 'Novo' },
   ]);
 

@@ -1,0 +1,92 @@
+<app-pagina titulo="Dashboard" [trilha]="[{ rotulo: 'Financeiro' }]">
+  <span paginaResumo>{{ saudacao }}</span>
+
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" class="erro" />
+  }
+
+  @if (dados(); as d) {
+    <div nz-row [nzGutter]="[16, 16]" class="linha-cards">
+      <div nz-col [nzXs]="24" [nzMd]="12">
+        <nz-card class="card-destaque card-receber">
+          <span class="rotulo-card">A receber hoje</span>
+          <strong class="valor-card">{{ moeda(d.aReceberHoje) }}</strong>
+          @if (d.totalVencidoReceber > 0) {
+            <span class="aviso-vencido">+ {{ moeda(d.totalVencidoReceber) }} vencido</span>
+          }
+          <a
+            nz-button
+            nzType="default"
+            nzSize="small"
+            class="link-card"
+            routerLink="/financeiro/contas-a-receber"
+          >
+            Ver contas a receber
+          </a>
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="24" [nzMd]="12">
+        <nz-card class="card-destaque card-pagar">
+          <span class="rotulo-card">A pagar hoje</span>
+          <strong class="valor-card">{{ moeda(d.aPagarHoje) }}</strong>
+          @if (d.totalVencidoPagar > 0) {
+            <span class="aviso-vencido">+ {{ moeda(d.totalVencidoPagar) }} vencido</span>
+          }
+          <a
+            nz-button
+            nzType="default"
+            nzSize="small"
+            class="link-card"
+            routerLink="/financeiro/contas-a-pagar"
+          >
+            Ver contas a pagar
+          </a>
+        </nz-card>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="[16, 16]" class="linha-indicadores">
+      <div nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card class="card-indicador">
+          <span class="rotulo-indicador">Recebimento do mês</span>
+          <nz-progress
+            nzType="circle"
+            [nzPercent]="d.percentualRecebidoMes"
+            [nzWidth]="96"
+            nzStrokeColor="#389e0d"
+          />
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="24" [nzSm]="12">
+        <nz-card class="card-indicador">
+          <span class="rotulo-indicador">Pagamento do mês</span>
+          <nz-progress
+            nzType="circle"
+            [nzPercent]="d.percentualPagoMes"
+            [nzWidth]="96"
+            nzStrokeColor="#cf1322"
+          />
+        </nz-card>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="[16, 16]" class="linha-graficos">
+      <div nz-col [nzXs]="24" [nzLg]="12">
+        <nz-card class="card-grafico">
+          <span class="titulo-grafico">Fluxo de caixa</span>
+          <span class="subtitulo-grafico">Saldo líquido diário dos últimos 14 dias</span>
+          <app-grafico tipo="line" [dados]="graficoFluxoCaixa()" [opcoes]="opcoesGrafico" />
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="24" [nzLg]="12">
+        <nz-card class="card-grafico">
+          <span class="titulo-grafico">Entradas por dia</span>
+          <span class="subtitulo-grafico">Receita diária dos últimos 14 dias</span>
+          <app-grafico tipo="bar" [dados]="graficoEntradas()" [opcoes]="opcoesGrafico" />
+        </nz-card>
+      </div>
+    </div>
+  } @else if (carregando()) {
+    <nz-card [nzLoading]="true" class="card-carregando" />
+  }
+</app-pagina>

@@ -216,3 +216,24 @@ export interface ExtratoResponse {
   totalSaidas: number;
   saldo: number;
 }
+
+/** Entradas e saídas de um dia, usado nos gráficos do dashboard financeiro. */
+export interface PontoFluxoCaixa {
+  data: string;
+  entradas: number;
+  saidas: number;
+}
+
+/** Visão geral do módulo Financeiro: valores do dia, percentuais do mês e fluxo de caixa recente. */
+export interface Dashboard {
+  aReceberHoje: number;
+  aPagarHoje: number;
+  totalVencidoReceber: number;
+  totalVencidoPagar: number;
+  /** 0 a 100, inteiro. */
+  percentualRecebidoMes: number;
+  /** 0 a 100, inteiro. */
+  percentualPagoMes: number;
+  /** 14 pontos, um por dia, dos últimos 14 dias (hoje incluso), em ordem cronológica. */
+  fluxoCaixa: PontoFluxoCaixa[];
+}

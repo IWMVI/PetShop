@@ -74,6 +74,7 @@ export class App {
       rotulo: 'Financeiro',
       icone: 'wallet',
       filhos: [
+        { rota: '/financeiro/dashboard', rotulo: 'Dashboard' },
         { rota: '/financeiro/extrato', rotulo: 'Extrato' },
         { rota: '/financeiro/contas-a-pagar', rotulo: 'Contas a Pagar', saldo: 'aPagar' },
         { rota: '/financeiro/contas-a-receber', rotulo: 'Contas a Receber', saldo: 'aReceber' },

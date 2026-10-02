@@ -1,4 +1,7 @@
-<app-pagina titulo="Financeiro" [trilha]="[{ rotulo: 'Financeiro' }]">
+<app-pagina
+  titulo="Extrato"
+  [trilha]="[{ rotulo: 'Financeiro', link: '/financeiro/dashboard' }, { rotulo: 'Extrato' }]"
+>
   <a paginaAcoes nz-button nzType="primary" class="btn-novo" routerLink="/financeiro/novo">
     <lucide-icon name="plus" [size]="16" /> Novo lançamento
   </a>
