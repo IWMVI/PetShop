@@ -13,6 +13,7 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -74,4 +75,24 @@ public interface LancamentoFinanceiroRepository extends SoftDeleteRepository<Lan
               AND l.dataVencimento < :agora
             """)
     BigDecimal somarVencidoPorTipo(@Param("tipo") TipoLancamento tipo, @Param("agora") LocalDateTime agora);
+
+    @Query("""
+            SELECT COALESCE(SUM(l.valor), 0) FROM LancamentoFinanceiro l
+            WHERE l.deletedAt IS NULL
+              AND l.tipo = :tipo
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PENDENTE
+              AND l.dataVencimento BETWEEN :inicio AND :fim
+            """)
+    BigDecimal somarVencimentoNoPeriodo(@Param("tipo") TipoLancamento tipo,
+                                        @Param("inicio") LocalDateTime inicio,
+                                        @Param("fim") LocalDateTime fim);
+
+    @Query("""
+            SELECT l FROM LancamentoFinanceiro l
+            WHERE l.deletedAt IS NULL
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PAGO
+              AND l.dataPagamento BETWEEN :inicio AND :fim
+            """)
+    List<LancamentoFinanceiro> buscarRealizadosNoPeriodo(@Param("inicio") LocalDateTime inicio,
+                                                          @Param("fim") LocalDateTime fim);
 }

@@ -116,3 +116,9 @@ Funcionalidade: Gerenciamento financeiro
     Dado que existe uma conta a receber pendente registrada
     Quando cancelar a conta registrada
     Então o retorno do financeiro deve ser o status 204
+
+  Cenário: Consultar o dashboard financeiro com conta a receber vencendo hoje
+    Quando registrar uma conta a receber com vencimento hoje e valor "500.00"
+    E consultar o dashboard financeiro
+    Então o retorno do financeiro deve ser o status 200
+    E o dashboard deve ter a receber hoje igual a "500.00"

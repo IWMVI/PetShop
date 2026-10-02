@@ -6,8 +6,10 @@ import br.iwmvi.petshop.exception.LancamentoFinanceiroNotFoundException;
 import br.iwmvi.petshop.financeiro.dto.request.ContaFinanceiraRequest;
 import br.iwmvi.petshop.financeiro.dto.request.LancamentoFinanceiroRequest;
 import br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest;
+import br.iwmvi.petshop.financeiro.dto.response.DashboardResponse;
 import br.iwmvi.petshop.financeiro.dto.response.ExtratoResponse;
 import br.iwmvi.petshop.financeiro.dto.response.LancamentoFinanceiroResponse;
+import br.iwmvi.petshop.financeiro.dto.response.PontoFluxoCaixaResponse;
 import br.iwmvi.petshop.financeiro.dto.response.SaldoContasResponse;
 import br.iwmvi.petshop.financeiro.mapper.LancamentoFinanceiroMapper;
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
@@ -24,8 +26,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Serviço do módulo financeiro.
@@ -174,5 +183,54 @@ public class LancamentoFinanceiroService {
 
     private LocalDateTime inicioDoMesAtual() {
         return YearMonth.now().atDay(1).atStartOfDay();
+    }
+
+    @Transactional(readOnly = true)
+    public DashboardResponse dashboard() {
+        LocalDate hoje = LocalDate.now();
+        LocalDateTime inicioHoje = hoje.atStartOfDay();
+        LocalDateTime fimHoje = hoje.atTime(LocalTime.MAX);
+        LocalDateTime inicioMes = YearMonth.now().atDay(1).atStartOfDay();
+        LocalDateTime fimMes = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
+
+        BigDecimal aReceberHoje = repository.somarVencimentoNoPeriodo(TipoLancamento.ENTRADA, inicioHoje, fimHoje);
+        BigDecimal aPagarHoje = repository.somarVencimentoNoPeriodo(TipoLancamento.SAIDA, inicioHoje, fimHoje);
+        BigDecimal totalVencidoReceber = repository.somarVencidoPorTipo(TipoLancamento.ENTRADA, LocalDateTime.now());
+        BigDecimal totalVencidoPagar = repository.somarVencidoPorTipo(TipoLancamento.SAIDA, LocalDateTime.now());
+
+        BigDecimal percentualRecebidoMes = calcularPercentualMes(TipoLancamento.ENTRADA, inicioMes, fimMes);
+        BigDecimal percentualPagoMes = calcularPercentualMes(TipoLancamento.SAIDA, inicioMes, fimMes);
+
+        LocalDate inicioFluxo = hoje.minusDays(13);
+        List<LancamentoFinanceiro> realizados = repository.buscarRealizadosNoPeriodo(inicioFluxo.atStartOfDay(), fimHoje);
+        List<PontoFluxoCaixaResponse> fluxoCaixa = montarFluxoCaixa(realizados, inicioFluxo, hoje);
+
+        return new DashboardResponse(aReceberHoje, aPagarHoje, totalVencidoReceber, totalVencidoPagar,
+                percentualRecebidoMes, percentualPagoMes, fluxoCaixa);
+    }
+
+    private BigDecimal calcularPercentualMes(TipoLancamento tipo, LocalDateTime inicioMes, LocalDateTime fimMes) {
+        BigDecimal realizado = repository.somarPorTipo(tipo, inicioMes, fimMes, null);
+        BigDecimal pendente = repository.somarVencimentoNoPeriodo(tipo, inicioMes, fimMes);
+        BigDecimal total = realizado.add(pendente);
+        if (total.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+        return realizado.multiply(BigDecimal.valueOf(100)).divide(total, 0, RoundingMode.HALF_UP);
+    }
+
+    private List<PontoFluxoCaixaResponse> montarFluxoCaixa(List<LancamentoFinanceiro> realizados, LocalDate inicio, LocalDate fim) {
+        Map<LocalDate, BigDecimal> entradasPorDia = new HashMap<>();
+        Map<LocalDate, BigDecimal> saidasPorDia = new HashMap<>();
+        for (LancamentoFinanceiro l : realizados) {
+            LocalDate dia = l.getDataPagamento().toLocalDate();
+            Map<LocalDate, BigDecimal> alvo = l.getTipo() == TipoLancamento.ENTRADA ? entradasPorDia : saidasPorDia;
+            alvo.merge(dia, l.getValor(), BigDecimal::add);
+        }
+        List<PontoFluxoCaixaResponse> pontos = new ArrayList<>();
+        for (LocalDate d = inicio; !d.isAfter(fim); d = d.plusDays(1)) {
+            pontos.add(new PontoFluxoCaixaResponse(d, entradasPorDia.getOrDefault(d, BigDecimal.ZERO), saidasPorDia.getOrDefault(d, BigDecimal.ZERO)));
+        }
+        return pontos;
     }
 }

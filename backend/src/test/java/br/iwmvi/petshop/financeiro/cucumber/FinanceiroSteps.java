@@ -209,6 +209,25 @@ public class FinanceiroSteps {
         resultado = mockMvc.perform(delete("/financeiro/lancamentos/{id}", lancamentoId)).andReturn();
     }
 
+    @Quando("registrar uma conta a receber com vencimento hoje e valor {string}")
+    public void registrarUmaContaAReceberComVencimentoHojeEValor(String valor) throws Exception {
+        Map<String, Object> request = criarContaRequest("ENTRADA", "OUTRA_RECEITA", "Conta a receber com vencimento hoje",
+                new BigDecimal(valor), 0);
+
+        resultado = mockMvc.perform(post("/financeiro/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        if (resultado.getResponse().getStatus() == 201) {
+            lancamentoId = obterId(resultado);
+        }
+    }
+
+    @Quando("consultar o dashboard financeiro")
+    public void consultarODashboardFinanceiro() throws Exception {
+        resultado = mockMvc.perform(get("/financeiro/dashboard")).andReturn();
+    }
+
     @Quando("consultar o saldo de contas a pagar")
     public void consultarOSaldoDeContasAPagar() throws Exception {
         resultado = mockMvc.perform(get("/financeiro/contas/saldo").param("tipo", "SAIDA")).andReturn();
@@ -292,6 +311,15 @@ public class FinanceiroSteps {
             }
         }
         assertThat(encontrado).as("extrato deve conter a conta " + lancamentoId + " agora paga").isTrue();
+    }
+
+    @Entao("o dashboard deve ter a receber hoje igual a {string}")
+    public void oDashboardDeveTerAReceberHojeIgualA(String valorEsperado) throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("aReceberHoje").decimalValue()).isEqualByComparingTo(new BigDecimal(valorEsperado));
+        assertThat(response.hasNonNull("fluxoCaixa")).isTrue();
+        assertThat(response.get("fluxoCaixa").isArray()).isTrue();
     }
 
     @Entao("o saldo de contas deve ter total pendente maior que zero")

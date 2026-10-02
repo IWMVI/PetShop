@@ -28,7 +28,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -444,6 +447,102 @@ class LancamentoFinanceiroServiceTest {
             service.cancelarPorPagamento(900L);
 
             verify(repository, never()).save(any());
+        }
+    }
+
+    @Nested
+    @DisplayName("Dashboard")
+    class Dashboard {
+
+        private final LocalDate hoje = LocalDate.now();
+        private final LocalDateTime inicioHoje = hoje.atStartOfDay();
+        private final LocalDateTime fimHoje = hoje.atTime(LocalTime.MAX);
+        private final LocalDateTime inicioMes = YearMonth.now().atDay(1).atStartOfDay();
+        private final LocalDateTime fimMes = YearMonth.now().atEndOfMonth().atTime(LocalTime.MAX);
+
+        @BeforeEach
+        void stubsPadrao() {
+            lenient().when(repository.somarVencimentoNoPeriodo(any(TipoLancamento.class), any(LocalDateTime.class), any(LocalDateTime.class)))
+                    .thenReturn(BigDecimal.ZERO);
+            lenient().when(repository.somarVencidoPorTipo(any(TipoLancamento.class), any(LocalDateTime.class)))
+                    .thenReturn(BigDecimal.ZERO);
+            lenient().when(repository.somarPorTipo(any(TipoLancamento.class), any(LocalDateTime.class), any(LocalDateTime.class), isNull()))
+                    .thenReturn(BigDecimal.ZERO);
+            lenient().when(repository.buscarRealizadosNoPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
+                    .thenReturn(List.of());
+        }
+
+        @Test
+        @DisplayName("PCE - Deve agregar o fluxo de caixa por dia, preenchendo dias sem movimento com zero")
+        void deveAgregarFluxoDeCaixaPorDiaComZerosNosDiasSemMovimento() {
+            LocalDate diaAnterior = hoje.minusDays(3);
+            var entradaHoje = new LancamentoFinanceiro(TipoLancamento.ENTRADA, CategoriaLancamento.VENDA_PRODUTO,
+                    "Venda de hoje", new BigDecimal("100.00"), hoje.atTime(10, 0));
+            var saidaAnterior = new LancamentoFinanceiro(TipoLancamento.SAIDA, CategoriaLancamento.FORNECEDOR,
+                    "Compra anterior", new BigDecimal("40.00"), diaAnterior.atTime(9, 0));
+            when(repository.buscarRealizadosNoPeriodo(any(LocalDateTime.class), any(LocalDateTime.class)))
+                    .thenReturn(List.of(entradaHoje, saidaAnterior));
+
+            var response = service.dashboard();
+
+            assertThat(response.fluxoCaixa()).hasSize(14);
+            assertThat(response.fluxoCaixa().get(0).data()).isEqualTo(hoje.minusDays(13));
+            assertThat(response.fluxoCaixa().get(13).data()).isEqualTo(hoje);
+
+            var pontoHoje = response.fluxoCaixa().stream().filter(p -> p.data().equals(hoje)).findFirst().orElseThrow();
+            assertThat(pontoHoje.entradas()).isEqualByComparingTo("100.00");
+            assertThat(pontoHoje.saidas()).isEqualByComparingTo(BigDecimal.ZERO);
+
+            var pontoAnterior = response.fluxoCaixa().stream().filter(p -> p.data().equals(diaAnterior)).findFirst().orElseThrow();
+            assertThat(pontoAnterior.entradas()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(pontoAnterior.saidas()).isEqualByComparingTo("40.00");
+
+            LocalDate diaSemMovimento = hoje.minusDays(1);
+            var pontoSemMovimento = response.fluxoCaixa().stream().filter(p -> p.data().equals(diaSemMovimento)).findFirst().orElseThrow();
+            assertThat(pontoSemMovimento.entradas()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(pontoSemMovimento.saidas()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("PCE - Deve calcular o percentual do mês como 80% quando recebido=80 e pendente=20")
+        void deveCalcularPercentualDoMesCorretamente() {
+            when(repository.somarPorTipo(eq(TipoLancamento.ENTRADA), eq(inicioMes), eq(fimMes), isNull()))
+                    .thenReturn(new BigDecimal("80.00"));
+            when(repository.somarVencimentoNoPeriodo(eq(TipoLancamento.ENTRADA), eq(inicioMes), eq(fimMes)))
+                    .thenReturn(new BigDecimal("20.00"));
+
+            var response = service.dashboard();
+
+            assertThat(response.percentualRecebidoMes()).isEqualByComparingTo("80");
+        }
+
+        @Test
+        @DisplayName("AVL - Percentual do mês deve ser zero quando não há nada esperado nem recebido")
+        void devePercentualZeroQuandoNadaEsperadoNoMes() {
+            when(repository.somarPorTipo(eq(TipoLancamento.SAIDA), eq(inicioMes), eq(fimMes), isNull()))
+                    .thenReturn(BigDecimal.ZERO);
+            when(repository.somarVencimentoNoPeriodo(eq(TipoLancamento.SAIDA), eq(inicioMes), eq(fimMes)))
+                    .thenReturn(BigDecimal.ZERO);
+
+            var response = service.dashboard();
+
+            assertThat(response.percentualPagoMes()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+
+        @Test
+        @DisplayName("PCE - aReceberHoje e aPagarHoje devem somar somente o que vence hoje")
+        void deveSomarApenasOQueVenceHoje() {
+            when(repository.somarVencimentoNoPeriodo(eq(TipoLancamento.ENTRADA), eq(inicioHoje), eq(fimHoje)))
+                    .thenReturn(new BigDecimal("150.00"));
+            when(repository.somarVencimentoNoPeriodo(eq(TipoLancamento.SAIDA), eq(inicioHoje), eq(fimHoje)))
+                    .thenReturn(new BigDecimal("75.00"));
+
+            var response = service.dashboard();
+
+            assertThat(response.aReceberHoje()).isEqualByComparingTo("150.00");
+            assertThat(response.aPagarHoje()).isEqualByComparingTo("75.00");
+            verify(repository).somarVencimentoNoPeriodo(TipoLancamento.ENTRADA, inicioHoje, fimHoje);
+            verify(repository).somarVencimentoNoPeriodo(TipoLancamento.SAIDA, inicioHoje, fimHoje);
         }
     }
 }
