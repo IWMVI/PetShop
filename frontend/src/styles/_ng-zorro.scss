@@ -43,6 +43,13 @@
   border-radius: 8px;
 }
 
+// O NG-ZORRO define o raio do select com uma especificidade maior (três classes);
+// !important aqui é mais simples e estável do que replicar essa cadeia de seletores,
+// que muda conforme a variante (single, multiple, aberto, desabilitado etc).
+.ant-select-selector {
+  border-radius: 8px !important;
+}
+
 .ant-input-group-addon:first-child {
   border-radius: 8px 0 0 8px;
 }
