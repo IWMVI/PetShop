@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, OnInit, computed, inject, input, numberAttribute, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,9 +7,10 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalRef } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { FuncionarioApi, mensagemDeErro } from '../../../core/api';
-import { Cargo, FuncionarioRequest } from '../../../core/models';
+import { Cargo, Funcionario, FuncionarioRequest } from '../../../core/models';
 import { formatarCpf } from '../../../shared/format';
 import { MASCARAS, aplicarMascara } from '../../../shared/mascara/mascara';
 import { MascaraDirective } from '../../../shared/mascara/mascara.directive';
@@ -20,6 +22,7 @@ import { cpfValidator } from '../../../shared/validators/cpf.validator';
 @Component({
   selector: 'app-funcionario-form',
   imports: [
+    NgTemplateOutlet,
     Pagina,
     ReactiveFormsModule,
     RouterLink,
@@ -36,6 +39,14 @@ import { cpfValidator } from '../../../shared/validators/cpf.validator';
 })
 export class FuncionarioForm implements OnInit {
   readonly id = input(undefined, { transform: numberAttribute });
+
+  /**
+   * Presente quando o formulário é aberto como modal de cadastro rápido
+   * (ex.: a partir do histórico do pet), em vez de navegado como página.
+   * Nesse modo, salvar fecha o modal devolvendo o funcionário criado, em
+   * vez de navegar, preservando o progresso do formulário que o abriu.
+   */
+  protected readonly modalRef = inject(NzModalRef, { optional: true });
 
   protected readonly titulo = computed(() =>
     this.id() ? 'Editar funcionário' : 'Novo funcionário',
@@ -91,9 +102,13 @@ export class FuncionarioForm implements OnInit {
     const id = this.id();
     this.salvando.set(true);
     (id ? this.api.atualizar(id, body) : this.api.criar(body)).subscribe({
-      next: () => {
+      next: (funcionario: Funcionario) => {
         this.toast.sucesso(id ? 'Funcionário atualizado.' : 'Funcionário cadastrado.');
-        this.router.navigate(['/funcionarios']);
+        if (this.modalRef) {
+          this.modalRef.close(funcionario);
+        } else {
+          this.router.navigate(['/funcionarios']);
+        }
       },
       error: (e) => {
         this.salvando.set(false);

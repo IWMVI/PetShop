@@ -23,6 +23,7 @@ import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import {
   Subject,
@@ -36,7 +37,8 @@ import {
   tap,
 } from 'rxjs';
 import { FuncionarioApi, HistoricoPetApi, mensagemDeErro } from '../../../core/api';
-import { HistoricoPetRequest, TipoEvento } from '../../../core/models';
+import { Funcionario, HistoricoPetRequest, TipoEvento } from '../../../core/models';
+import { FuncionarioForm } from '../../funcionarios/funcionario-form/funcionario-form';
 import { paraLocalDateTime } from '../../../shared/format';
 import { ATRASO_BUSCA_MS } from '../../../shared/listagem/listagem-paginada';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
@@ -88,6 +90,7 @@ export class HistoricoForm implements OnInit {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly modal = inject(NzModalService);
 
   protected readonly salvando = signal(false);
   protected readonly tipos = opcoes(TIPOS_EVENTO);
@@ -135,6 +138,28 @@ export class HistoricoForm implements OnInit {
 
   buscarFuncionarios(termo: string) {
     this.busca$.next(termo);
+  }
+
+  /**
+   * Abre o cadastro de funcionário num modal, sem navegar para fora do
+   * histórico (preservando o que já foi preenchido aqui). Ao salvar, o
+   * funcionário criado já fica selecionado no formulário.
+   */
+  cadastrarFuncionario() {
+    const modalRef = this.modal.create({
+      nzTitle: 'Novo funcionário',
+      nzContent: FuncionarioForm,
+      nzFooter: null,
+      nzWidth: 480,
+    });
+    modalRef.afterClose.subscribe((funcionario?: Funcionario) => {
+      if (!funcionario) return;
+      this.escolhido.set({
+        id: funcionario.id,
+        rotulo: `${funcionario.nome} · ${CARGOS[funcionario.cargo]}`,
+      });
+      this.form.controls.funcionarioId.setValue(funcionario.id);
+    });
   }
 
   salvar() {

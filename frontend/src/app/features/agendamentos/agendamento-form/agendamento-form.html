@@ -43,7 +43,10 @@
             @if (buscandoServicos()) {
               Buscando…
             } @else {
-              Nenhum serviço encontrado. <a routerLink="/servicos/novo">Cadastrar serviço</a>
+              Nenhum serviço encontrado.
+              <a (click)="cadastrarServico()" (keydown.enter)="cadastrarServico()" tabindex="0"
+                >Cadastrar serviço</a
+              >
             }
           </ng-template>
         </nz-form-control>

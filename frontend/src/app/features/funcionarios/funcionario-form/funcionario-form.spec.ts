@@ -1,6 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { NzModalRef } from 'ng-zorro-antd/modal';
 import { of, throwError } from 'rxjs';
 import { provideTestEnv } from '../../../../testing/providers';
 import { FuncionarioApi } from '../../../core/api';
@@ -135,5 +136,49 @@ describe('FuncionarioForm', () => {
       telefone: '1133334444',
     });
     expect(toast.sucesso).toHaveBeenCalledWith('Funcionário atualizado.');
+  });
+
+  describe('como modal de cadastro rápido', () => {
+    let modalRef: jest.Mocked<Pick<NzModalRef, 'close'>>;
+
+    beforeEach(async () => {
+      modalRef = { close: jest.fn() };
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [FuncionarioForm],
+        providers: [
+          provideTestEnv(),
+          { provide: FuncionarioApi, useValue: api },
+          { provide: ToastService, useValue: toast },
+          { provide: NzModalRef, useValue: modalRef },
+        ],
+      }).compileComponents();
+      fixture = TestBed.createComponent(FuncionarioForm);
+      jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      fixture.detectChanges();
+    });
+
+    it('não mostra a trilha/breadcrumb da página', () => {
+      expect(el().querySelector('nz-breadcrumb')).toBeNull();
+    });
+
+    it('fecha o modal com o funcionário criado em vez de navegar', () => {
+      preencher();
+      enviar();
+
+      expect(api.criar).toHaveBeenCalled();
+      expect(modalRef.close).toHaveBeenCalledWith({ id: 1 });
+      expect(TestBed.inject(Router).navigate).not.toHaveBeenCalled();
+    });
+
+    it('o botão Cancelar fecha o modal sem salvar', () => {
+      const botaoCancelar = Array.from(el().querySelectorAll('button')).find(
+        (b) => b.textContent?.trim() === 'Cancelar',
+      )!;
+      botaoCancelar.click();
+
+      expect(modalRef.close).toHaveBeenCalledWith();
+      expect(api.criar).not.toHaveBeenCalled();
+    });
   });
 });

@@ -1,9 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal';
+import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideTestEnv } from '../../../../testing/providers';
 import { FuncionarioApi, HistoricoPetApi } from '../../../core/api';
+import { Funcionario } from '../../../core/models';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { HistoricoForm } from './historico-form';
 
@@ -12,6 +14,9 @@ describe('HistoricoForm', () => {
   let api: jest.Mocked<Pick<HistoricoPetApi, 'registrar'>>;
   let funcionarioApi: jest.Mocked<Pick<FuncionarioApi, 'listar'>>;
   const toast = { sucesso: jest.fn(), erro: jest.fn() };
+
+  let modalAfterClose: Subject<Funcionario | undefined>;
+  let modal: jest.Mocked<Pick<NzModalService, 'create'>>;
 
   beforeEach(async () => {
     toast.sucesso.mockReset();
@@ -30,6 +35,10 @@ describe('HistoricoForm', () => {
         }),
       ),
     };
+    modalAfterClose = new Subject();
+    modal = {
+      create: jest.fn().mockReturnValue({ afterClose: modalAfterClose } as Partial<NzModalRef>),
+    };
     await TestBed.configureTestingModule({
       imports: [HistoricoForm],
       providers: [
@@ -37,6 +46,7 @@ describe('HistoricoForm', () => {
         { provide: HistoricoPetApi, useValue: api },
         { provide: FuncionarioApi, useValue: funcionarioApi },
         { provide: ToastService, useValue: toast },
+        { provide: NzModalService, useValue: modal },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(HistoricoForm);
@@ -48,6 +58,7 @@ describe('HistoricoForm', () => {
 
   const el = () => fixture.nativeElement as HTMLElement;
   const form = () => (fixture.componentInstance as unknown as { form: HistoricoForm['form'] }).form;
+  const comp = () => fixture.componentInstance as unknown as { cadastrarFuncionario: () => void };
   const enviar = () => {
     el().querySelector('form')!.dispatchEvent(new Event('submit'));
     fixture.detectChanges();
@@ -128,5 +139,23 @@ describe('HistoricoForm', () => {
 
     expect(toast.erro).toHaveBeenCalledWith('Pet não encontrado.');
     expect(TestBed.inject(Router).navigate).not.toHaveBeenCalled();
+  });
+
+  it('abre o cadastro de funcionário num modal e seleciona o funcionário criado ao salvar', () => {
+    comp().cadastrarFuncionario();
+    expect(modal.create).toHaveBeenCalledWith(
+      expect.objectContaining({ nzTitle: 'Novo funcionário' }),
+    );
+
+    modalAfterClose.next({ id: 42, nome: 'João', cpf: '1', cargo: 'TOSADOR', telefone: '1' });
+
+    expect(form().value.funcionarioId).toBe(42);
+  });
+
+  it('não altera a seleção quando o modal é fechado sem criar um funcionário', () => {
+    comp().cadastrarFuncionario();
+    modalAfterClose.next(undefined);
+
+    expect(form().value.funcionarioId).toBeNull();
   });
 });

@@ -1,3 +1,4 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { Component, computed, OnInit, inject, input, numberAttribute, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,8 +9,9 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
+import { NzModalRef } from 'ng-zorro-antd/modal';
 import { ServicoApi, mensagemDeErro } from '../../../core/api';
-import { ServicoRequest } from '../../../core/models';
+import { Servico, ServicoRequest } from '../../../core/models';
 import { vazioParaNull } from '../../../shared/format';
 import { MoedaDirective } from '../../../shared/moeda/moeda.directive';
 import { ToastService } from '../../../shared/toast/toast.service';
@@ -18,6 +20,7 @@ import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
 @Component({
   selector: 'app-servico-form',
   imports: [
+    NgTemplateOutlet,
     Pagina,
     ReactiveFormsModule,
     RouterLink,
@@ -35,6 +38,14 @@ import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
 })
 export class ServicoForm implements OnInit {
   readonly id = input(undefined, { transform: numberAttribute });
+
+  /**
+   * Presente quando o formulário é aberto como modal de cadastro rápido
+   * (ex.: a partir do agendamento), em vez de navegado como página. Nesse
+   * modo, salvar fecha o modal devolvendo o serviço criado, em vez de
+   * navegar, preservando o progresso do formulário que o abriu.
+   */
+  protected readonly modalRef = inject(NzModalRef, { optional: true });
 
   protected readonly titulo = computed(() => (this.id() ? 'Editar serviço' : 'Novo serviço'));
   protected readonly trilha = computed<ItemTrilha[]>(() => [
@@ -83,9 +94,13 @@ export class ServicoForm implements OnInit {
     const id = this.id();
     this.salvando.set(true);
     (id ? this.api.atualizar(id, body) : this.api.criar(body)).subscribe({
-      next: () => {
+      next: (servico: Servico) => {
         this.toast.sucesso(id ? 'Serviço atualizado.' : 'Serviço cadastrado.');
-        this.router.navigate(['/servicos']);
+        if (this.modalRef) {
+          this.modalRef.close(servico);
+        } else {
+          this.router.navigate(['/servicos']);
+        }
       },
       error: (e) => {
         this.salvando.set(false);

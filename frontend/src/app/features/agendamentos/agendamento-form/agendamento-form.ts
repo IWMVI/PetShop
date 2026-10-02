@@ -16,6 +16,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import {
   Subject,
@@ -29,7 +30,8 @@ import {
   tap,
 } from 'rxjs';
 import { AgendamentoApi, ServicoApi, mensagemDeErro } from '../../../core/api';
-import { AgendamentoRequest } from '../../../core/models';
+import { AgendamentoRequest, Servico } from '../../../core/models';
+import { ServicoForm } from '../../servicos/servico-form/servico-form';
 import { formatarMoeda, paraLocalDateTime, vazioParaNull } from '../../../shared/format';
 import { ATRASO_BUSCA_MS } from '../../../shared/listagem/listagem-paginada';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
@@ -76,6 +78,7 @@ export class AgendamentoForm implements OnInit {
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly modal = inject(NzModalService);
 
   protected readonly salvando = signal(false);
   protected readonly moeda = formatarMoeda;
@@ -150,6 +153,25 @@ export class AgendamentoForm implements OnInit {
 
   buscarServicos(termo: string) {
     this.busca$.next(termo);
+  }
+
+  /**
+   * Abre o cadastro de serviço num modal, sem navegar para fora do
+   * agendamento (preservando o que já foi preenchido aqui). Ao salvar, o
+   * serviço criado é adicionado às opções e já selecionado no formulário.
+   */
+  cadastrarServico() {
+    const modalRef = this.modal.create({
+      nzTitle: 'Novo serviço',
+      nzContent: ServicoForm,
+      nzFooter: null,
+      nzWidth: 480,
+    });
+    modalRef.afterClose.subscribe((servico?: Servico) => {
+      if (!servico) return;
+      this.lembrar([{ id: servico.id, nome: servico.nome, preco: servico.preco }]);
+      this.form.controls.servicoIds.setValue([...this.selecionados(), servico.id]);
+    });
   }
 
   salvar() {

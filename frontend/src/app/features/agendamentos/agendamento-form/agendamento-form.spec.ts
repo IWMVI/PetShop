@@ -1,8 +1,10 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { NzModalRef, NzModalService } from 'ng-zorro-antd/modal';
+import { Subject, of } from 'rxjs';
 import { provideTestEnv } from '../../../../testing/providers';
 import { AgendamentoApi, ServicoApi } from '../../../core/api';
+import { Servico } from '../../../core/models';
 import { ATRASO_BUSCA_MS } from '../../../shared/listagem/listagem-paginada';
 import { ToastService } from '../../../shared/toast/toast.service';
 import { AgendamentoForm } from './agendamento-form';
@@ -20,6 +22,9 @@ describe('AgendamentoForm', () => {
   let api: jest.Mocked<Pick<AgendamentoApi, 'buscar' | 'criar' | 'atualizar'>>;
   const servicoApi = { listar: jest.fn() };
 
+  let modalAfterClose: Subject<Servico | undefined>;
+  let modal: jest.Mocked<Pick<NzModalService, 'create'>>;
+
   beforeEach(async () => {
     api = {
       buscar: jest.fn(),
@@ -34,6 +39,10 @@ describe('AgendamentoForm', () => {
         ]),
       ),
     );
+    modalAfterClose = new Subject();
+    modal = {
+      create: jest.fn().mockReturnValue({ afterClose: modalAfterClose } as Partial<NzModalRef>),
+    };
     await TestBed.configureTestingModule({
       imports: [AgendamentoForm],
       providers: [
@@ -41,6 +50,7 @@ describe('AgendamentoForm', () => {
         { provide: AgendamentoApi, useValue: api },
         { provide: ServicoApi, useValue: servicoApi },
         { provide: ToastService, useValue: { sucesso: jest.fn(), erro: jest.fn() } },
+        { provide: NzModalService, useValue: modal },
       ],
     }).compileComponents();
     jest.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
@@ -59,6 +69,7 @@ describe('AgendamentoForm', () => {
     form: AgendamentoForm['form'];
     opcoes: () => { id: number; nome: string }[];
     buscarServicos: (t: string) => void;
+    cadastrarServico: () => void;
   }
   const comp = () => fixture.componentInstance as unknown as Interno;
   const submeter = () => {
@@ -148,4 +159,33 @@ describe('AgendamentoForm', () => {
     expect(comp().opcoes()[0]).toMatchObject({ id: 9, nome: 'Corte de unhas' });
     expect(el().querySelector('.total')!.textContent!.replace(/\s/g, ' ')).toContain('R$ 45,00');
   });
+
+  it('abre o cadastro de serviço num modal e seleciona o serviço criado ao salvar', fakeAsync(() => {
+    criar();
+    tick();
+    comp().form.controls.servicoIds.setValue([1]);
+
+    comp().cadastrarServico();
+    expect(modal.create).toHaveBeenCalledWith(expect.objectContaining({ nzTitle: 'Novo serviço' }));
+
+    modalAfterClose.next({ id: 99, nome: 'Hidratação', descricao: null, preco: 80 });
+
+    expect(comp().form.value.servicoIds).toEqual([1, 99]);
+    expect(
+      comp()
+        .opcoes()
+        .map((o) => o.nome),
+    ).toContain('Hidratação');
+  }));
+
+  it('não altera a seleção quando o modal é fechado sem criar um serviço', fakeAsync(() => {
+    criar();
+    tick();
+    comp().form.controls.servicoIds.setValue([1]);
+
+    comp().cadastrarServico();
+    modalAfterClose.next(undefined);
+
+    expect(comp().form.value.servicoIds).toEqual([1]);
+  }));
 });
