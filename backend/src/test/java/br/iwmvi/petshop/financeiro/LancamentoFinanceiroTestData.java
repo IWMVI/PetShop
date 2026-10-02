@@ -1,5 +1,6 @@
 package br.iwmvi.petshop.financeiro;
 
+import br.iwmvi.petshop.financeiro.dto.request.ContaFinanceiraRequest;
 import br.iwmvi.petshop.financeiro.dto.request.LancamentoFinanceiroRequest;
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
 import br.iwmvi.petshop.financeiro.model.LancamentoFinanceiro;
@@ -47,5 +48,31 @@ public class LancamentoFinanceiroTestData {
         var lancamento = LancamentoFinanceiro.deEntradaPagamento(pagamento);
         ReflectionTestUtils.setField(lancamento, "id", id);
         return lancamento;
+    }
+
+    public static ContaFinanceiraRequest criarContaRequest(TipoLancamento tipo, LocalDateTime dataVencimento) {
+        if (tipo == TipoLancamento.ENTRADA) {
+            return new ContaFinanceiraRequest(
+                    TipoLancamento.ENTRADA,
+                    CategoriaLancamento.OUTRA_RECEITA,
+                    "Conta a receber de teste",
+                    new BigDecimal("150.00"),
+                    dataVencimento
+            );
+        }
+        return new ContaFinanceiraRequest(
+                TipoLancamento.SAIDA,
+                CategoriaLancamento.FORNECEDOR,
+                "Conta a pagar de teste",
+                new BigDecimal("150.00"),
+                dataVencimento
+        );
+    }
+
+    public static LancamentoFinanceiro criarContaPendente(Long id, TipoLancamento tipo, CategoriaLancamento categoria,
+                                                           String valor, LocalDateTime dataVencimento) {
+        var conta = LancamentoFinanceiro.novaConta(tipo, categoria, "Conta pendente de teste", new BigDecimal(valor), dataVencimento);
+        ReflectionTestUtils.setField(conta, "id", id);
+        return conta;
     }
 }

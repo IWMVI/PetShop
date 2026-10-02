@@ -8,9 +8,11 @@ import br.iwmvi.petshop.exception.LancamentoFinanceiroValidationException;
 import br.iwmvi.petshop.financeiro.LancamentoFinanceiroTestData;
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
 import br.iwmvi.petshop.financeiro.model.LancamentoFinanceiro;
+import br.iwmvi.petshop.financeiro.model.StatusLancamento;
 import br.iwmvi.petshop.financeiro.model.TipoLancamento;
 import br.iwmvi.petshop.financeiro.repository.LancamentoFinanceiroRepository;
 import br.iwmvi.petshop.financeiro.validator.CategoriaCompativelComTipoValidador;
+import br.iwmvi.petshop.financeiro.validator.StatusCoerenteComDatasValidador;
 import br.iwmvi.petshop.pagamento.PagamentoTestData;
 import br.iwmvi.petshop.pagamento.model.Pagamento;
 import br.iwmvi.petshop.pagamento.model.StatusPagamento;
@@ -49,7 +51,10 @@ class LancamentoFinanceiroServiceTest {
     void setUp() {
         service = new LancamentoFinanceiroService(
                 repository,
-                new CompositeValidator<>(List.of(new CategoriaCompativelComTipoValidador()))
+                new CompositeValidator<>(List.of(
+                        new CategoriaCompativelComTipoValidador(),
+                        new StatusCoerenteComDatasValidador()
+                ))
         );
     }
 
@@ -232,6 +237,170 @@ class LancamentoFinanceiroServiceTest {
             verify(repository).buscarExtrato(captorInicio.capture(), any(), isNull(), isNull(), any(Pageable.class));
             assertThat(captorInicio.getValue().getDayOfMonth()).isEqualTo(1);
             assertThat(captorInicio.getValue().toLocalTime()).isEqualTo(java.time.LocalTime.MIDNIGHT);
+        }
+
+        @Test
+        @DisplayName("ESE - O extrato não deve incluir lançamentos com status PENDENTE")
+        void extratoNaoDeveIncluirLancamentosPendentes() {
+            LocalDateTime inicio = LocalDateTime.now().minusDays(7);
+            LocalDateTime fim = LocalDateTime.now();
+
+            // A query buscarExtrato já filtra por status PAGO internamente; aqui garantimos
+            // que o service não contorna esse filtro nem mistura lançamentos pendentes no total.
+            when(repository.buscarExtrato(eq(inicio), eq(fim), isNull(), isNull(), any(Pageable.class)))
+                    .thenAnswer(i -> new PageImpl<>(List.<LancamentoFinanceiro>of(), i.getArgument(4), 0));
+            when(repository.somarPorTipo(eq(TipoLancamento.ENTRADA), eq(inicio), eq(fim), isNull()))
+                    .thenReturn(BigDecimal.ZERO);
+            when(repository.somarPorTipo(eq(TipoLancamento.SAIDA), eq(inicio), eq(fim), isNull()))
+                    .thenReturn(BigDecimal.ZERO);
+
+            var response = service.extrato(inicio, fim, null, null, 0, 10);
+
+            assertThat(response.lancamentos().itens()).isEmpty();
+            assertThat(response.totalEntradas()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(response.totalSaidas()).isEqualByComparingTo(BigDecimal.ZERO);
+        }
+    }
+
+    @Nested
+    @DisplayName("Contas a pagar e a receber")
+    class ContasAPagarEReceber {
+
+        @Test
+        @DisplayName("PCE - Deve registrar uma conta a pagar pendente")
+        void deveRegistrarContaAPagar() {
+            var request = LancamentoFinanceiroTestData.criarContaRequest(TipoLancamento.SAIDA, LocalDateTime.now().plusDays(10));
+            when(repository.save(any(LancamentoFinanceiro.class))).thenAnswer(i -> i.getArgument(0));
+
+            var response = service.registrarConta(request);
+
+            assertThat(response.status()).isEqualTo(StatusLancamento.PENDENTE);
+            assertThat(response.dataPagamento()).isNull();
+            assertThat(response.dataVencimento()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("PCE - Deve registrar uma conta a receber pendente")
+        void deveRegistrarContaAReceber() {
+            var request = LancamentoFinanceiroTestData.criarContaRequest(TipoLancamento.ENTRADA, LocalDateTime.now().plusDays(5));
+            when(repository.save(any(LancamentoFinanceiro.class))).thenAnswer(i -> i.getArgument(0));
+
+            var response = service.registrarConta(request);
+
+            assertThat(response.tipo()).isEqualTo(TipoLancamento.ENTRADA);
+            assertThat(response.status()).isEqualTo(StatusLancamento.PENDENTE);
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve registrar conta sem data de vencimento")
+        void naoDeveRegistrarContaSemDataDeVencimento() {
+            var conta = LancamentoFinanceiro.novaConta(TipoLancamento.SAIDA, CategoriaLancamento.FORNECEDOR,
+                    "Conta sem vencimento", new BigDecimal("10.00"), null);
+
+            assertThatThrownBy(() -> new StatusCoerenteComDatasValidador().validate(conta))
+                    .isInstanceOf(LancamentoFinanceiroValidationException.class)
+                    .hasMessageContaining("Data de vencimento é obrigatória");
+        }
+
+        @Test
+        @DisplayName("PCE - Deve marcar uma conta pendente como paga com sucesso")
+        void deveMarcarContaComoPaga() {
+            var conta = LancamentoFinanceiroTestData.criarContaPendente(1L, TipoLancamento.SAIDA,
+                    CategoriaLancamento.FORNECEDOR, "150.00", LocalDateTime.now().plusDays(3));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(conta));
+            when(repository.save(any(LancamentoFinanceiro.class))).thenAnswer(i -> i.getArgument(0));
+
+            var request = new br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest(LocalDateTime.now());
+            var response = service.marcarComoPaga(1L, request);
+
+            assertThat(response.status()).isEqualTo(StatusLancamento.PAGO);
+            assertThat(response.dataPagamento()).isNotNull();
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve marcar como paga uma conta já paga")
+        void naoDeveMarcarComoPagaContaJaPaga() {
+            var lancamento = LancamentoFinanceiroTestData.criarLancamento(1L, TipoLancamento.SAIDA, CategoriaLancamento.FORNECEDOR, "50.00");
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(lancamento));
+
+            var request = new br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest(LocalDateTime.now());
+
+            assertThatThrownBy(() -> service.marcarComoPaga(1L, request))
+                    .isInstanceOf(LancamentoFinanceiroValidationException.class)
+                    .hasMessageContaining("pendente");
+
+            verify(repository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve marcar como paga uma conta cancelada")
+        void naoDeveMarcarComoPagaContaCancelada() {
+            var conta = LancamentoFinanceiroTestData.criarContaPendente(1L, TipoLancamento.SAIDA,
+                    CategoriaLancamento.FORNECEDOR, "150.00", LocalDateTime.now().plusDays(3));
+            conta.cancelar();
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(conta));
+
+            var request = new br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest(LocalDateTime.now());
+
+            assertThatThrownBy(() -> service.marcarComoPaga(1L, request))
+                    .isInstanceOf(LancamentoFinanceiroValidationException.class);
+
+            verify(repository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("PCE - Deve atualizar uma conta pendente")
+        void deveAtualizarContaPendente() {
+            var conta = LancamentoFinanceiroTestData.criarContaPendente(1L, TipoLancamento.SAIDA,
+                    CategoriaLancamento.FORNECEDOR, "150.00", LocalDateTime.now().plusDays(3));
+            var request = LancamentoFinanceiroTestData.criarContaRequest(TipoLancamento.SAIDA, LocalDateTime.now().plusDays(20));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(conta));
+            when(repository.save(any(LancamentoFinanceiro.class))).thenAnswer(i -> i.getArgument(0));
+
+            var response = service.atualizarConta(1L, request);
+
+            assertThat(response.descricao()).isEqualTo("Conta a pagar de teste");
+            assertThat(response.status()).isEqualTo(StatusLancamento.PENDENTE);
+        }
+
+        @Test
+        @DisplayName("ESE - Não deve atualizar uma conta já paga")
+        void naoDeveAtualizarContaJaPaga() {
+            var lancamento = LancamentoFinanceiroTestData.criarLancamento(1L, TipoLancamento.SAIDA, CategoriaLancamento.FORNECEDOR, "50.00");
+            var request = LancamentoFinanceiroTestData.criarContaRequest(TipoLancamento.SAIDA, LocalDateTime.now().plusDays(20));
+            when(repository.findActiveById(1L)).thenReturn(Optional.of(lancamento));
+
+            assertThatThrownBy(() -> service.atualizarConta(1L, request))
+                    .isInstanceOf(LancamentoFinanceiroValidationException.class)
+                    .hasMessageContaining("pendente");
+
+            verify(repository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("PCE - Deve calcular saldo pendente e vencido corretamente")
+        void deveCalcularSaldoPendenteEVencido() {
+            when(repository.somarPendentePorTipo(TipoLancamento.SAIDA)).thenReturn(new BigDecimal("300.00"));
+            when(repository.somarVencidoPorTipo(eq(TipoLancamento.SAIDA), any(LocalDateTime.class))).thenReturn(new BigDecimal("100.00"));
+
+            var response = service.saldoContas(TipoLancamento.SAIDA);
+
+            assertThat(response.totalPendente()).isEqualByComparingTo("300.00");
+            assertThat(response.totalVencido()).isEqualByComparingTo("100.00");
+        }
+
+        @Test
+        @DisplayName("PCE - Deve listar contas filtrando por tipo e status")
+        void deveListarContasFiltrandoPorTipoEStatus() {
+            var conta = LancamentoFinanceiroTestData.criarContaPendente(1L, TipoLancamento.SAIDA,
+                    CategoriaLancamento.FORNECEDOR, "150.00", LocalDateTime.now().plusDays(3));
+            when(repository.buscarContas(eq(TipoLancamento.SAIDA), eq(StatusLancamento.PENDENTE), any(Pageable.class)))
+                    .thenAnswer(i -> new PageImpl<>(List.of(conta), i.getArgument(2), 1));
+
+            var response = service.listarContas(TipoLancamento.SAIDA, StatusLancamento.PENDENTE, 0, 10);
+
+            assertThat(response.itens()).hasSize(1);
+            assertThat(response.itens().get(0).status()).isEqualTo(StatusLancamento.PENDENTE);
         }
     }
 

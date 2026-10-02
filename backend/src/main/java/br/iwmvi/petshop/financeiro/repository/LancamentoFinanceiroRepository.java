@@ -3,6 +3,7 @@ package br.iwmvi.petshop.financeiro.repository;
 import br.iwmvi.petshop.common.repository.SoftDeleteRepository;
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
 import br.iwmvi.petshop.financeiro.model.LancamentoFinanceiro;
+import br.iwmvi.petshop.financeiro.model.StatusLancamento;
 import br.iwmvi.petshop.financeiro.model.TipoLancamento;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +23,8 @@ public interface LancamentoFinanceiroRepository extends SoftDeleteRepository<Lan
     @Query("""
             SELECT l FROM LancamentoFinanceiro l
             WHERE l.deletedAt IS NULL
-              AND l.data BETWEEN :inicio AND :fim
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PAGO
+              AND l.dataPagamento BETWEEN :inicio AND :fim
               AND (:tipo IS NULL OR l.tipo = :tipo)
               AND (:categoria IS NULL OR l.categoria = :categoria)
             """)
@@ -35,12 +37,41 @@ public interface LancamentoFinanceiroRepository extends SoftDeleteRepository<Lan
     @Query("""
             SELECT COALESCE(SUM(l.valor), 0) FROM LancamentoFinanceiro l
             WHERE l.deletedAt IS NULL
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PAGO
               AND l.tipo = :tipo
-              AND l.data BETWEEN :inicio AND :fim
+              AND l.dataPagamento BETWEEN :inicio AND :fim
               AND (:categoria IS NULL OR l.categoria = :categoria)
             """)
     BigDecimal somarPorTipo(@Param("tipo") TipoLancamento tipo,
                             @Param("inicio") LocalDateTime inicio,
                             @Param("fim") LocalDateTime fim,
                             @Param("categoria") CategoriaLancamento categoria);
+
+    @Query("""
+            SELECT l FROM LancamentoFinanceiro l
+            WHERE l.deletedAt IS NULL
+              AND l.tipo = :tipo
+              AND l.status = :status
+            ORDER BY l.dataVencimento ASC, l.id ASC
+            """)
+    Page<LancamentoFinanceiro> buscarContas(@Param("tipo") TipoLancamento tipo,
+                                             @Param("status") StatusLancamento status,
+                                             Pageable pageable);
+
+    @Query("""
+            SELECT COALESCE(SUM(l.valor), 0) FROM LancamentoFinanceiro l
+            WHERE l.deletedAt IS NULL
+              AND l.tipo = :tipo
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PENDENTE
+            """)
+    BigDecimal somarPendentePorTipo(@Param("tipo") TipoLancamento tipo);
+
+    @Query("""
+            SELECT COALESCE(SUM(l.valor), 0) FROM LancamentoFinanceiro l
+            WHERE l.deletedAt IS NULL
+              AND l.tipo = :tipo
+              AND l.status = br.iwmvi.petshop.financeiro.model.StatusLancamento.PENDENTE
+              AND l.dataVencimento < :agora
+            """)
+    BigDecimal somarVencidoPorTipo(@Param("tipo") TipoLancamento tipo, @Param("agora") LocalDateTime agora);
 }

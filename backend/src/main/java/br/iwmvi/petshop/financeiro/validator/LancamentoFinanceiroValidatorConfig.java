@@ -18,7 +18,8 @@ public class LancamentoFinanceiroValidatorConfig {
     @Bean
     public EntityValidator<LancamentoFinanceiro> lancamentoFinanceiroValidator() {
         return new CompositeValidator<>(List.of(
-                new CategoriaCompativelComTipoValidador()
+                new CategoriaCompativelComTipoValidador(),
+                new StatusCoerenteComDatasValidador()
         ));
     }
 }

@@ -1,6 +1,7 @@
 package br.iwmvi.petshop.financeiro.dto.response;
 
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
+import br.iwmvi.petshop.financeiro.model.StatusLancamento;
 import br.iwmvi.petshop.financeiro.model.TipoLancamento;
 
 import java.math.BigDecimal;
@@ -12,7 +13,10 @@ public record LancamentoFinanceiroResponse(
         CategoriaLancamento categoria,
         String descricao,
         BigDecimal valor,
-        LocalDateTime data,
+        StatusLancamento status,
+        LocalDateTime dataVencimento,
+        LocalDateTime dataPagamento,
+        boolean vencido,
         Long pagamentoId
 ) {
 }

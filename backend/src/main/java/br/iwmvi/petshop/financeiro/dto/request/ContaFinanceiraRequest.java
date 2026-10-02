@@ -10,7 +10,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-public record LancamentoFinanceiroRequest(
+public record ContaFinanceiraRequest(
         @NotNull TipoLancamento tipo,
 
         @NotNull CategoriaLancamento categoria,
@@ -22,7 +22,7 @@ public record LancamentoFinanceiroRequest(
         @NotNull @DecimalMin(value = "0.01", message = "O valor deve ser maior que zero.")
         BigDecimal valor,
 
-        @NotNull(message = "A data é obrigatória.")
-        LocalDateTime dataPagamento
+        @NotNull(message = "A data de vencimento é obrigatória.")
+        LocalDateTime dataVencimento
 ) {
 }

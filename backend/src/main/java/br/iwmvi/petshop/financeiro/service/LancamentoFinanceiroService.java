@@ -3,12 +3,16 @@ package br.iwmvi.petshop.financeiro.service;
 import br.iwmvi.petshop.common.dto.PaginaResponse;
 import br.iwmvi.petshop.common.validator.EntityValidator;
 import br.iwmvi.petshop.exception.LancamentoFinanceiroNotFoundException;
+import br.iwmvi.petshop.financeiro.dto.request.ContaFinanceiraRequest;
 import br.iwmvi.petshop.financeiro.dto.request.LancamentoFinanceiroRequest;
+import br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest;
 import br.iwmvi.petshop.financeiro.dto.response.ExtratoResponse;
 import br.iwmvi.petshop.financeiro.dto.response.LancamentoFinanceiroResponse;
+import br.iwmvi.petshop.financeiro.dto.response.SaldoContasResponse;
 import br.iwmvi.petshop.financeiro.mapper.LancamentoFinanceiroMapper;
 import br.iwmvi.petshop.financeiro.model.CategoriaLancamento;
 import br.iwmvi.petshop.financeiro.model.LancamentoFinanceiro;
+import br.iwmvi.petshop.financeiro.model.StatusLancamento;
 import br.iwmvi.petshop.financeiro.model.TipoLancamento;
 import br.iwmvi.petshop.financeiro.repository.LancamentoFinanceiroRepository;
 import br.iwmvi.petshop.exception.LancamentoFinanceiroValidationException;
@@ -57,7 +61,7 @@ public class LancamentoFinanceiroService {
         LancamentoFinanceiro lancamento = buscarAtivo(id);
         garantirQueEhManual(lancamento);
 
-        lancamento.atualizar(request.tipo(), request.categoria(), request.descricao(), request.valor(), request.data());
+        lancamento.atualizarLancamento(request.tipo(), request.categoria(), request.descricao(), request.valor(), request.dataPagamento());
         validator.validate(lancamento);
 
         return LancamentoFinanceiroMapper.toResponse(repository.save(lancamento));
@@ -67,7 +71,7 @@ public class LancamentoFinanceiroService {
         LancamentoFinanceiro lancamento = buscarAtivo(id);
         garantirQueEhManual(lancamento);
 
-        lancamento.delete();
+        lancamento.cancelar();
         repository.save(lancamento);
     }
 
@@ -78,7 +82,7 @@ public class LancamentoFinanceiroService {
         LocalDateTime fimEfetivo = fim != null ? fim : LocalDateTime.now();
 
         var pageable = PaginaResponse.pageable(pagina, tamanho,
-                Sort.by(Sort.Direction.DESC, "data").and(Sort.by(Sort.Direction.DESC, "id")));
+                Sort.by(Sort.Direction.DESC, "dataPagamento").and(Sort.by(Sort.Direction.DESC, "id")));
 
         Page<LancamentoFinanceiro> page = repository.buscarExtrato(inicioEfetivo, fimEfetivo, tipo, categoria, pageable);
         BigDecimal totalEntradas = repository.somarPorTipo(TipoLancamento.ENTRADA, inicioEfetivo, fimEfetivo, categoria);
@@ -90,6 +94,50 @@ public class LancamentoFinanceiroService {
                 totalSaidas,
                 totalEntradas.subtract(totalSaidas)
         );
+    }
+
+    public LancamentoFinanceiroResponse registrarConta(ContaFinanceiraRequest request) {
+        LancamentoFinanceiro conta = LancamentoFinanceiroMapper.toEntity(request);
+        validator.validate(conta);
+        return LancamentoFinanceiroMapper.toResponse(repository.save(conta));
+    }
+
+    @Transactional(readOnly = true)
+    public PaginaResponse<LancamentoFinanceiroResponse> listarContas(TipoLancamento tipo, StatusLancamento status, int pagina, int tamanho) {
+        StatusLancamento statusEfetivo = status != null ? status : StatusLancamento.PENDENTE;
+        var pageable = PaginaResponse.pageable(pagina, tamanho, Sort.by("dataVencimento").and(Sort.by("id")));
+        Page<LancamentoFinanceiro> page = repository.buscarContas(tipo, statusEfetivo, pageable);
+        return PaginaResponse.of(page.map(LancamentoFinanceiroMapper::toResponse));
+    }
+
+    @Transactional(readOnly = true)
+    public SaldoContasResponse saldoContas(TipoLancamento tipo) {
+        return new SaldoContasResponse(
+                repository.somarPendentePorTipo(tipo),
+                repository.somarVencidoPorTipo(tipo, LocalDateTime.now())
+        );
+    }
+
+    public LancamentoFinanceiroResponse atualizarConta(Long id, ContaFinanceiraRequest request) {
+        LancamentoFinanceiro conta = buscarAtivo(id);
+        garantirQueEhManual(conta);
+        garantirQuePendente(conta);
+
+        conta.atualizarConta(request.tipo(), request.categoria(), request.descricao(), request.valor(), request.dataVencimento());
+        validator.validate(conta);
+
+        return LancamentoFinanceiroMapper.toResponse(repository.save(conta));
+    }
+
+    public LancamentoFinanceiroResponse marcarComoPaga(Long id, MarcarComoPagaRequest request) {
+        LancamentoFinanceiro conta = buscarAtivo(id);
+        garantirQueEhManual(conta);
+        garantirQuePendente(conta);
+
+        conta.marcarComoPaga(request.dataPagamento());
+        validator.validate(conta);
+
+        return LancamentoFinanceiroMapper.toResponse(repository.save(conta));
     }
 
     /** Chamado pelo PagamentoService quando um pagamento é marcado como PAGO. */
@@ -115,6 +163,12 @@ public class LancamentoFinanceiroService {
             throw new LancamentoFinanceiroValidationException(
                     "Lançamentos gerados automaticamente a partir de um pagamento não podem ser " +
                             "editados ou cancelados diretamente; altere o status do pagamento correspondente.");
+        }
+    }
+
+    private void garantirQuePendente(LancamentoFinanceiro lancamento) {
+        if (lancamento.getStatus() != StatusLancamento.PENDENTE) {
+            throw new LancamentoFinanceiroValidationException("Só é possível editar ou marcar como paga uma conta pendente.");
         }
     }
 

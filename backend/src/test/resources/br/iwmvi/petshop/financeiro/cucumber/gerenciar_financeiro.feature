@@ -68,3 +68,51 @@ Funcionalidade: Gerenciamento financeiro
     Dado que existe um pagamento de agendamento marcado como pago
     Quando tentar cancelar o lançamento gerado pelo pagamento
     Então o retorno do financeiro deve ser o status 400
+
+  Cenário: Registrar uma conta a pagar
+    Quando registrar uma conta a pagar com os dados:
+      | categoria      | FORNECEDOR          |
+      | descricao      | Conta de fornecedor |
+      | valor          | 300.00              |
+      | diasVencimento | 10                  |
+    Então o retorno do financeiro deve ser o status 201
+    E a conta criada deve ter identificador e status PENDENTE
+
+  Cenário: Registrar uma conta a receber
+    Quando registrar uma conta a receber com os dados:
+      | categoria      | OUTRA_RECEITA         |
+      | descricao      | Conta a receber       |
+      | valor          | 400.00                |
+      | diasVencimento | 10                    |
+    Então o retorno do financeiro deve ser o status 201
+    E a conta criada deve ter identificador e status PENDENTE
+
+  Cenário: Marcar conta como paga e ela aparece no extrato depois
+    Dado que existe uma conta a pagar pendente registrada
+    Quando marcar a conta registrada como paga
+    Então o retorno do financeiro deve ser o status 200
+    E a conta deve estar com status PAGO
+    E o extrato deve conter a conta paga
+
+  Cenário: Consultar saldo de contas a pagar
+    Dado que existe uma conta a pagar pendente registrada
+    Quando consultar o saldo de contas a pagar
+    Então o retorno do financeiro deve ser o status 200
+    E o saldo de contas deve ter total pendente maior que zero
+
+  Cenário: Consultar saldo de contas a receber
+    Dado que existe uma conta a receber pendente registrada
+    Quando consultar o saldo de contas a receber
+    Então o retorno do financeiro deve ser o status 200
+    E o saldo de contas deve ter total pendente maior que zero
+
+  Cenário: Não marcar como paga uma conta que já foi paga
+    Dado que existe uma conta a pagar pendente registrada
+    Quando marcar a conta registrada como paga
+    E tentar marcar a conta registrada como paga novamente
+    Então o retorno do financeiro deve ser o status 400
+
+  Cenário: Cancelar uma conta pendente
+    Dado que existe uma conta a receber pendente registrada
+    Quando cancelar a conta registrada
+    Então o retorno do financeiro deve ser o status 204

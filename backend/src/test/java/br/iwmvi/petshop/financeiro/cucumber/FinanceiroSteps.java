@@ -47,6 +47,28 @@ public class FinanceiroSteps {
         lancamentoId = obterId(resultado);
     }
 
+    @Dado("que existe uma conta a pagar pendente registrada")
+    public void queExisteUmaContaAPagarPendenteRegistrada() throws Exception {
+        Map<String, Object> request = criarContaRequest("SAIDA", "FORNECEDOR", "Conta de fornecedor", new BigDecimal("300.00"), 10);
+
+        resultado = mockMvc.perform(post("/financeiro/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        lancamentoId = obterId(resultado);
+    }
+
+    @Dado("que existe uma conta a receber pendente registrada")
+    public void queExisteUmaContaAReceberPendenteRegistrada() throws Exception {
+        Map<String, Object> request = criarContaRequest("ENTRADA", "OUTRA_RECEITA", "Conta a receber de cliente", new BigDecimal("400.00"), 10);
+
+        resultado = mockMvc.perform(post("/financeiro/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        lancamentoId = obterId(resultado);
+    }
+
     @Dado("que existe um pagamento de agendamento marcado como pago")
     public void queExisteUmPagamentoDeAgendamentoMarcadoComoPago() throws Exception {
         Long tutorId = criarTutor();
@@ -137,6 +159,66 @@ public class FinanceiroSteps {
         resultado = mockMvc.perform(delete("/financeiro/lancamentos/{id}", id)).andReturn();
     }
 
+    @Quando("registrar uma conta a pagar com os dados:")
+    public void registrarUmaContaAPagarComOsDados(DataTable dataTable) throws Exception {
+        Map<String, String> dados = dataTable.asMap(String.class, String.class);
+        Map<String, Object> request = criarContaRequest("SAIDA", dados.get("categoria"), dados.get("descricao"),
+                new BigDecimal(dados.get("valor")), Integer.parseInt(dados.get("diasVencimento")));
+
+        resultado = mockMvc.perform(post("/financeiro/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        if (resultado.getResponse().getStatus() == 201) {
+            lancamentoId = obterId(resultado);
+        }
+    }
+
+    @Quando("registrar uma conta a receber com os dados:")
+    public void registrarUmaContaAReceberComOsDados(DataTable dataTable) throws Exception {
+        Map<String, String> dados = dataTable.asMap(String.class, String.class);
+        Map<String, Object> request = criarContaRequest("ENTRADA", dados.get("categoria"), dados.get("descricao"),
+                new BigDecimal(dados.get("valor")), Integer.parseInt(dados.get("diasVencimento")));
+
+        resultado = mockMvc.perform(post("/financeiro/contas")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        if (resultado.getResponse().getStatus() == 201) {
+            lancamentoId = obterId(resultado);
+        }
+    }
+
+    @Quando("marcar a conta registrada como paga")
+    public void marcarAContaRegistradaComoPaga() throws Exception {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("dataPagamento", LocalDateTime.now().withNano(0).format(FORMATADOR));
+
+        resultado = mockMvc.perform(put("/financeiro/contas/{id}/pagar", lancamentoId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+    }
+
+    @Quando("tentar marcar a conta registrada como paga novamente")
+    public void tentarMarcarAContaRegistradaComoPagaNovamente() throws Exception {
+        marcarAContaRegistradaComoPaga();
+    }
+
+    @Quando("cancelar a conta registrada")
+    public void cancelarAContaRegistrada() throws Exception {
+        resultado = mockMvc.perform(delete("/financeiro/lancamentos/{id}", lancamentoId)).andReturn();
+    }
+
+    @Quando("consultar o saldo de contas a pagar")
+    public void consultarOSaldoDeContasAPagar() throws Exception {
+        resultado = mockMvc.perform(get("/financeiro/contas/saldo").param("tipo", "SAIDA")).andReturn();
+    }
+
+    @Quando("consultar o saldo de contas a receber")
+    public void consultarOSaldoDeContasAReceber() throws Exception {
+        resultado = mockMvc.perform(get("/financeiro/contas/saldo").param("tipo", "ENTRADA")).andReturn();
+    }
+
     @Quando("consultar o extrato financeiro")
     public void consultarOExtratoFinanceiro() throws Exception {
         LocalDateTime inicio = LocalDateTime.now().minusDays(1);
@@ -173,6 +255,50 @@ public class FinanceiroSteps {
     @Entao("o extrato deve conter um lançamento vinculado ao pagamento")
     public void oExtratoDeveConterUmLancamentoVinculadoAoPagamento() throws Exception {
         assertThat(obterIdDoLancamentoDoPagamento()).isNotNull();
+    }
+
+    @Entao("a conta criada deve ter identificador e status PENDENTE")
+    public void aContaCriadaDeveTerIdentificadorEStatusPendente() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.hasNonNull("id")).isTrue();
+        assertThat(response.get("status").asText()).isEqualTo("PENDENTE");
+        assertThat(response.get("dataPagamento").isNull()).isTrue();
+    }
+
+    @Entao("a conta deve estar com status PAGO")
+    public void aContaDeveEstarComStatusPago() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("status").asText()).isEqualTo("PAGO");
+        assertThat(response.hasNonNull("dataPagamento")).isTrue();
+    }
+
+    @Entao("o extrato deve conter a conta paga")
+    public void oExtratoDeveConterAContaPaga() throws Exception {
+        MvcResult extratoResult = mockMvc.perform(get("/financeiro/extrato")
+                .param("inicio", LocalDateTime.now().minusDays(1).format(FORMATADOR))
+                .param("fim", LocalDateTime.now().plusDays(1).format(FORMATADOR))
+                .param("tamanho", "50")).andReturn();
+
+        JsonNode itens = objectMapper.readTree(extratoResult.getResponse().getContentAsString())
+                .get("lancamentos").get("itens");
+
+        boolean encontrado = false;
+        for (JsonNode item : itens) {
+            if (item.hasNonNull("id") && item.get("id").asLong() == lancamentoId) {
+                encontrado = true;
+                break;
+            }
+        }
+        assertThat(encontrado).as("extrato deve conter a conta " + lancamentoId + " agora paga").isTrue();
+    }
+
+    @Entao("o saldo de contas deve ter total pendente maior que zero")
+    public void oSaldoDeContasDeveTerTotalPendenteMaiorQueZero() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+
+        assertThat(response.get("totalPendente").decimalValue()).isGreaterThan(BigDecimal.ZERO);
     }
 
     private Long obterIdDoLancamentoDoPagamento() throws Exception {
@@ -264,7 +390,17 @@ public class FinanceiroSteps {
         request.put("categoria", categoria);
         request.put("descricao", descricao);
         request.put("valor", valor);
-        request.put("data", LocalDateTime.now().withNano(0).format(FORMATADOR));
+        request.put("dataPagamento", LocalDateTime.now().withNano(0).format(FORMATADOR));
+        return request;
+    }
+
+    private Map<String, Object> criarContaRequest(String tipo, String categoria, String descricao, BigDecimal valor, int diasVencimento) {
+        Map<String, Object> request = new LinkedHashMap<>();
+        request.put("tipo", tipo);
+        request.put("categoria", categoria);
+        request.put("descricao", descricao);
+        request.put("valor", valor);
+        request.put("dataVencimento", LocalDateTime.now().plusDays(diasVencimento).withNano(0).format(FORMATADOR));
         return request;
     }
 
