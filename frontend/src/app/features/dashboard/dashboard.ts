@@ -5,12 +5,13 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzTableModule } from 'ng-zorro-antd/table';
 import { RouterLink } from '@angular/router';
-import { Dashboard as DashboardResponse, PontoFluxoCaixa } from '../../../core/models';
-import { FinanceiroApi, mensagemDeErro } from '../../../core/api';
-import { formatarMoeda } from '../../../shared/format';
-import { Grafico } from '../../../shared/grafico/grafico';
-import { Pagina } from '../../../shared/pagina/pagina';
+import { AgendamentoResumo, DashboardFinanceiro, PontoFluxoCaixa } from '../../core/models';
+import { DashboardApi, mensagemDeErro } from '../../core/api';
+import { formatarDataHora, formatarMoeda } from '../../shared/format';
+import { Grafico } from '../../shared/grafico/grafico';
+import { Pagina } from '../../shared/pagina/pagina';
 
 const FORMATO_DATA_CURTA = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit' });
 
@@ -30,9 +31,10 @@ function dataCurta(iso: string): string {
 const COR_ENTRADA = '#389e0d';
 
 /**
- * Página inicial do módulo Financeiro: visão geral do dia e do mês (a pagar/a receber
- * hoje, percentuais do mês) e dois gráficos com os dados de caixa já existentes —
- * como o pet shop ainda não vende produtos, não há "vendas" para mostrar.
+ * Página inicial do sistema: visão geral do dia e do mês no financeiro (a pagar/a
+ * receber hoje, percentuais do mês, gráficos de caixa) e os agendamentos de hoje e
+ * dos próximos dias — como o pet shop ainda não vende produtos, não há "vendas" para
+ * mostrar.
  */
 @Component({
   selector: 'app-dashboard',
@@ -45,19 +47,23 @@ const COR_ENTRADA = '#389e0d';
     NzCardModule,
     NzGridModule,
     NzProgressModule,
+    NzTableModule,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
 export class Dashboard implements OnInit {
-  private readonly api = inject(FinanceiroApi);
+  private readonly api = inject(DashboardApi);
 
   protected readonly carregando = signal(true);
   protected readonly erro = signal<string | null>(null);
-  protected readonly dados = signal<DashboardResponse | null>(null);
+  protected readonly dados = signal<DashboardFinanceiro | null>(null);
+  protected readonly agendamentosHoje = signal<AgendamentoResumo[]>([]);
+  protected readonly agendamentosProximos = signal<AgendamentoResumo[]>([]);
 
   protected readonly saudacao = saudacao();
   protected readonly moeda = formatarMoeda;
+  protected readonly dataHora = formatarDataHora;
 
   protected readonly graficoFluxoCaixa = signal<ChartConfiguration['data']>({
     labels: [],
@@ -81,8 +87,10 @@ export class Dashboard implements OnInit {
     this.carregando.set(true);
     this.api.dashboard().subscribe({
       next: (r) => {
-        this.dados.set(r);
-        this.montarGraficos(r.fluxoCaixa);
+        this.dados.set(r.financeiro);
+        this.agendamentosHoje.set(r.agendamentosHoje);
+        this.agendamentosProximos.set(r.agendamentosProximos);
+        this.montarGraficos(r.financeiro.fluxoCaixa);
         this.erro.set(null);
         this.carregando.set(false);
       },

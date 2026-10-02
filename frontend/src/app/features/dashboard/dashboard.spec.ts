@@ -1,14 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { of, throwError } from 'rxjs';
-import { provideTestEnv } from '../../../../testing/providers';
-import { FinanceiroApi } from '../../../core/api';
-import { Dashboard as DashboardResponse } from '../../../core/models';
-import { formatarMoeda } from '../../../shared/format';
-import { Grafico } from '../../../shared/grafico/grafico';
+import { provideTestEnv } from '../../../testing/providers';
+import { DashboardApi } from '../../core/api';
+import { AgendamentoResumo, DashboardFinanceiro, DashboardGeral } from '../../core/models';
+import { formatarMoeda } from '../../shared/format';
+import { Grafico } from '../../shared/grafico/grafico';
 import { Dashboard } from './dashboard';
 
-function resposta(parcial: Partial<DashboardResponse> = {}): DashboardResponse {
+function financeiro(parcial: Partial<DashboardFinanceiro> = {}): DashboardFinanceiro {
   return {
     aReceberHoje: 300,
     aPagarHoje: 150,
@@ -25,9 +25,31 @@ function resposta(parcial: Partial<DashboardResponse> = {}): DashboardResponse {
   };
 }
 
+function agendamento(parcial: Partial<AgendamentoResumo> = {}): AgendamentoResumo {
+  return {
+    id: 1,
+    dataHora: '2026-10-01T10:00:00',
+    petId: 2,
+    petNome: 'Rex',
+    tutorId: 3,
+    tutorNome: 'Wallace',
+    valorTotal: 80,
+    ...parcial,
+  };
+}
+
+function resposta(parcial: Partial<DashboardGeral> = {}): DashboardGeral {
+  return {
+    financeiro: financeiro(),
+    agendamentosHoje: [],
+    agendamentosProximos: [],
+    ...parcial,
+  };
+}
+
 describe('Dashboard', () => {
   let fixture: ComponentFixture<Dashboard>;
-  let api: jest.Mocked<Pick<FinanceiroApi, 'dashboard'>>;
+  let api: jest.Mocked<Pick<DashboardApi, 'dashboard'>>;
 
   function criarComponente() {
     fixture = TestBed.createComponent(Dashboard);
@@ -37,7 +59,7 @@ describe('Dashboard', () => {
   async function montar() {
     await TestBed.configureTestingModule({
       imports: [Dashboard],
-      providers: [provideTestEnv(), { provide: FinanceiroApi, useValue: api }],
+      providers: [provideTestEnv(), { provide: DashboardApi, useValue: api }],
     }).compileComponents();
     criarComponente();
   }
@@ -84,7 +106,9 @@ describe('Dashboard', () => {
   });
 
   it('mostra aviso de vencido quando há valor vencido a receber ou a pagar', async () => {
-    api.dashboard.mockReturnValue(of(resposta({ totalVencidoReceber: 80, totalVencidoPagar: 20 })));
+    api.dashboard.mockReturnValue(
+      of(resposta({ financeiro: financeiro({ totalVencidoReceber: 80, totalVencidoPagar: 20 }) })),
+    );
     await montar();
 
     expect(el().textContent).toContain(`${formatarMoeda(80)} vencido`);
@@ -102,5 +126,41 @@ describe('Dashboard', () => {
     await montar();
 
     expect(el().querySelector('nz-alert')).not.toBeNull();
+  });
+
+  it('mostra os agendamentos de hoje, com nome do pet e do tutor', async () => {
+    api.dashboard.mockReturnValue(
+      of(resposta({ agendamentosHoje: [agendamento({ petNome: 'Rex', tutorNome: 'Wallace' })] })),
+    );
+    await montar();
+
+    expect(el().textContent).toContain('Rex');
+    expect(el().textContent).toContain('Wallace');
+  });
+
+  it('mostra mensagem de vazio quando não há agendamentos para hoje', async () => {
+    await montar();
+
+    expect(el().textContent).toContain('Nenhum agendamento para hoje.');
+  });
+
+  it('mostra mensagem de vazio quando não há próximos agendamentos', async () => {
+    await montar();
+
+    expect(el().textContent).toContain('Nenhum agendamento futuro.');
+  });
+
+  it('mostra os próximos agendamentos, com nome do pet e do tutor', async () => {
+    api.dashboard.mockReturnValue(
+      of(
+        resposta({
+          agendamentosProximos: [agendamento({ id: 2, petNome: 'Totó', tutorNome: 'Maria' })],
+        }),
+      ),
+    );
+    await montar();
+
+    expect(el().textContent).toContain('Totó');
+    expect(el().textContent).toContain('Maria');
   });
 });

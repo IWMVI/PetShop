@@ -42,10 +42,10 @@ describe('App', () => {
       a.textContent?.trim(),
     );
     expect(itens).toEqual([
+      'Dashboard',
       'Tutores',
       'Serviços',
       'Funcionários',
-      'Dashboard',
       'Extrato',
       'Contas a Pagar',
       'Contas a Receber',
@@ -126,10 +126,10 @@ describe('App', () => {
     expect(
       Array.from(gaveta.querySelectorAll('[nz-menu-item]')).map((i) => i.textContent?.trim()),
     ).toEqual([
+      'Dashboard',
       'Tutores',
       'Serviços',
       'Funcionários',
-      'Dashboard',
       'Extrato',
       'Contas a Pagar',
       'Contas a Receber',

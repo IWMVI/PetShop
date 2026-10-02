@@ -71,7 +71,7 @@ export class Contas implements OnInit {
     this.tipo() === 'SAIDA' ? 'Contas a Pagar' : 'Contas a Receber',
   );
   protected readonly trilha = computed<ItemTrilha[]>(() => [
-    { rotulo: 'Financeiro', link: '/financeiro/dashboard' },
+    { rotulo: 'Financeiro', link: '/financeiro/extrato' },
     { rotulo: this.titulo() },
   ]);
   protected readonly rotaNova = computed(() =>

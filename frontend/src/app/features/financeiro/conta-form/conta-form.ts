@@ -77,7 +77,7 @@ export class ContaForm implements OnInit {
     return this.id() ? `Editar ${nome}` : `Nova ${nome}`;
   });
   protected readonly trilha = computed<ItemTrilha[]>(() => [
-    { rotulo: 'Financeiro', link: '/financeiro/dashboard' },
+    { rotulo: 'Financeiro', link: '/financeiro/extrato' },
     { rotulo: this.tituloLista(), link: this.rotaLista() },
     { rotulo: this.id() ? 'Editar' : 'Nova' },
   ]);

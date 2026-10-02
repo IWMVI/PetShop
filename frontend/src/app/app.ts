@@ -67,6 +67,7 @@ export class App {
   protected readonly menuAberto = signal(false);
 
   protected readonly menu: ItemMenu[] = [
+    { rota: '/', rotulo: 'Dashboard', icone: 'layout-dashboard' },
     { rota: '/tutores', rotulo: 'Tutores', icone: 'users' },
     { rota: '/servicos', rotulo: 'Serviços', icone: 'wrench' },
     { rota: '/funcionarios', rotulo: 'Funcionários', icone: 'id-card' },
@@ -74,7 +75,6 @@ export class App {
       rotulo: 'Financeiro',
       icone: 'wallet',
       filhos: [
-        { rota: '/financeiro/dashboard', rotulo: 'Dashboard' },
         { rota: '/financeiro/extrato', rotulo: 'Extrato' },
         { rota: '/financeiro/contas-a-pagar', rotulo: 'Contas a Pagar', saldo: 'aPagar' },
         { rota: '/financeiro/contas-a-receber', rotulo: 'Contas a Receber', saldo: 'aReceber' },

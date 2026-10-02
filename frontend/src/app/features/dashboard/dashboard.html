@@ -1,4 +1,4 @@
-<app-pagina titulo="Dashboard" [trilha]="[{ rotulo: 'Financeiro' }]">
+<app-pagina titulo="Dashboard">
   <span paginaResumo>{{ saudacao }}</span>
 
   @if (erro()) {
@@ -83,6 +83,93 @@
           <span class="titulo-grafico">Entradas por dia</span>
           <span class="subtitulo-grafico">Receita diária dos últimos 14 dias</span>
           <app-grafico tipo="bar" [dados]="graficoEntradas()" [opcoes]="opcoesGrafico" />
+        </nz-card>
+      </div>
+    </div>
+
+    <div nz-row [nzGutter]="[16, 16]" class="linha-agendamentos">
+      <div nz-col [nzXs]="24" [nzLg]="12">
+        <nz-card class="card-agendamentos">
+          <span class="titulo-grafico">Agendamentos de hoje</span>
+          @if (agendamentosHoje().length) {
+            <nz-table [nzData]="agendamentosHoje()" [nzShowPagination]="false" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Pet</th>
+                  <th class="ocultar-pequeno">Tutor</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (a of agendamentosHoje(); track a.id) {
+                  <tr>
+                    <td class="nowrap">
+                      <a
+                        [routerLink]="[
+                          '/tutores',
+                          a.tutorId,
+                          'pets',
+                          a.petId,
+                          'agendamentos',
+                          a.id,
+                        ]"
+                      >
+                        {{ dataHora(a.dataHora) }}
+                      </a>
+                    </td>
+                    <td>{{ a.petNome }}</td>
+                    <td class="ocultar-pequeno">{{ a.tutorNome }}</td>
+                    <td class="nowrap">{{ moeda(a.valorTotal) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          } @else {
+            <p class="muted">Nenhum agendamento para hoje.</p>
+          }
+        </nz-card>
+      </div>
+      <div nz-col [nzXs]="24" [nzLg]="12">
+        <nz-card class="card-agendamentos">
+          <span class="titulo-grafico">Próximos agendamentos</span>
+          @if (agendamentosProximos().length) {
+            <nz-table [nzData]="agendamentosProximos()" [nzShowPagination]="false" nzSize="small">
+              <thead>
+                <tr>
+                  <th>Horário</th>
+                  <th>Pet</th>
+                  <th class="ocultar-pequeno">Tutor</th>
+                  <th>Valor</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (a of agendamentosProximos(); track a.id) {
+                  <tr>
+                    <td class="nowrap">
+                      <a
+                        [routerLink]="[
+                          '/tutores',
+                          a.tutorId,
+                          'pets',
+                          a.petId,
+                          'agendamentos',
+                          a.id,
+                        ]"
+                      >
+                        {{ dataHora(a.dataHora) }}
+                      </a>
+                    </td>
+                    <td>{{ a.petNome }}</td>
+                    <td class="ocultar-pequeno">{{ a.tutorNome }}</td>
+                    <td class="nowrap">{{ moeda(a.valorTotal) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          } @else {
+            <p class="muted">Nenhum agendamento futuro.</p>
+          }
         </nz-card>
       </div>
     </div>

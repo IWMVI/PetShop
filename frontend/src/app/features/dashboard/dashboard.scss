@@ -4,7 +4,8 @@
 
 .linha-cards,
 .linha-indicadores,
-.linha-graficos {
+.linha-graficos,
+.linha-agendamentos {
   margin-bottom: 1rem;
 }
 
@@ -97,6 +98,16 @@
   color: rgba(0, 0, 0, 0.45);
   font-size: 0.85rem;
   margin-bottom: 0.75rem;
+}
+
+// Cards dos agendamentos de hoje/próximos: mesmo cabeçalho dos gráficos (.titulo-grafico),
+// com a tabela compacta logo abaixo.
+.card-agendamentos {
+  ::ng-deep .ant-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
 }
 
 .card-carregando {

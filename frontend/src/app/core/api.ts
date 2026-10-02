@@ -9,7 +9,7 @@ import {
   AtualizarStatusPagamentoRequest,
   CategoriaLancamento,
   ContaFinanceiraRequest,
-  Dashboard,
+  DashboardGeral,
   ExtratoResponse,
   HistoricoPet,
   HistoricoPetRequest,
@@ -293,8 +293,15 @@ export class FinanceiroApi {
   marcarComoPaga(id: number, body: MarcarComoPagaRequest) {
     return this.http.put<LancamentoFinanceiro>(`${this.url}/contas/${id}/pagar`, body);
   }
+}
+
+/** Página inicial do sistema: resumo financeiro e agendamentos de hoje/próximos. */
+@Injectable({ providedIn: 'root' })
+export class DashboardApi {
+  private readonly http = inject(HttpClient);
+
   dashboard() {
-    return this.http.get<Dashboard>(`${this.url}/dashboard`);
+    return this.http.get<DashboardGeral>(`${API_URL}/dashboard`);
   }
 }
 

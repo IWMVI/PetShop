@@ -225,7 +225,7 @@ export interface PontoFluxoCaixa {
 }
 
 /** Visão geral do módulo Financeiro: valores do dia, percentuais do mês e fluxo de caixa recente. */
-export interface Dashboard {
+export interface DashboardFinanceiro {
   aReceberHoje: number;
   aPagarHoje: number;
   totalVencidoReceber: number;
@@ -236,4 +236,22 @@ export interface Dashboard {
   percentualPagoMes: number;
   /** 14 pontos, um por dia, dos últimos 14 dias (hoje incluso), em ordem cronológica. */
   fluxoCaixa: PontoFluxoCaixa[];
+}
+
+/** Agendamento resumido para listagem fora do contexto de um pet específico (ex.: dashboard). */
+export interface AgendamentoResumo {
+  id: number;
+  dataHora: string;
+  petId: number;
+  petNome: string;
+  tutorId: number;
+  tutorNome: string;
+  valorTotal: number;
+}
+
+/** Dados da página inicial do sistema: resumo financeiro e agendamentos de hoje/próximos. */
+export interface DashboardGeral {
+  financeiro: DashboardFinanceiro;
+  agendamentosHoje: AgendamentoResumo[];
+  agendamentosProximos: AgendamentoResumo[];
 }
