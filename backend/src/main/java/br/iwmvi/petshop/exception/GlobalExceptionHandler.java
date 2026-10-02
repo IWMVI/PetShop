@@ -63,4 +63,16 @@ public class GlobalExceptionHandler {
     public Map<String, String> handleEntityNotFound(EntityNotFoundException ex) {
         return Map.of("mensagem", ex.getMessage());
     }
+
+    @ExceptionHandler(PagamentoNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handlePagamentoNotFound(PagamentoNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
+    @ExceptionHandler(PagamentoValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handlePagamentoValidation(PagamentoValidationException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
 }
