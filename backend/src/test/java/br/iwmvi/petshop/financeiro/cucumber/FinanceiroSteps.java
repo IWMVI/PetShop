@@ -225,7 +225,7 @@ public class FinanceiroSteps {
 
     @Quando("consultar o dashboard financeiro")
     public void consultarODashboardFinanceiro() throws Exception {
-        resultado = mockMvc.perform(get("/financeiro/dashboard")).andReturn();
+        resultado = mockMvc.perform(get("/dashboard")).andReturn();
     }
 
     @Quando("consultar o saldo de contas a pagar")
@@ -316,10 +316,11 @@ public class FinanceiroSteps {
     @Entao("o dashboard deve ter a receber hoje igual a {string}")
     public void oDashboardDeveTerAReceberHojeIgualA(String valorEsperado) throws Exception {
         JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+        JsonNode financeiro = response.get("financeiro");
 
-        assertThat(response.get("aReceberHoje").decimalValue()).isEqualByComparingTo(new BigDecimal(valorEsperado));
-        assertThat(response.hasNonNull("fluxoCaixa")).isTrue();
-        assertThat(response.get("fluxoCaixa").isArray()).isTrue();
+        assertThat(financeiro.get("aReceberHoje").decimalValue()).isEqualByComparingTo(new BigDecimal(valorEsperado));
+        assertThat(financeiro.hasNonNull("fluxoCaixa")).isTrue();
+        assertThat(financeiro.get("fluxoCaixa").isArray()).isTrue();
     }
 
     @Entao("o saldo de contas deve ter total pendente maior que zero")

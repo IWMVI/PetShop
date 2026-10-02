@@ -69,6 +69,42 @@ public class AgendamentoSteps {
         agendamentoId = obterId(resultado);
     }
 
+    @Dado("que existe um agendamento ativo para o pet hoje")
+    public void queExisteUmAgendamentoAtivoParaOPetHoje() throws Exception {
+        queExisteUmPetDisponivelParaAgendamento();
+        queExistemServicosDisponiveisParaAgendamento();
+
+        Map<String, Object> request = criarAgendamentoRequest(
+                LocalDateTime.now().plusMinutes(5),
+                "Agendamento de hoje",
+                List.of(servicoIdsCriados.getFirst())
+        );
+
+        resultado = mockMvc.perform(post("/pets/{petId}/agendamentos", petId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        agendamentoId = obterId(resultado);
+    }
+
+    @Dado("que existe um agendamento ativo para o pet daqui a alguns dias")
+    public void queExisteUmAgendamentoAtivoParaOPetDaquiAAlgunsDias() throws Exception {
+        queExisteUmPetDisponivelParaAgendamento();
+        queExistemServicosDisponiveisParaAgendamento();
+
+        Map<String, Object> request = criarAgendamentoRequest(
+                LocalDateTime.now().plusDays(3),
+                "Agendamento próximo",
+                List.of(servicoIdsCriados.getFirst())
+        );
+
+        resultado = mockMvc.perform(post("/pets/{petId}/agendamentos", petId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))).andReturn();
+
+        agendamentoId = obterId(resultado);
+    }
+
     @Quando("agendar serviços para o pet com os dados:")
     public void agendarServicosParaOPetComOsDados(DataTable dataTable) throws Exception {
         Map<String, String> dados = dataTable.asMap(String.class, String.class);
@@ -138,6 +174,11 @@ public class AgendamentoSteps {
                 .content(objectMapper.writeValueAsString(request))).andReturn();
     }
 
+    @Quando("consultar o dashboard")
+    public void consultarODashboard() throws Exception {
+        resultado = mockMvc.perform(get("/dashboard")).andReturn();
+    }
+
     @Quando("cancelar o agendamento do pet")
     public void cancelarOAgendamentoDoPet() throws Exception {
         resultado = mockMvc.perform(delete("/pets/{petId}/agendamentos/{id}", petId, agendamentoId)).andReturn();
@@ -202,6 +243,39 @@ public class AgendamentoSteps {
         assertThat(response.get("servicos").isArray()).isTrue();
         assertThat(response.get("servicos").size()).isEqualTo(1);
         assertThat(response.get("servicos").get(0).get("servicoId").asLong()).isEqualTo(servicoIdsCriados.get(1));
+    }
+
+    @Entao("o dashboard deve conter o agendamento de hoje para o pet")
+    public void oDashboardDeveConterOAgendamentoDeHojeParaOPet() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+        JsonNode agendamentosHoje = response.get("agendamentosHoje");
+
+        assertThat(agendamentosHoje.isArray()).isTrue();
+        assertThat(encontrarAgendamento(agendamentosHoje, agendamentoId))
+                .as("agendamentosHoje deve conter o agendamento " + agendamentoId)
+                .isTrue();
+    }
+
+    @Entao("o dashboard deve conter o agendamento futuro entre os próximos")
+    public void oDashboardDeveConterOAgendamentoFuturoEntreOsProximos() throws Exception {
+        JsonNode response = objectMapper.readTree(resultado.getResponse().getContentAsString());
+        JsonNode agendamentosProximos = response.get("agendamentosProximos");
+
+        assertThat(agendamentosProximos.isArray()).isTrue();
+        assertThat(encontrarAgendamento(agendamentosProximos, agendamentoId))
+                .as("agendamentosProximos deve conter o agendamento " + agendamentoId)
+                .isTrue();
+    }
+
+    private boolean encontrarAgendamento(JsonNode agendamentos, Long id) {
+        for (JsonNode item : agendamentos) {
+            if (item.get("id").asLong() == id) {
+                assertThat(item.get("petNome").asText()).isEqualTo("Rex");
+                assertThat(item.get("tutorNome").asText()).isEqualTo("Wallace");
+                return true;
+            }
+        }
+        return false;
     }
 
     private Long criarTutor() throws Exception {

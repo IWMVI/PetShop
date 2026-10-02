@@ -66,3 +66,15 @@ Funcionalidade: Gerenciamento de agendamentos
     Dado que existe um agendamento ativo para o pet
     Quando cancelar o agendamento do pet
     Então o retorno do agendamento deve ser o status 204
+
+  Cenário: Dashboard geral deve listar o agendamento de hoje
+    Dado que existe um agendamento ativo para o pet hoje
+    Quando consultar o dashboard
+    Então o retorno do agendamento deve ser o status 200
+    E o dashboard deve conter o agendamento de hoje para o pet
+
+  Cenário: Dashboard geral deve listar os próximos agendamentos
+    Dado que existe um agendamento ativo para o pet daqui a alguns dias
+    Quando consultar o dashboard
+    Então o retorno do agendamento deve ser o status 200
+    E o dashboard deve conter o agendamento futuro entre os próximos

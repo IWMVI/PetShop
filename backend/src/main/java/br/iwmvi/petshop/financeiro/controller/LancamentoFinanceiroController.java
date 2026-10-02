@@ -4,7 +4,6 @@ import br.iwmvi.petshop.common.dto.PaginaResponse;
 import br.iwmvi.petshop.financeiro.dto.request.ContaFinanceiraRequest;
 import br.iwmvi.petshop.financeiro.dto.request.LancamentoFinanceiroRequest;
 import br.iwmvi.petshop.financeiro.dto.request.MarcarComoPagaRequest;
-import br.iwmvi.petshop.financeiro.dto.response.DashboardResponse;
 import br.iwmvi.petshop.financeiro.dto.response.ExtratoResponse;
 import br.iwmvi.petshop.financeiro.dto.response.LancamentoFinanceiroResponse;
 import br.iwmvi.petshop.financeiro.dto.response.SaldoContasResponse;
@@ -93,8 +92,4 @@ public class LancamentoFinanceiroController {
         return service.marcarComoPaga(id, request);
     }
 
-    @GetMapping("/dashboard")
-    public DashboardResponse dashboard() {
-        return service.dashboard();
-    }
 }
