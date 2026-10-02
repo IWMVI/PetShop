@@ -2,11 +2,26 @@
   margin-bottom: 1rem;
 }
 
+.filtro-situacao {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+
+  label {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+}
+
 .filtro-status {
   width: 160px;
 }
 
 @media (max-width: 767.98px) {
+  .filtro-situacao {
+    width: 100%;
+  }
+
   .filtro-status {
     width: 100%;
   }

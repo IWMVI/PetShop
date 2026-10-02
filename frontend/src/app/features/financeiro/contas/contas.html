@@ -117,10 +117,13 @@
   /></ng-template>
 
   <ng-template #filtroPorStatus>
-    <nz-select [formControl]="filtroStatus" class="filtro-status">
-      @for (o of opcoesFiltro; track o.valor) {
-        <nz-option [nzValue]="o.valor" [nzLabel]="o.rotulo" />
-      }
-    </nz-select>
+    <div class="filtro-situacao">
+      <label for="filtro-situacao" class="muted">Situação</label>
+      <nz-select id="filtro-situacao" [formControl]="filtroStatus" class="filtro-status">
+        @for (o of opcoesFiltro; track o.valor) {
+          <nz-option [nzValue]="o.valor" [nzLabel]="o.rotulo" />
+        }
+      </nz-select>
+    </div>
   </ng-template>
 </app-pagina>
