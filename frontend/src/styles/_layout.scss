@@ -47,6 +47,16 @@
   padding: 0 1rem;
 }
 
+// O cabeçalho do card (busca/filtro em nzExtra) não tem título nessas telas; com o
+// padding e a borda padrão do ng-zorro, ele vira uma faixa larga e quase vazia que
+// destoa do resto da página. Deixamos mais baixo e com uma linha mais sutil, pra ficar
+// perto de um rodapé de toolbar e não de um cabeçalho de card à parte.
+.table-card .ant-card-head {
+  min-height: 0;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
 .form-actions {
   display: flex;
   justify-content: flex-end;

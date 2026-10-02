@@ -118,6 +118,7 @@
 
   <ng-template #filtroPorStatus>
     <div class="filtro-situacao">
+      <lucide-icon name="list-filter" [size]="14" class="muted" />
       <label for="filtro-situacao" class="muted">Situação</label>
       <nz-select id="filtro-situacao" [formControl]="filtroStatus" class="filtro-status">
         @for (o of opcoesFiltro; track o.valor) {
