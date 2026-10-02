@@ -1,0 +1,26 @@
+.resumo-agendamento {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.linha-status {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.total {
+  margin-top: 0.25rem;
+}
+
+.acoes-pagamento {
+  display: flex;
+  gap: 0.5rem;
+}
+
+@media (max-width: 767.98px) {
+  .acoes-pagamento {
+    flex-direction: column;
+  }
+}

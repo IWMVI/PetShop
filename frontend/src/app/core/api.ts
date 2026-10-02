@@ -6,8 +6,11 @@ import {
   ConsultaPaginada,
   Funcionario,
   FuncionarioRequest,
+  AtualizarStatusPagamentoRequest,
   HistoricoPet,
   HistoricoPetRequest,
+  Pagamento,
+  PagamentoRequest,
   Pagina,
   Pet,
   PetRequest,
@@ -149,6 +152,36 @@ export class FuncionarioApi {
   }
   excluir(id: number) {
     return this.http.delete<void>(`${this.url}/${id}`);
+  }
+}
+
+/**
+ * Pagamentos de um agendamento. Registrar e listar são aninhados sob o
+ * agendamento; consultar, atualizar status e cancelar são por id do próprio
+ * pagamento, espelhando o controller da API.
+ */
+@Injectable({ providedIn: 'root' })
+export class PagamentoApi {
+  private readonly http = inject(HttpClient);
+  private url(agendamentoId: number) {
+    return `${API_URL}/agendamentos/${agendamentoId}/pagamentos`;
+  }
+  private readonly urlPagamento = `${API_URL}/pagamentos`;
+
+  listar(agendamentoId: number) {
+    return this.http.get<Pagamento[]>(this.url(agendamentoId));
+  }
+  criar(agendamentoId: number, body: PagamentoRequest) {
+    return this.http.post<Pagamento>(this.url(agendamentoId), body);
+  }
+  buscar(id: number) {
+    return this.http.get<Pagamento>(`${this.urlPagamento}/${id}`);
+  }
+  atualizarStatus(id: number, body: AtualizarStatusPagamentoRequest) {
+    return this.http.put<Pagamento>(`${this.urlPagamento}/${id}`, body);
+  }
+  cancelar(id: number) {
+    return this.http.delete<void>(`${this.urlPagamento}/${id}`);
   }
 }
 

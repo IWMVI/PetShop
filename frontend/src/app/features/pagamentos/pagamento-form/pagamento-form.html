@@ -1,0 +1,34 @@
+<app-pagina titulo="Registrar pagamento" [trilha]="trilha()">
+  <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
+    <nz-card>
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="valor">Valor</nz-form-label>
+        <nz-form-control nzErrorTip="Informe um valor maior que zero.">
+          <nz-input-group nzAddOnBefore="R$">
+            <input nz-input id="valor" formControlName="valor" appMoeda placeholder="0,00" />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item>
+        <nz-form-label nzRequired nzFor="metodoPagamento">Método de pagamento</nz-form-label>
+        <nz-form-control nzErrorTip="Selecione o método de pagamento.">
+          <nz-select
+            nzId="metodoPagamento"
+            formControlName="metodoPagamento"
+            nzPlaceHolder="Selecione"
+          >
+            @for (m of metodos; track m.valor) {
+              <nz-option [nzValue]="m.valor" [nzLabel]="m.rotulo" />
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </nz-card>
+
+    <div class="form-actions">
+      <a nz-button [routerLink]="voltar()">Cancelar</a>
+      <button nz-button nzType="primary" type="submit" [nzLoading]="salvando()">Salvar</button>
+    </div>
+  </form>
+</app-pagina>

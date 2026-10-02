@@ -90,6 +90,28 @@ export interface AgendamentoRequest {
   servicoIds: number[];
 }
 
+export type StatusPagamento = 'PENDENTE' | 'PAGO' | 'CANCELADO';
+export type MetodoPagamento = 'CARTAO_CREDITO' | 'CARTAO_DEBITO' | 'PIX' | 'DINHEIRO';
+
+export interface Pagamento {
+  id: number;
+  agendamentoId: number;
+  valor: number;
+  metodoPagamento: MetodoPagamento;
+  status: StatusPagamento;
+  dataPagamento: string | null;
+}
+
+export interface PagamentoRequest {
+  valor: number;
+  metodoPagamento: MetodoPagamento;
+}
+
+export interface AtualizarStatusPagamentoRequest {
+  status: StatusPagamento;
+  dataPagamento?: string | null;
+}
+
 export type Cargo = 'VETERINARIO' | 'TOSADOR' | 'BANHISTA' | 'ATENDENTE' | 'GERENTE';
 
 export interface Funcionario {

@@ -60,11 +60,27 @@ export const routes: Routes = [
           ),
       },
       {
+        path: ':tutorId/pets/:petId/agendamentos/:agendamentoId',
+        title: 'Agendamento',
+        loadComponent: () =>
+          import('./features/agendamentos/agendamento-detail/agendamento-detail').then(
+            (m) => m.AgendamentoDetail,
+          ),
+      },
+      {
         path: ':tutorId/pets/:petId/agendamentos/:id/editar',
         title: 'Reagendar',
         loadComponent: () =>
           import('./features/agendamentos/agendamento-form/agendamento-form').then(
             (m) => m.AgendamentoForm,
+          ),
+      },
+      {
+        path: ':tutorId/pets/:petId/agendamentos/:agendamentoId/pagamentos/novo',
+        title: 'Registrar pagamento',
+        loadComponent: () =>
+          import('./features/pagamentos/pagamento-form/pagamento-form').then(
+            (m) => m.PagamentoForm,
           ),
       },
     ],

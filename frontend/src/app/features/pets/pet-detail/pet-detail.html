@@ -55,7 +55,9 @@
           @for (a of tabela.data; track a.id) {
             <tr>
               <td class="nowrap">
-                {{ dataHora(a.dataHora) }}
+                <a [routerLink]="['/tutores', tutorId(), 'pets', p.id, 'agendamentos', a.id]">{{
+                  dataHora(a.dataHora)
+                }}</a>
                 <div class="so-pequeno resumo-celular">
                   {{ nomesServicos(a) }} · {{ moeda(a.valorTotal) }}
                 </div>

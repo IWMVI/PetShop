@@ -1,4 +1,4 @@
-import { Cargo, TipoEvento } from '../../core/models';
+import { Cargo, MetodoPagamento, StatusPagamento, TipoEvento } from '../../core/models';
 import { TomStatus } from '../status/status';
 
 /** Rótulos dos cargos, na ordem em que aparecem nos formulários. */
@@ -17,6 +17,21 @@ export const TIPOS_EVENTO: Record<TipoEvento, { rotulo: string; tom: TomStatus }
   PROCEDIMENTO: { rotulo: 'Procedimento', tom: 'alerta' },
   SERVICO: { rotulo: 'Serviço', tom: 'neutro' },
   OUTRO: { rotulo: 'Outro', tom: 'neutro' },
+};
+
+/** Rótulos dos métodos de pagamento, na ordem em que aparecem nos formulários. */
+export const METODOS_PAGAMENTO: Record<MetodoPagamento, string> = {
+  CARTAO_CREDITO: 'Cartão de crédito',
+  CARTAO_DEBITO: 'Cartão de débito',
+  PIX: 'Pix',
+  DINHEIRO: 'Dinheiro',
+};
+
+/** Rótulo e tom de cada status de pagamento, exibidos com o <app-status>. */
+export const STATUS_PAGAMENTO: Record<StatusPagamento, { rotulo: string; tom: TomStatus }> = {
+  PENDENTE: { rotulo: 'Pendente', tom: 'destaque' },
+  PAGO: { rotulo: 'Pago', tom: 'sucesso' },
+  CANCELADO: { rotulo: 'Cancelado', tom: 'neutro' },
 };
 
 /** Lista de opções {valor, rótulo} para selects, preservando a ordem de declaração. */

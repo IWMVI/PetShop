@@ -1,0 +1,117 @@
+<app-pagina titulo="Agendamento" [trilha]="trilha()">
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" />
+  } @else if (agendamento(); as a) {
+    <nz-card>
+      <div class="resumo-agendamento">
+        <div class="linha-status">
+          <strong>{{ dataHora(a.dataHora) }}</strong>
+          <app-status [tom]="statusAgendamento[a.status].tom">{{
+            statusAgendamento[a.status].rotulo
+          }}</app-status>
+        </div>
+        <div class="muted">{{ nomesServicos(a) }}</div>
+        @if (a.observacoes) {
+          <div class="muted">{{ a.observacoes }}</div>
+        }
+        <div class="total">
+          Valor total: <strong>{{ moeda(a.valorTotal) }}</strong>
+        </div>
+      </div>
+    </nz-card>
+
+    <header class="section-header">
+      <h2>Pagamentos</h2>
+      <a
+        nz-button
+        nzType="primary"
+        class="btn-novo"
+        [routerLink]="[
+          '/tutores',
+          tutorId(),
+          'pets',
+          petId(),
+          'agendamentos',
+          agendamentoId(),
+          'pagamentos',
+          'novo',
+        ]"
+      >
+        <lucide-icon name="plus" [size]="16" /> Registrar pagamento
+      </a>
+    </header>
+
+    @if (erroPagamentos()) {
+      <nz-alert nzType="error" nzShowIcon [nzMessage]="erroPagamentos()!" />
+    } @else {
+      <nz-card class="table-card">
+        <nz-table
+          #tabela
+          [nzData]="pagamentos()"
+          [nzLoading]="carregandoPagamentos()"
+          [nzFrontPagination]="false"
+          [nzNoResult]="vazio"
+          nzSize="middle"
+        >
+          <thead>
+            <tr>
+              <th>Valor</th>
+              <th>Método</th>
+              <th>Status</th>
+              <th class="ocultar-pequeno">Data de pagamento</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of tabela.data; track p.id) {
+              <tr>
+                <td class="nowrap">
+                  {{ moeda(p.valor) }}
+                  <div class="so-pequeno muted">{{ metodosPagamento[p.metodoPagamento] }}</div>
+                </td>
+                <td class="ocultar-pequeno">{{ metodosPagamento[p.metodoPagamento] }}</td>
+                <td>
+                  <app-status [tom]="statusPagamento[p.status].tom">{{
+                    statusPagamento[p.status].rotulo
+                  }}</app-status>
+                </td>
+                <td class="nowrap ocultar-pequeno">
+                  {{ p.dataPagamento ? dataHora(p.dataPagamento) : '—' }}
+                </td>
+                <td>
+                  @if (p.status === 'PENDENTE') {
+                    <div class="acoes-pagamento">
+                      <button
+                        nz-button
+                        nzSize="small"
+                        type="button"
+                        [nzLoading]="atualizandoId() === p.id"
+                        (click)="marcarComoPago(p)"
+                      >
+                        Marcar como pago
+                      </button>
+                      <button
+                        nz-button
+                        nzSize="small"
+                        nzDanger
+                        type="button"
+                        (click)="confirmarCancelamento(p)"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+      </nz-card>
+      <ng-template #vazio
+        ><nz-empty nzNotFoundContent="Nenhum pagamento registrado para este agendamento."
+      /></ng-template>
+    }
+  } @else {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  }
+</app-pagina>
