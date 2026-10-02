@@ -1,14 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  OnInit,
-  computed,
-  inject,
-  input,
-  numberAttribute,
-  signal,
-} from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnInit, computed, inject, input, numberAttribute, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
@@ -20,11 +10,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { FinanceiroApi, mensagemDeErro } from '../../../core/api';
-import {
-  CategoriaLancamento,
-  LancamentoFinanceiroRequest,
-  TipoLancamento,
-} from '../../../core/models';
+import { CategoriaLancamento, ContaFinanceiraRequest, TipoLancamento } from '../../../core/models';
 import { paraLocalDateTime } from '../../../shared/format';
 import { MoedaDirective } from '../../../shared/moeda/moeda.directive';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
@@ -32,13 +18,18 @@ import {
   CATEGORIAS_ENTRADA,
   CATEGORIAS_LANCAMENTO,
   CATEGORIAS_SAIDA,
-  TIPOS_LANCAMENTO,
-  opcoes,
 } from '../../../shared/rotulos/rotulos';
+import { SaldoFinanceiroService } from '../../../shared/saldo-financeiro.service';
 import { ToastService } from '../../../shared/toast/toast.service';
 
+/**
+ * Cadastro/edição de conta a pagar ou a receber (`tipo` fixo, vindo da rota via
+ * `withComponentInputBinding`, ao contrário do LancamentoForm onde o tipo é escolhido
+ * no próprio formulário). Reaproveita o GET de lançamento por id para carregar a conta
+ * na edição, já que é a mesma entidade.
+ */
 @Component({
-  selector: 'app-lancamento-form',
+  selector: 'app-conta-form',
   imports: [
     Pagina,
     ReactiveFormsModule,
@@ -53,72 +44,65 @@ import { ToastService } from '../../../shared/toast/toast.service';
     NzInputModule,
     NzSelectModule,
   ],
-  templateUrl: './lancamento-form.html',
-  styleUrl: './lancamento-form.scss',
+  templateUrl: './conta-form.html',
+  styleUrl: './conta-form.scss',
 })
-export class LancamentoForm implements OnInit {
+export class ContaForm implements OnInit {
+  readonly tipo = input.required<TipoLancamento>();
   readonly id = input(undefined, { transform: numberAttribute });
-
-  protected readonly titulo = computed(() => (this.id() ? 'Editar lançamento' : 'Novo lançamento'));
-  protected readonly trilha = computed<ItemTrilha[]>(() => [
-    { rotulo: 'Financeiro', link: '/financeiro/extrato' },
-    { rotulo: this.id() ? 'Editar' : 'Novo' },
-  ]);
 
   private readonly api = inject(FinanceiroApi);
   private readonly router = inject(Router);
   private readonly toast = inject(ToastService);
-  private readonly destroyRef = inject(DestroyRef);
+  private readonly saldoFinanceiro = inject(SaldoFinanceiroService);
 
   protected readonly salvando = signal(false);
-  /** Defesa: um lançamento gerado por pagamento não deveria chegar a esta tela editável. */
+  /** Defesa: uma conta já paga/cancelada não deveria chegar a esta tela editável. */
   protected readonly bloqueado = signal(false);
 
-  protected readonly tipos = opcoes(TIPOS_LANCAMENTO);
   protected readonly categoriasLancamento = CATEGORIAS_LANCAMENTO;
-
-  protected readonly form = inject(FormBuilder).group({
-    tipo: [null as TipoLancamento | null, Validators.required],
-    categoria: [null as CategoriaLancamento | null, Validators.required],
-    descricao: ['', [Validators.required, Validators.maxLength(255)]],
-    valor: [null as number | null, [Validators.required, Validators.min(0.01)]],
-    dataPagamento: [null as Date | null, Validators.required],
-  });
-
-  private readonly tipoAtual = signal<TipoLancamento | null>(null);
-
-  /** Opções de categoria compatíveis com o tipo escolhido no formulário. */
   protected readonly categorias = computed(() => {
-    const lista = this.tipoAtual() === 'SAIDA' ? CATEGORIAS_SAIDA : CATEGORIAS_ENTRADA;
+    const lista = this.tipo() === 'SAIDA' ? CATEGORIAS_SAIDA : CATEGORIAS_ENTRADA;
     return lista.map((valor) => ({ valor, rotulo: CATEGORIAS_LANCAMENTO[valor] }));
   });
 
-  ngOnInit() {
-    this.form.controls.tipo.valueChanges
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((tipo) => {
-        this.tipoAtual.set(tipo);
-        const validas = tipo === 'SAIDA' ? CATEGORIAS_SAIDA : CATEGORIAS_ENTRADA;
-        const categoriaAtual = this.form.controls.categoria.value;
-        if (categoriaAtual && !validas.includes(categoriaAtual)) {
-          this.form.controls.categoria.setValue(null);
-        }
-      });
+  protected readonly rotaLista = computed(() =>
+    this.tipo() === 'SAIDA' ? '/financeiro/contas-a-pagar' : '/financeiro/contas-a-receber',
+  );
+  private readonly tituloLista = computed(() =>
+    this.tipo() === 'SAIDA' ? 'Contas a Pagar' : 'Contas a Receber',
+  );
+  protected readonly titulo = computed(() => {
+    const nome = this.tipo() === 'SAIDA' ? 'conta a pagar' : 'conta a receber';
+    return this.id() ? `Editar ${nome}` : `Nova ${nome}`;
+  });
+  protected readonly trilha = computed<ItemTrilha[]>(() => [
+    { rotulo: 'Financeiro', link: '/financeiro/extrato' },
+    { rotulo: this.tituloLista(), link: this.rotaLista() },
+    { rotulo: this.id() ? 'Editar' : 'Nova' },
+  ]);
 
+  protected readonly form = inject(FormBuilder).group({
+    categoria: [null as CategoriaLancamento | null, Validators.required],
+    descricao: ['', [Validators.required, Validators.maxLength(255)]],
+    valor: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    dataVencimento: [null as Date | null, Validators.required],
+  });
+
+  ngOnInit() {
     const id = this.id();
     if (!id) return;
     this.api.buscar(id).subscribe({
-      next: (l) => {
-        if (l.pagamentoId != null) {
+      next: (c) => {
+        if (c.status !== 'PENDENTE' || c.pagamentoId != null) {
           this.bloqueado.set(true);
           this.form.disable();
         }
         this.form.patchValue({
-          tipo: l.tipo,
-          categoria: l.categoria,
-          descricao: l.descricao,
-          valor: l.valor,
-          dataPagamento: l.dataPagamento ? new Date(l.dataPagamento) : null,
+          categoria: c.categoria,
+          descricao: c.descricao,
+          valor: c.valor,
+          dataVencimento: c.dataVencimento ? new Date(c.dataVencimento) : null,
         });
       },
       error: (e) => this.toast.erro(mensagemDeErro(e)),
@@ -135,19 +119,20 @@ export class LancamentoForm implements OnInit {
       return;
     }
     const v = this.form.getRawValue();
-    const body: LancamentoFinanceiroRequest = {
-      tipo: v.tipo!,
+    const body: ContaFinanceiraRequest = {
+      tipo: this.tipo(),
       categoria: v.categoria!,
       descricao: v.descricao!.trim(),
       valor: v.valor!,
-      dataPagamento: paraLocalDateTime(v.dataPagamento!),
+      dataVencimento: paraLocalDateTime(v.dataVencimento!),
     };
     const id = this.id();
     this.salvando.set(true);
-    (id ? this.api.atualizar(id, body) : this.api.criar(body)).subscribe({
+    (id ? this.api.atualizarConta(id, body) : this.api.registrarConta(body)).subscribe({
       next: () => {
-        this.toast.sucesso(id ? 'Lançamento atualizado.' : 'Lançamento cadastrado.');
-        this.router.navigate(['/financeiro/extrato']);
+        this.toast.sucesso(id ? 'Conta atualizada.' : 'Conta cadastrada.');
+        this.saldoFinanceiro.carregar();
+        this.router.navigate([this.rotaLista()]);
       },
       error: (e) => {
         this.salvando.set(false);

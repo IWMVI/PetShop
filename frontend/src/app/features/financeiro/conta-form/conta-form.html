@@ -3,8 +3,8 @@
     <nz-alert
       nzType="warning"
       nzShowIcon
-      nzMessage="Lançamento gerado automaticamente"
-      nzDescription="Este lançamento foi gerado a partir de um pagamento e não pode ser editado nem cancelado por aqui. Para alterá-lo, mude o status do pagamento de origem."
+      nzMessage="Conta não pode mais ser editada"
+      nzDescription="Esta conta já foi paga ou cancelada e não pode ser alterada por aqui."
       class="aviso-bloqueado"
     />
   }
@@ -12,18 +12,6 @@
   <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="salvar()">
     <nz-card>
       <div nz-row [nzGutter]="[24, 0]">
-        <div nz-col [nzXs]="24" [nzMd]="8">
-          <nz-form-item>
-            <nz-form-label nzRequired nzFor="tipo">Tipo</nz-form-label>
-            <nz-form-control nzErrorTip="Selecione o tipo do lançamento.">
-              <nz-select nzId="tipo" formControlName="tipo" nzPlaceHolder="Selecione">
-                @for (t of tipos; track t.valor) {
-                  <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
-                }
-              </nz-select>
-            </nz-form-control>
-          </nz-form-item>
-        </div>
         <div nz-col [nzXs]="24" [nzMd]="8">
           <nz-form-item>
             <nz-form-label nzRequired nzFor="categoria">Categoria</nz-form-label>
@@ -46,7 +34,21 @@
             </nz-form-control>
           </nz-form-item>
         </div>
-        <div nz-col [nzXs]="24" [nzMd]="12">
+        <div nz-col [nzXs]="24" [nzMd]="8">
+          <nz-form-item>
+            <nz-form-label nzRequired nzFor="dataVencimento">Vencimento</nz-form-label>
+            <nz-form-control nzErrorTip="Informe a data de vencimento.">
+              <nz-date-picker
+                nzId="dataVencimento"
+                formControlName="dataVencimento"
+                nzFormat="dd/MM/yyyy"
+                nzPlaceHolder="Selecione"
+                style="width: 100%"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="24">
           <nz-form-item>
             <nz-form-label nzRequired nzFor="descricao">Descrição</nz-form-label>
             <nz-form-control nzErrorTip="Informe a descrição (até 255 caracteres).">
@@ -54,26 +56,11 @@
             </nz-form-control>
           </nz-form-item>
         </div>
-        <div nz-col [nzXs]="24" [nzMd]="12">
-          <nz-form-item>
-            <nz-form-label nzRequired nzFor="dataPagamento">Data e hora</nz-form-label>
-            <nz-form-control nzErrorTip="Informe a data e a hora.">
-              <nz-date-picker
-                nzId="dataPagamento"
-                formControlName="dataPagamento"
-                [nzShowTime]="{ nzFormat: 'HH:mm' }"
-                nzFormat="dd/MM/yyyy HH:mm"
-                nzPlaceHolder="Selecione"
-                style="width: 100%"
-              />
-            </nz-form-control>
-          </nz-form-item>
-        </div>
       </div>
     </nz-card>
 
     <div class="form-actions">
-      <a nz-button routerLink="/financeiro/extrato">Cancelar</a>
+      <a nz-button [routerLink]="rotaLista()">Cancelar</a>
       <button
         nz-button
         nzType="primary"

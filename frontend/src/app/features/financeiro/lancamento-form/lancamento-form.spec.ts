@@ -14,7 +14,10 @@ const lancamentoManual: LancamentoFinanceiro = {
   categoria: 'ALUGUEL',
   descricao: 'Aluguel de outubro',
   valor: 2000,
-  data: '2026-01-10T08:00:00',
+  status: 'PAGO',
+  dataVencimento: null,
+  dataPagamento: '2026-01-10T08:00:00',
+  vencido: false,
   pagamentoId: null,
 };
 
@@ -62,7 +65,7 @@ describe('LancamentoForm', () => {
       categoria: 'VENDA_PRODUTO',
       descricao: 'Venda de ração',
       valor: 80,
-      data: new Date(2026, 0, 15, 10, 30),
+      dataPagamento: new Date(2026, 0, 15, 10, 30),
       ...overrides,
     });
 
@@ -108,10 +111,10 @@ describe('LancamentoForm', () => {
       categoria: 'VENDA_PRODUTO',
       descricao: 'Venda de ração',
       valor: 80,
-      data: '2026-01-15T10:30:00',
+      dataPagamento: '2026-01-15T10:30:00',
     });
     expect(toast.sucesso).toHaveBeenCalledWith('Lançamento cadastrado.');
-    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/financeiro']);
+    expect(TestBed.inject(Router).navigate).toHaveBeenCalledWith(['/financeiro/extrato']);
   });
 
   it('mostra o erro da API e permanece no formulário', () => {

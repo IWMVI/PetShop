@@ -8,18 +8,22 @@ import {
   FuncionarioRequest,
   AtualizarStatusPagamentoRequest,
   CategoriaLancamento,
+  ContaFinanceiraRequest,
   ExtratoResponse,
   HistoricoPet,
   HistoricoPetRequest,
   LancamentoFinanceiro,
   LancamentoFinanceiroRequest,
+  MarcarComoPagaRequest,
   Pagamento,
   PagamentoRequest,
   Pagina,
   Pet,
   PetRequest,
+  SaldoContas,
   Servico,
   ServicoRequest,
+  StatusLancamento,
   TipoLancamento,
   Tutor,
   TutorRequest,
@@ -232,10 +236,14 @@ function paramsDeExtrato(c: ConsultaExtrato = {}): HttpParams {
 }
 
 /**
- * Lançamentos financeiros (caixa do pet shop): entradas e saídas manuais, mais o
- * extrato com os totais do período. Lançamentos com `pagamentoId` preenchido foram
- * gerados automaticamente por um pagamento e não podem ser editados nem cancelados
- * por aqui (a API recusa com 400).
+ * Lançamentos financeiros (caixa do pet shop): entradas e saídas manuais, contas a
+ * pagar/receber e o extrato com os totais do período. Lançamentos com `pagamentoId`
+ * preenchido foram gerados automaticamente por um pagamento e não podem ser editados
+ * nem cancelados por aqui (a API recusa com 400).
+ *
+ * Contas a pagar/receber são a mesma entidade de lançamento, só criadas com vencimento
+ * e sem data de pagamento (ficam `PENDENTE` até serem marcadas como pagas); por isso
+ * `cancelar` é reaproveitado para cancelar uma conta pendente.
  */
 @Injectable({ providedIn: 'root' })
 export class FinanceiroApi {
@@ -258,6 +266,31 @@ export class FinanceiroApi {
     return this.http.get<ExtratoResponse>(`${this.url}/extrato`, {
       params: paramsDeExtrato(consulta),
     });
+  }
+
+  registrarConta(body: ContaFinanceiraRequest) {
+    return this.http.post<LancamentoFinanceiro>(`${this.url}/contas`, body);
+  }
+  listarContas(
+    tipo: TipoLancamento,
+    status?: StatusLancamento,
+    pagina = 0,
+    tamanho = TAMANHO_PAGINA,
+  ) {
+    let params = new HttpParams().set('tipo', tipo).set('pagina', pagina).set('tamanho', tamanho);
+    if (status) params = params.set('status', status);
+    return this.http.get<Pagina<LancamentoFinanceiro>>(`${this.url}/contas`, { params });
+  }
+  saldoContas(tipo: TipoLancamento) {
+    return this.http.get<SaldoContas>(`${this.url}/contas/saldo`, {
+      params: new HttpParams().set('tipo', tipo),
+    });
+  }
+  atualizarConta(id: number, body: ContaFinanceiraRequest) {
+    return this.http.put<LancamentoFinanceiro>(`${this.url}/contas/${id}`, body);
+  }
+  marcarComoPaga(id: number, body: MarcarComoPagaRequest) {
+    return this.http.put<LancamentoFinanceiro>(`${this.url}/contas/${id}/pagar`, body);
   }
 }
 

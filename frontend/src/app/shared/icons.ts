@@ -2,7 +2,10 @@ import { Provider } from '@angular/core';
 import {
   CalendarClock,
   CalendarX,
+  CircleCheck,
+  CreditCard,
   Eye,
+  HandCoins,
   History,
   IdCard,
   LUCIDE_ICONS,
@@ -26,7 +29,10 @@ export function provideAppIcons(): Provider {
     useValue: new LucideIconProvider({
       CalendarClock,
       CalendarX,
+      CircleCheck,
+      CreditCard,
       Eye,
+      HandCoins,
       History,
       IdCard,
       Menu,

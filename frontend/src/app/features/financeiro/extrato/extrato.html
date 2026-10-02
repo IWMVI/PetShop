@@ -103,7 +103,7 @@
       <tbody>
         @for (l of tabela.data; track l.id) {
           <tr>
-            <td class="nowrap">{{ dataHora(l.data) }}</td>
+            <td class="nowrap">{{ dataHora(l.dataPagamento!) }}</td>
             <td>
               {{ l.descricao }}
               <div class="so-pequeno muted">{{ categoriasLancamento[l.categoria] }}</div>

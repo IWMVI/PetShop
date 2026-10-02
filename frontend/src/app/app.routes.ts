@@ -140,9 +140,10 @@ export const routes: Routes = [
   {
     path: 'financeiro',
     children: [
+      { path: '', pathMatch: 'full', redirectTo: 'extrato' },
       {
-        path: '',
-        title: 'Financeiro',
+        path: 'extrato',
+        title: 'Extrato',
         loadComponent: () => import('./features/financeiro/extrato/extrato').then((m) => m.Extrato),
       },
       {
@@ -160,6 +161,46 @@ export const routes: Routes = [
           import('./features/financeiro/lancamento-form/lancamento-form').then(
             (m) => m.LancamentoForm,
           ),
+      },
+      {
+        path: 'contas-a-pagar',
+        title: 'Contas a Pagar',
+        data: { tipo: 'SAIDA' },
+        loadComponent: () => import('./features/financeiro/contas/contas').then((m) => m.Contas),
+      },
+      {
+        path: 'contas-a-pagar/novo',
+        title: 'Nova conta a pagar',
+        data: { tipo: 'SAIDA' },
+        loadComponent: () =>
+          import('./features/financeiro/conta-form/conta-form').then((m) => m.ContaForm),
+      },
+      {
+        path: 'contas-a-pagar/:id/editar',
+        title: 'Editar conta a pagar',
+        data: { tipo: 'SAIDA' },
+        loadComponent: () =>
+          import('./features/financeiro/conta-form/conta-form').then((m) => m.ContaForm),
+      },
+      {
+        path: 'contas-a-receber',
+        title: 'Contas a Receber',
+        data: { tipo: 'ENTRADA' },
+        loadComponent: () => import('./features/financeiro/contas/contas').then((m) => m.Contas),
+      },
+      {
+        path: 'contas-a-receber/novo',
+        title: 'Nova conta a receber',
+        data: { tipo: 'ENTRADA' },
+        loadComponent: () =>
+          import('./features/financeiro/conta-form/conta-form').then((m) => m.ContaForm),
+      },
+      {
+        path: 'contas-a-receber/:id/editar',
+        title: 'Editar conta a receber',
+        data: { tipo: 'ENTRADA' },
+        loadComponent: () =>
+          import('./features/financeiro/conta-form/conta-form').then((m) => m.ContaForm),
       },
     ],
   },

@@ -4,6 +4,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideTestEnv } from '../testing/providers';
 import { App } from './app';
+import { formatarMoeda } from './shared/format';
 import { TelaService } from './shared/tela/tela.service';
 
 describe('App', () => {
@@ -36,12 +37,59 @@ describe('App', () => {
     fixture.detectChanges();
   };
 
-  it('no desktop exibe o menu lateral com Tutores, Serviços, Funcionários e Financeiro', () => {
+  it('no desktop exibe o menu lateral com Tutores, Serviços, Funcionários e o submenu Financeiro', () => {
     const itens = Array.from(el().querySelectorAll('nz-sider [nz-menu-item]')).map((a) =>
       a.textContent?.trim(),
     );
-    expect(itens).toEqual(['Tutores', 'Serviços', 'Funcionários', 'Financeiro']);
+    expect(itens).toEqual([
+      'Tutores',
+      'Serviços',
+      'Funcionários',
+      'Extrato',
+      'Contas a Pagar',
+      'Contas a Receber',
+    ]);
+    expect(el().querySelector('nz-sider [nz-submenu]')?.textContent).toContain('Financeiro');
     expect(el().querySelector('.topo')).toBeNull();
+  });
+
+  it('mostra um badge com o saldo pendente de Contas a Pagar/Receber, destacando o vencido', () => {
+    // Usa a gaveta do celular para o menu: no desktop, o nz-sider tem um breakpoint
+    // responsivo próprio que, no jsdom (sem matchMedia real), recolhe o menu assim que
+    // uma segunda detecção de mudanças roda — passando os filhos do submenu a só existir
+    // dentro de um overlay lazy, fora do DOM. A gaveta não tem esse comportamento.
+    celular.set(true);
+    fixture.detectChanges();
+
+    const itemPagar = () =>
+      Array.from(document.querySelectorAll('.menu-celular [nz-menu-item]')).find((i) =>
+        i.textContent?.includes('Contas a Pagar'),
+      )!;
+    const itemReceber = () =>
+      Array.from(document.querySelectorAll('.menu-celular [nz-menu-item]')).find((i) =>
+        i.textContent?.includes('Contas a Receber'),
+      )!;
+
+    // Sem saldo pendente, nenhum badge aparece (evita poluição visual).
+    expect(itemPagar().querySelector('nz-badge')).toBeNull();
+    expect(itemReceber().querySelector('nz-badge')).toBeNull();
+
+    http
+      .expectOne(
+        (r) => r.url === '/api/financeiro/contas/saldo' && r.params.get('tipo') === 'SAIDA',
+      )
+      .flush({ totalPendente: 500, totalVencido: 200 });
+    http
+      .expectOne(
+        (r) => r.url === '/api/financeiro/contas/saldo' && r.params.get('tipo') === 'ENTRADA',
+      )
+      .flush({ totalPendente: 300, totalVencido: 0 });
+    fixture.detectChanges();
+
+    expect(itemPagar().querySelector('nz-badge')?.textContent).toContain(formatarMoeda(500));
+    expect(itemPagar().querySelector('.ant-badge-status-error')).not.toBeNull();
+    expect(itemReceber().querySelector('nz-badge')?.textContent).toContain(formatarMoeda(300));
+    expect(itemReceber().querySelector('.ant-badge-status-default')).not.toBeNull();
   });
 
   it('renderiza os ícones Lucide como SVG', () => {
@@ -76,6 +124,13 @@ describe('App', () => {
     const gaveta = document.querySelector('.menu-celular')!;
     expect(
       Array.from(gaveta.querySelectorAll('[nz-menu-item]')).map((i) => i.textContent?.trim()),
-    ).toEqual(['Tutores', 'Serviços', 'Funcionários', 'Financeiro']);
+    ).toEqual([
+      'Tutores',
+      'Serviços',
+      'Funcionários',
+      'Extrato',
+      'Contas a Pagar',
+      'Contas a Receber',
+    ]);
   });
 });

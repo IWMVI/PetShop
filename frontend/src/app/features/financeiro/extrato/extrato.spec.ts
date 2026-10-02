@@ -14,7 +14,10 @@ const lancamentoManual: LancamentoFinanceiro = {
   categoria: 'VENDA_PRODUTO',
   descricao: 'Venda de ração',
   valor: 80,
-  data: '2026-01-15T10:30:00',
+  status: 'PAGO',
+  dataVencimento: null,
+  dataPagamento: '2026-01-15T10:30:00',
+  vencido: false,
   pagamentoId: null,
 };
 
@@ -24,7 +27,10 @@ const lancamentoAutomatico: LancamentoFinanceiro = {
   categoria: 'PAGAMENTO_SERVICO',
   descricao: 'Pagamento do agendamento #50',
   valor: 150,
-  data: '2026-01-16T09:00:00',
+  status: 'PAGO',
+  dataVencimento: null,
+  dataPagamento: '2026-01-16T09:00:00',
+  vencido: false,
   pagamentoId: 9,
 };
 

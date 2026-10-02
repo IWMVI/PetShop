@@ -162,18 +162,52 @@ export type CategoriaLancamento =
   | 'IMPOSTO'
   | 'OUTRA_DESPESA';
 
+export type StatusLancamento = 'PENDENTE' | 'PAGO' | 'CANCELADO';
+
 export interface LancamentoFinanceiro {
   id: number;
   tipo: TipoLancamento;
   categoria: CategoriaLancamento;
   descricao: string;
   valor: number;
-  data: string;
+  status: StatusLancamento;
+  /** Vencimento de uma conta a pagar/receber; nulo em lançamentos já realizados. */
+  dataVencimento: string | null;
+  /** Preenchida quando o lançamento foi realizado; nula enquanto a conta está pendente. */
+  dataPagamento: string | null;
+  /** Computado pelo back-end: true quando ainda PENDENTE e a data de vencimento já passou. */
+  vencido: boolean;
   /** Preenchido quando o lançamento foi gerado automaticamente por um pagamento; nesse caso é imutável por aqui. */
   pagamentoId: number | null;
 }
 
-export type LancamentoFinanceiroRequest = Omit<LancamentoFinanceiro, 'id' | 'pagamentoId'>;
+/** Lançamento avulso já realizado (entrada/saída de caixa), criado a partir da tela Extrato. */
+export interface LancamentoFinanceiroRequest {
+  tipo: TipoLancamento;
+  categoria: CategoriaLancamento;
+  descricao: string;
+  valor: number;
+  dataPagamento: string;
+}
+
+/** Conta a pagar/receber: ainda não realizada, tem vencimento mas nenhuma data de pagamento. */
+export interface ContaFinanceiraRequest {
+  tipo: TipoLancamento;
+  categoria: CategoriaLancamento;
+  descricao: string;
+  valor: number;
+  dataVencimento: string;
+}
+
+export interface MarcarComoPagaRequest {
+  dataPagamento: string;
+}
+
+/** Totais de contas pendentes de um tipo (a pagar ou a receber). */
+export interface SaldoContas {
+  totalPendente: number;
+  totalVencido: number;
+}
 
 /** Extrato financeiro de um período: lançamentos paginados e os totais do período. */
 export interface ExtratoResponse {

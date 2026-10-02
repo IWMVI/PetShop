@@ -2,6 +2,7 @@ import {
   Cargo,
   CategoriaLancamento,
   MetodoPagamento,
+  StatusLancamento,
   StatusPagamento,
   TipoEvento,
   TipoLancamento,
@@ -45,6 +46,16 @@ export const STATUS_PAGAMENTO: Record<StatusPagamento, { rotulo: string; tom: To
 export const TIPOS_LANCAMENTO: Record<TipoLancamento, { rotulo: string; tom: TomStatus }> = {
   ENTRADA: { rotulo: 'Entrada', tom: 'sucesso' },
   SAIDA: { rotulo: 'Saída', tom: 'erro' },
+};
+
+/**
+ * Rótulo e tom de cada status de lançamento financeiro, exibidos com o <app-status>.
+ * Uma conta PENDENTE vencida é exibida com tom de erro e rótulo "Vencida" (ver tela de Contas).
+ */
+export const STATUS_LANCAMENTO: Record<StatusLancamento, { rotulo: string; tom: TomStatus }> = {
+  PENDENTE: { rotulo: 'Pendente', tom: 'destaque' },
+  PAGO: { rotulo: 'Pago', tom: 'sucesso' },
+  CANCELADO: { rotulo: 'Cancelado', tom: 'neutro' },
 };
 
 /** Rótulos das categorias de lançamento financeiro. */

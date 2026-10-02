@@ -48,6 +48,21 @@
     color: inherit !important;
   }
 
+  // Itens de submenu (ex.: Contas a Pagar) empurram o badge de saldo para a direita.
+  .item-filho {
+    justify-content: space-between;
+  }
+
+  .badge-saldo {
+    margin-left: 0.5rem;
+
+    .ant-badge-status-text {
+      color: inherit;
+      font-size: 12px;
+      font-weight: 600;
+    }
+  }
+
   &.ant-menu-inline-collapsed {
     .rotulo {
       display: none;

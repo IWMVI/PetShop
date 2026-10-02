@@ -1,0 +1,124 @@
+<app-pagina [titulo]="titulo()" [trilha]="trilha()">
+  <a paginaAcoes nz-button nzType="primary" class="btn-novo" [routerLink]="rotaNova()">
+    <lucide-icon name="plus" [size]="16" /> {{ rotuloNova() }}
+  </a>
+
+  <nz-card class="resumo-contas">
+    <div class="resumo-item">
+      <span class="muted">Pendente</span>
+      <strong>{{ moeda(saldo()?.totalPendente ?? 0) }}</strong>
+    </div>
+    <div class="resumo-item" [class.destaque-vencido]="(saldo()?.totalVencido ?? 0) > 0">
+      <span class="muted">Vencido</span>
+      <strong>{{ moeda(saldo()?.totalVencido ?? 0) }}</strong>
+    </div>
+  </nz-card>
+
+  <form nz-form nzLayout="vertical" class="filtros-contas">
+    <div nz-row [nzGutter]="[16, 0]">
+      <div nz-col [nzXs]="12" [nzMd]="6">
+        <nz-form-item>
+          <nz-form-label>Status</nz-form-label>
+          <nz-form-control>
+            <nz-select [formControl]="filtroStatus" style="width: 100%">
+              @for (o of opcoesFiltro; track o.valor) {
+                <nz-option [nzValue]="o.valor" [nzLabel]="o.rotulo" />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </div>
+  </form>
+
+  @if (erro()) {
+    <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" class="erro" />
+  }
+  <nz-card class="table-card">
+    <nz-table
+      #tabela
+      [nzData]="itens()"
+      [nzLoading]="carregando()"
+      [nzFrontPagination]="false"
+      [nzTotal]="total()"
+      [nzPageSize]="tamanho"
+      [nzPageIndex]="pagina() + 1"
+      (nzPageIndexChange)="irPara($event - 1)"
+      [nzHideOnSinglePage]="true"
+      [nzNoResult]="vazio"
+      nzSize="middle"
+    >
+      <thead>
+        <tr>
+          <th>Descrição</th>
+          <th class="ocultar-pequeno">Categoria</th>
+          <th>Valor</th>
+          <th>Vencimento</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (l of tabela.data; track l.id) {
+          <tr>
+            <td>
+              {{ l.descricao }}
+              <div class="so-pequeno muted">{{ categoriasLancamento[l.categoria] }}</div>
+            </td>
+            <td class="ocultar-pequeno">{{ categoriasLancamento[l.categoria] }}</td>
+            <td class="nowrap">{{ moeda(l.valor) }}</td>
+            <td class="nowrap">{{ l.dataVencimento ? dataHora(l.dataVencimento) : '—' }}</td>
+            <td>
+              <app-status [tom]="statusExibido(l).tom">{{ statusExibido(l).rotulo }}</app-status>
+            </td>
+            <td>
+              @if (l.pagamentoId == null && l.status === 'PENDENTE') {
+                <button
+                  nz-button
+                  nz-dropdown
+                  nzTrigger="click"
+                  nzPlacement="bottomRight"
+                  [nzDropdownMenu]="acoes"
+                  aria-label="Ações"
+                  class="menu-acoes"
+                >
+                  <lucide-icon name="menu" [size]="18" />
+                </button>
+                <nz-dropdown-menu #acoes="nzDropdownMenu">
+                  <ul nz-menu>
+                    <li
+                      nz-menu-item
+                      tabindex="0"
+                      (click)="confirmarPagamento(l)"
+                      (keydown.enter)="confirmarPagamento(l)"
+                    >
+                      <lucide-icon name="circle-check" [size]="15" /> {{ rotuloMarcar() }}
+                    </li>
+                    <li nz-menu-item [routerLink]="rotaEditar(l)">
+                      <lucide-icon name="pencil" [size]="15" /> Editar
+                    </li>
+                    <li nz-menu-divider></li>
+                    <li
+                      nz-menu-item
+                      nzDanger
+                      tabindex="0"
+                      (click)="confirmarCancelamento(l)"
+                      (keydown.enter)="confirmarCancelamento(l)"
+                    >
+                      <lucide-icon name="trash-2" [size]="15" /> Cancelar
+                    </li>
+                  </ul>
+                </nz-dropdown-menu>
+              } @else {
+                <span class="muted">Sem ações</span>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+  </nz-card>
+  <ng-template #vazio
+    ><nz-empty nzNotFoundContent="Nenhuma conta encontrada para os filtros selecionados."
+  /></ng-template>
+</app-pagina>

@@ -1,0 +1,31 @@
+.resumo-contas {
+  margin-bottom: 1rem;
+}
+
+.resumo-contas ::ng-deep .ant-card-body {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.resumo-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  strong {
+    font-size: 1.25rem;
+  }
+}
+
+.destaque-vencido strong {
+  color: #cf1322;
+}
+
+.filtros-contas {
+  margin-bottom: 1rem;
+}
+
+.erro {
+  margin-bottom: 1rem;
+}

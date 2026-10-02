@@ -86,13 +86,39 @@
 
 <ng-template #navegacao let-recolhido="recolhido">
   <ul nz-menu nzTheme="dark" nzMode="inline" class="menu-app" [nzInlineCollapsed]="recolhido">
-    @for (item of menu; track item.rota) {
-      <li nz-menu-item nzMatchRouter>
-        <a class="item" [routerLink]="item.rota" (click)="fecharMenu()">
-          <lucide-icon [name]="item.icone" [size]="18" />
-          <span class="rotulo">{{ item.rotulo }}</span>
-        </a>
-      </li>
+    @for (item of menu; track item.rotulo) {
+      @if (item.filhos; as filhos) {
+        <li nz-submenu [nzTitle]="tituloSubmenu" nzMatchRouter>
+          <ng-template #tituloSubmenu>
+            <lucide-icon [name]="item.icone" [size]="18" />
+            <span class="rotulo">{{ item.rotulo }}</span>
+          </ng-template>
+          <ul>
+            @for (filho of filhos; track filho.rota) {
+              <li nz-menu-item nzMatchRouter>
+                <a class="item item-filho" [routerLink]="filho.rota" (click)="fecharMenu()">
+                  <span class="rotulo">{{ filho.rotulo }}</span>
+                  @if (badgeDe(filho.saldo); as badge) {
+                    <nz-badge
+                      nzStandalone
+                      [nzStatus]="badge.status"
+                      [nzText]="badge.texto"
+                      class="badge-saldo"
+                    />
+                  }
+                </a>
+              </li>
+            }
+          </ul>
+        </li>
+      } @else {
+        <li nz-menu-item nzMatchRouter>
+          <a class="item" [routerLink]="item.rota" (click)="fecharMenu()">
+            <lucide-icon [name]="item.icone" [size]="18" />
+            <span class="rotulo">{{ item.rotulo }}</span>
+          </a>
+        </li>
+      }
     }
   </ul>
 </ng-template>
