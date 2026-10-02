@@ -3,38 +3,32 @@
     <lucide-icon name="plus" [size]="16" /> {{ rotuloNova() }}
   </a>
 
-  <nz-card class="resumo-contas">
-    <div class="resumo-item">
-      <span class="muted">Pendente</span>
-      <strong>{{ moeda(saldo()?.totalPendente ?? 0) }}</strong>
+  <div nz-row [nzGutter]="[16, 16]" class="resumo-contas">
+    <div nz-col [nzXs]="24" [nzSm]="12">
+      <nz-card>
+        <app-estatistica
+          icone="calendar-clock"
+          rotulo="Pendente"
+          [valor]="moeda(saldo()?.totalPendente ?? 0)"
+        />
+      </nz-card>
     </div>
-    <div class="resumo-item" [class.destaque-vencido]="(saldo()?.totalVencido ?? 0) > 0">
-      <span class="muted">Vencido</span>
-      <strong>{{ moeda(saldo()?.totalVencido ?? 0) }}</strong>
+    <div nz-col [nzXs]="24" [nzSm]="12">
+      <nz-card>
+        <app-estatistica
+          icone="calendar-x"
+          rotulo="Vencido"
+          [valor]="moeda(saldo()?.totalVencido ?? 0)"
+          [tom]="(saldo()?.totalVencido ?? 0) > 0 ? 'erro' : 'neutro'"
+        />
+      </nz-card>
     </div>
-  </nz-card>
-
-  <form nz-form nzLayout="vertical" class="filtros-contas">
-    <div nz-row [nzGutter]="[16, 0]">
-      <div nz-col [nzXs]="12" [nzMd]="6">
-        <nz-form-item>
-          <nz-form-label>Status</nz-form-label>
-          <nz-form-control>
-            <nz-select [formControl]="filtroStatus" style="width: 100%">
-              @for (o of opcoesFiltro; track o.valor) {
-                <nz-option [nzValue]="o.valor" [nzLabel]="o.rotulo" />
-              }
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-    </div>
-  </form>
+  </div>
 
   @if (erro()) {
     <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" class="erro" />
   }
-  <nz-card class="table-card">
+  <nz-card class="table-card" [nzExtra]="filtroPorStatus">
     <nz-table
       #tabela
       [nzData]="itens()"
@@ -121,4 +115,12 @@
   <ng-template #vazio
     ><nz-empty nzNotFoundContent="Nenhuma conta encontrada para os filtros selecionados."
   /></ng-template>
+
+  <ng-template #filtroPorStatus>
+    <nz-select [formControl]="filtroStatus" class="filtro-status">
+      @for (o of opcoesFiltro; track o.valor) {
+        <nz-option [nzValue]="o.valor" [nzLabel]="o.rotulo" />
+      }
+    </nz-select>
+  </ng-template>
 </app-pagina>

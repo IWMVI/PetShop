@@ -6,75 +6,90 @@
     <lucide-icon name="plus" [size]="16" /> Novo lançamento
   </a>
 
-  <nz-card class="resumo-financeiro">
-    <div class="resumo-item">
-      <span class="muted">Entradas</span>
-      <strong class="valor-entrada">{{ moeda(totalEntradas()) }}</strong>
+  <div nz-row [nzGutter]="[16, 16]" class="resumo-financeiro">
+    <div nz-col [nzXs]="24" [nzSm]="8">
+      <nz-card>
+        <app-estatistica
+          icone="trending-up"
+          tom="sucesso"
+          rotulo="Entradas"
+          [valor]="moeda(totalEntradas())"
+        />
+      </nz-card>
     </div>
-    <div class="resumo-item">
-      <span class="muted">Saídas</span>
-      <strong class="valor-saida">{{ moeda(totalSaidas()) }}</strong>
+    <div nz-col [nzXs]="24" [nzSm]="8">
+      <nz-card>
+        <app-estatistica
+          icone="trending-down"
+          tom="erro"
+          rotulo="Saídas"
+          [valor]="moeda(totalSaidas())"
+        />
+      </nz-card>
     </div>
-    <div class="resumo-item">
-      <span class="muted">Saldo</span>
-      <strong>{{ moeda(saldo()) }}</strong>
+    <div nz-col [nzXs]="24" [nzSm]="8">
+      <nz-card>
+        <app-estatistica icone="wallet" rotulo="Saldo" [valor]="moeda(saldo())" />
+      </nz-card>
     </div>
-  </nz-card>
+  </div>
 
-  <form nz-form nzLayout="vertical" [formGroup]="filtros" class="filtros-extrato">
-    <div nz-row [nzGutter]="[16, 0]">
-      <div nz-col [nzXs]="12" [nzMd]="6">
-        <nz-form-item>
-          <nz-form-label>Início</nz-form-label>
-          <nz-form-control>
-            <nz-date-picker
-              formControlName="inicio"
-              nzFormat="dd/MM/yyyy"
-              nzPlaceHolder="Início"
-              style="width: 100%"
-            />
-          </nz-form-control>
-        </nz-form-item>
+  <nz-card class="filtros-extrato">
+    <form nz-form nzLayout="vertical" [formGroup]="filtros">
+      <div nz-row [nzGutter]="[16, 0]">
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label>Início</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker
+                formControlName="inicio"
+                nzFormat="dd/MM/yyyy"
+                nzPlaceHolder="Início"
+                style="width: 100%"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label>Fim</nz-form-label>
+            <nz-form-control>
+              <nz-date-picker
+                formControlName="fim"
+                nzFormat="dd/MM/yyyy"
+                nzPlaceHolder="Fim"
+                style="width: 100%"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label>Tipo</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="tipo" nzAllowClear nzPlaceHolder="Todos">
+                @for (t of tipos; track t.valor) {
+                  <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzXs]="12" [nzMd]="6">
+          <nz-form-item>
+            <nz-form-label>Categoria</nz-form-label>
+            <nz-form-control>
+              <nz-select formControlName="categoria" nzAllowClear nzPlaceHolder="Todas">
+                @for (c of categorias; track c.valor) {
+                  <nz-option [nzValue]="c.valor" [nzLabel]="c.rotulo" />
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
       </div>
-      <div nz-col [nzXs]="12" [nzMd]="6">
-        <nz-form-item>
-          <nz-form-label>Fim</nz-form-label>
-          <nz-form-control>
-            <nz-date-picker
-              formControlName="fim"
-              nzFormat="dd/MM/yyyy"
-              nzPlaceHolder="Fim"
-              style="width: 100%"
-            />
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-      <div nz-col [nzXs]="12" [nzMd]="6">
-        <nz-form-item>
-          <nz-form-label>Tipo</nz-form-label>
-          <nz-form-control>
-            <nz-select formControlName="tipo" nzAllowClear nzPlaceHolder="Todos">
-              @for (t of tipos; track t.valor) {
-                <nz-option [nzValue]="t.valor" [nzLabel]="t.rotulo" />
-              }
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-      <div nz-col [nzXs]="12" [nzMd]="6">
-        <nz-form-item>
-          <nz-form-label>Categoria</nz-form-label>
-          <nz-form-control>
-            <nz-select formControlName="categoria" nzAllowClear nzPlaceHolder="Todas">
-              @for (c of categorias; track c.valor) {
-                <nz-option [nzValue]="c.valor" [nzLabel]="c.rotulo" />
-              }
-            </nz-select>
-          </nz-form-control>
-        </nz-form-item>
-      </div>
-    </div>
-  </form>
+    </form>
+  </nz-card>
 
   @if (erro()) {
     <nz-alert nzType="error" nzShowIcon [nzMessage]="erro()!" class="erro" />

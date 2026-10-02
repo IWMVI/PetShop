@@ -1,0 +1,58 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.65);
+}
+
+.texto {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.rotulo {
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.valor {
+  font-size: 1.3rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+// Mesma paleta de verde/vermelho usada no dashboard e nos status (app/shared/status/status.scss).
+:host(.tom-sucesso) {
+  .icone {
+    background: #f0fae8;
+    color: #389e0d;
+  }
+
+  .valor {
+    color: #389e0d;
+  }
+}
+
+:host(.tom-erro) {
+  .icone {
+    background: #fff1f0;
+    color: #cf1322;
+  }
+
+  .valor {
+    color: #cf1322;
+  }
+}

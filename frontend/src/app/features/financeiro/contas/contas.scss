@@ -2,28 +2,14 @@
   margin-bottom: 1rem;
 }
 
-.resumo-contas ::ng-deep .ant-card-body {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
+.filtro-status {
+  width: 160px;
 }
 
-.resumo-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-
-  strong {
-    font-size: 1.25rem;
+@media (max-width: 767.98px) {
+  .filtro-status {
+    width: 100%;
   }
-}
-
-.destaque-vencido strong {
-  color: #cf1322;
-}
-
-.filtros-contas {
-  margin-bottom: 1rem;
 }
 
 .erro {

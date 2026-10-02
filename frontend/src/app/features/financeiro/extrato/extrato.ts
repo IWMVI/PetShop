@@ -16,6 +16,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { ConsultaExtrato, FinanceiroApi, TAMANHO_PAGINA, mensagemDeErro } from '../../../core/api';
 import { CategoriaLancamento, LancamentoFinanceiro, TipoLancamento } from '../../../core/models';
 import { ConfirmacaoService } from '../../../shared/confirmacao.service';
+import { Estatistica } from '../../../shared/estatistica/estatistica';
 import { formatarDataHora, formatarMoeda, paraLocalDateTime } from '../../../shared/format';
 import { Pagina } from '../../../shared/pagina/pagina';
 import { CATEGORIAS_LANCAMENTO, TIPOS_LANCAMENTO, opcoes } from '../../../shared/rotulos/rotulos';
@@ -29,6 +30,7 @@ import { ToastService } from '../../../shared/toast/toast.service';
     ReactiveFormsModule,
     RouterLink,
     LucideAngularModule,
+    Estatistica,
     NzAlertModule,
     NzButtonModule,
     NzCardModule,

@@ -8,13 +8,13 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
-import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { FinanceiroApi, TAMANHO_PAGINA, mensagemDeErro } from '../../../core/api';
 import { LancamentoFinanceiro, StatusLancamento, TipoLancamento } from '../../../core/models';
 import { ConfirmacaoService } from '../../../shared/confirmacao.service';
+import { Estatistica } from '../../../shared/estatistica/estatistica';
 import { formatarDataHora, formatarMoeda, paraLocalDateTime } from '../../../shared/format';
 import { ItemTrilha, Pagina } from '../../../shared/pagina/pagina';
 import { CATEGORIAS_LANCAMENTO, STATUS_LANCAMENTO } from '../../../shared/rotulos/rotulos';
@@ -44,12 +44,12 @@ const OPCOES_FILTRO: { valor: FiltroStatus; rotulo: string }[] = [
     ReactiveFormsModule,
     RouterLink,
     LucideAngularModule,
+    Estatistica,
     NzAlertModule,
     NzButtonModule,
     NzCardModule,
     NzDropDownModule,
     NzEmptyModule,
-    NzFormModule,
     NzGridModule,
     NzSelectModule,
     NzTableModule,

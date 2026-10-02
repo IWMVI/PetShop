@@ -2,30 +2,6 @@
   margin-bottom: 1rem;
 }
 
-.resumo-financeiro ::ng-deep .ant-card-body {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.resumo-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-
-  strong {
-    font-size: 1.25rem;
-  }
-}
-
-.valor-entrada {
-  color: #389e0d;
-}
-
-.valor-saida {
-  color: #cf1322;
-}
-
 .filtros-extrato {
   margin-bottom: 1rem;
 }
