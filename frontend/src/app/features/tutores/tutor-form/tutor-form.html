@@ -118,8 +118,8 @@
         <div nz-col [nzXs]="24" [nzMd]="8">
           <nz-form-item>
             <nz-form-label nzFor="numero">Número</nz-form-label>
-            <nz-form-control>
-              <input nz-input id="numero" formControlName="numero" />
+            <nz-form-control nzErrorTip="Até 20 caracteres.">
+              <input nz-input id="numero" formControlName="numero" maxlength="20" />
             </nz-form-control>
           </nz-form-item>
         </div>

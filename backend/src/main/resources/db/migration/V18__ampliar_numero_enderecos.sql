@@ -1,0 +1,1 @@
+ALTER TABLE enderecos ALTER COLUMN numero TYPE VARCHAR(20);

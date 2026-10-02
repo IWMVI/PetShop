@@ -86,7 +86,7 @@ export class TutorForm implements OnInit {
     endereco: this.fb.group({
       cep: ['', [Validators.required, Validators.pattern(/^\d{5}-?\d{3}$/)]],
       logradouro: ['', Validators.required],
-      numero: [''],
+      numero: ['', Validators.maxLength(20)],
       complemento: [''],
       bairro: ['', Validators.required],
       cidade: ['', Validators.required],

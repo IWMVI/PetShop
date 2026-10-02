@@ -23,7 +23,7 @@ public class Endereco {
     @Column(nullable = false, length = 150)
     private String logradouro;
 
-    @Column(length = 6)
+    @Column(length = 20)
     private String numero;
 
     @Column(length = 100)

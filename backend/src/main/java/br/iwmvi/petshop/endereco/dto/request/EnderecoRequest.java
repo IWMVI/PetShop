@@ -12,8 +12,10 @@ public record EnderecoRequest(
         @NotBlank(message = "Logradouro é obrigatório.")
         String logradouro,
 
+        @Size(max = 20, message = "Número deve ter até 20 caracteres.")
         String numero,
 
+        @Size(max = 100, message = "Complemento deve ter até 100 caracteres.")
         String complemento,
 
         @NotBlank(message = "Bairro é obrigatório.")
