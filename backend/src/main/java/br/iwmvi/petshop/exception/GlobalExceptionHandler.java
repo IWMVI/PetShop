@@ -75,4 +75,16 @@ public class GlobalExceptionHandler {
     public Map<String, String> handlePagamentoValidation(PagamentoValidationException ex) {
         return Map.of("mensagem", ex.getMessage());
     }
+
+    @ExceptionHandler(LancamentoFinanceiroNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public Map<String, String> handleLancamentoFinanceiroNotFound(LancamentoFinanceiroNotFoundException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
+
+    @ExceptionHandler(LancamentoFinanceiroValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleLancamentoFinanceiroValidation(LancamentoFinanceiroValidationException ex) {
+        return Map.of("mensagem", ex.getMessage());
+    }
 }

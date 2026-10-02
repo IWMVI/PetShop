@@ -6,6 +6,7 @@ import br.iwmvi.petshop.common.validator.CompositeValidator;
 import br.iwmvi.petshop.exception.AgendamentoNotFoundException;
 import br.iwmvi.petshop.exception.PagamentoNotFoundException;
 import br.iwmvi.petshop.exception.PagamentoValidationException;
+import br.iwmvi.petshop.financeiro.service.LancamentoFinanceiroService;
 import br.iwmvi.petshop.pagamento.PagamentoTestData;
 import br.iwmvi.petshop.pagamento.model.MetodoPagamento;
 import br.iwmvi.petshop.pagamento.model.Pagamento;
@@ -40,6 +41,9 @@ class PagamentoServiceTest {
     @Mock
     private AgendamentoRepository agendamentoRepository;
 
+    @Mock
+    private LancamentoFinanceiroService lancamentoFinanceiroService;
+
     private PagamentoService pagamentoService;
 
     @BeforeEach
@@ -50,7 +54,8 @@ class PagamentoServiceTest {
                 new CompositeValidator<>(List.of(
                         new ValorPositivoValidador(),
                         new DataPagamentoCoerenteValidador()
-                ))
+                )),
+                lancamentoFinanceiroService
         );
     }
 
@@ -262,6 +267,56 @@ class PagamentoServiceTest {
 
             verify(pagamentoRepository, never()).save(any());
         }
+
+        @Test
+        @DisplayName("PCE - Deve registrar entrada financeira ao marcar pagamento como PAGO")
+        void deveRegistrarEntradaFinanceiraAoMarcarComoPago() {
+            Agendamento agendamento = PagamentoTestData.criarAgendamentoAtivo(50L);
+            Pagamento pagamento = PagamentoTestData.criarPagamento(1L, agendamento);
+            var request = PagamentoTestData.criarAtualizarStatusRequest(StatusPagamento.PAGO, LocalDateTime.now());
+
+            when(pagamentoRepository.findActiveById(1L)).thenReturn(Optional.of(pagamento));
+            when(pagamentoRepository.save(any(Pagamento.class))).thenAnswer(i -> i.getArgument(0));
+
+            pagamentoService.atualizarStatus(1L, request);
+
+            verify(lancamentoFinanceiroService).registrarEntradaDePagamento(pagamento);
+            verify(lancamentoFinanceiroService, never()).cancelarPorPagamento(any());
+        }
+
+        @Test
+        @DisplayName("PCE - Deve cancelar a entrada financeira ao tirar o pagamento de PAGO")
+        void deveCancelarEntradaFinanceiraAoSairDePago() {
+            Agendamento agendamento = PagamentoTestData.criarAgendamentoAtivo(50L);
+            Pagamento pagamento = PagamentoTestData.criarPagamento(1L, agendamento);
+            pagamento.atualizarStatus(StatusPagamento.PAGO, LocalDateTime.now());
+            var request = PagamentoTestData.criarAtualizarStatusRequest(StatusPagamento.PENDENTE, null);
+
+            when(pagamentoRepository.findActiveById(1L)).thenReturn(Optional.of(pagamento));
+            when(pagamentoRepository.save(any(Pagamento.class))).thenAnswer(i -> i.getArgument(0));
+
+            pagamentoService.atualizarStatus(1L, request);
+
+            verify(lancamentoFinanceiroService).cancelarPorPagamento(1L);
+            verify(lancamentoFinanceiroService, never()).registrarEntradaDePagamento(any());
+        }
+
+        @Test
+        @DisplayName("AVL - Não deve duplicar a entrada financeira quando o status continua PAGO")
+        void naoDeveDuplicarEntradaQuandoStatusContinuaPago() {
+            Agendamento agendamento = PagamentoTestData.criarAgendamentoAtivo(50L);
+            Pagamento pagamento = PagamentoTestData.criarPagamento(1L, agendamento);
+            LocalDateTime dataOriginal = LocalDateTime.now().minusDays(1);
+            pagamento.atualizarStatus(StatusPagamento.PAGO, dataOriginal);
+            var request = PagamentoTestData.criarAtualizarStatusRequest(StatusPagamento.PAGO, LocalDateTime.now());
+
+            when(pagamentoRepository.findActiveById(1L)).thenReturn(Optional.of(pagamento));
+            when(pagamentoRepository.save(any(Pagamento.class))).thenAnswer(i -> i.getArgument(0));
+
+            pagamentoService.atualizarStatus(1L, request);
+
+            verifyNoInteractions(lancamentoFinanceiroService);
+        }
     }
 
     @Nested
@@ -292,6 +347,33 @@ class PagamentoServiceTest {
                     .isInstanceOf(PagamentoNotFoundException.class);
 
             verify(pagamentoRepository, never()).save(any());
+        }
+
+        @Test
+        @DisplayName("PCE - Deve cancelar a entrada financeira ao cancelar pagamento já PAGO")
+        void deveCancelarEntradaFinanceiraAoCancelarPagamentoPago() {
+            Agendamento agendamento = PagamentoTestData.criarAgendamentoAtivo(50L);
+            Pagamento pagamento = PagamentoTestData.criarPagamento(1L, agendamento);
+            pagamento.atualizarStatus(StatusPagamento.PAGO, LocalDateTime.now());
+
+            when(pagamentoRepository.findActiveById(1L)).thenReturn(Optional.of(pagamento));
+
+            pagamentoService.cancelar(1L);
+
+            verify(lancamentoFinanceiroService).cancelarPorPagamento(1L);
+        }
+
+        @Test
+        @DisplayName("AVL - Não deve tentar cancelar entrada financeira de pagamento que nunca foi PAGO")
+        void naoDeveCancelarEntradaDePagamentoNuncaPago() {
+            Agendamento agendamento = PagamentoTestData.criarAgendamentoAtivo(50L);
+            Pagamento pagamento = PagamentoTestData.criarPagamento(1L, agendamento);
+
+            when(pagamentoRepository.findActiveById(1L)).thenReturn(Optional.of(pagamento));
+
+            pagamentoService.cancelar(1L);
+
+            verifyNoInteractions(lancamentoFinanceiroService);
         }
     }
 }

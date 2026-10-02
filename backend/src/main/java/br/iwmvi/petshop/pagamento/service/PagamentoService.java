@@ -5,11 +5,13 @@ import br.iwmvi.petshop.agendamento.repository.AgendamentoRepository;
 import br.iwmvi.petshop.common.validator.EntityValidator;
 import br.iwmvi.petshop.exception.AgendamentoNotFoundException;
 import br.iwmvi.petshop.exception.PagamentoNotFoundException;
+import br.iwmvi.petshop.financeiro.service.LancamentoFinanceiroService;
 import br.iwmvi.petshop.pagamento.dto.request.AtualizarStatusPagamentoRequest;
 import br.iwmvi.petshop.pagamento.dto.request.PagamentoRequest;
 import br.iwmvi.petshop.pagamento.dto.response.PagamentoResponse;
 import br.iwmvi.petshop.pagamento.mapper.PagamentoMapper;
 import br.iwmvi.petshop.pagamento.model.Pagamento;
+import br.iwmvi.petshop.pagamento.model.StatusPagamento;
 import br.iwmvi.petshop.pagamento.repository.PagamentoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,11 @@ import java.util.List;
  * consulta/atualização/cancelamento são operações flat por id do próprio pagamento
  * ({@code /pagamentos/{id}}), e o "delete" tem semântica própria (status CANCELADO +
  * soft delete).
+ *
+ * <p>Quando um pagamento transiciona para/de PAGO, um lançamento de ENTRADA é
+ * criado/cancelado em {@link LancamentoFinanceiroService}, mantendo o extrato
+ * financeiro sincronizado com os pagamentos (ver {@link #atualizarStatus} e
+ * {@link #cancelar}).
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +42,7 @@ public class PagamentoService {
     private final PagamentoRepository pagamentoRepository;
     private final AgendamentoRepository agendamentoRepository;
     private final EntityValidator<Pagamento> pagamentoValidator;
+    private final LancamentoFinanceiroService lancamentoFinanceiroService;
 
     public PagamentoResponse registrar(Long agendamentoId, PagamentoRequest request) {
         Agendamento agendamento = buscarAgendamentoAtivo(agendamentoId);
@@ -61,18 +69,44 @@ public class PagamentoService {
 
     public PagamentoResponse atualizarStatus(Long id, AtualizarStatusPagamentoRequest request) {
         Pagamento pagamento = buscarPagamentoAtivo(id);
+        StatusPagamento statusAnterior = pagamento.getStatus();
 
         pagamento.atualizarStatus(request.status(), request.dataPagamento());
         pagamentoValidator.validate(pagamento);
+        Pagamento salvo = pagamentoRepository.save(pagamento);
 
-        return PagamentoMapper.toResponse(pagamentoRepository.save(pagamento));
+        sincronizarLancamentoFinanceiro(salvo, statusAnterior);
+
+        return PagamentoMapper.toResponse(salvo);
     }
 
     public void cancelar(Long id) {
         Pagamento pagamento = buscarPagamentoAtivo(id);
+        boolean eraPago = pagamento.getStatus() == StatusPagamento.PAGO;
 
         pagamento.cancelar();
         pagamentoRepository.save(pagamento);
+
+        if (eraPago) {
+            lancamentoFinanceiroService.cancelarPorPagamento(id);
+        }
+    }
+
+    /**
+     * Mantém o extrato financeiro sincronizado com a transição de status do pagamento:
+     * cria a entrada ao chegar em PAGO, cancela a entrada ao sair de PAGO. Transições que
+     * não cruzam a fronteira PAGO (ex.: PENDENTE→PENDENTE, PAGO→PAGO) não fazem nada, para
+     * não duplicar nem recriar o lançamento à toa.
+     */
+    private void sincronizarLancamentoFinanceiro(Pagamento pagamento, StatusPagamento statusAnterior) {
+        boolean ficouPago = statusAnterior != StatusPagamento.PAGO && pagamento.getStatus() == StatusPagamento.PAGO;
+        boolean deixouDeSerPago = statusAnterior == StatusPagamento.PAGO && pagamento.getStatus() != StatusPagamento.PAGO;
+
+        if (ficouPago) {
+            lancamentoFinanceiroService.registrarEntradaDePagamento(pagamento);
+        } else if (deixouDeSerPago) {
+            lancamentoFinanceiroService.cancelarPorPagamento(pagamento.getId());
+        }
     }
 
     private Agendamento buscarAgendamentoAtivo(Long agendamentoId) {
