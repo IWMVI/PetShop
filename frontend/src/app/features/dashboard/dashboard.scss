@@ -2,11 +2,14 @@
   margin-bottom: 1rem;
 }
 
+// O ng-zorro aplica margin-bottom negativo inline no nz-row quando nzGutter tem
+// valor vertical (pra compensar o padding das colunas); !important é necessário
+// pra vencer esse estilo inline.
 .linha-cards,
 .linha-indicadores,
 .linha-graficos,
 .linha-agendamentos {
-  margin-bottom: 1rem;
+  margin-bottom: 1rem !important;
 }
 
 // Cards grandes e coloridos: mesma paleta de verde/vermelho do extrato e dos status
